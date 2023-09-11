@@ -1,0 +1,4 @@
+- copy/paste multiple cells
+- video files thumbnails/preview
+- move hard-coded settings to QSettings
+- rename once when multiple cells change

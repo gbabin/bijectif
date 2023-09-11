@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Bijectif
+Exec=/usr/bin/bijectif
+Terminal=false
+Categories=Graphics;Viewer;Qt
