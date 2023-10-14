@@ -184,12 +184,12 @@ Le nombre maximum autorisé est %2.</translation>
         <translation>Chargement terminé</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="262"/>
+        <location filename="../src/window.cpp" line="266"/>
         <source>Selection limitations</source>
         <translation>Restriction de sélection</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="263"/>
+        <location filename="../src/window.cpp" line="267"/>
         <source>Only one cell can be copied at a time.</source>
         <translation>Une seule cellule peut être copiée à la fois.</translation>
     </message>
