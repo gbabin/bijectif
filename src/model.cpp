@@ -79,7 +79,7 @@ void Model::load(const QFileInfoList &files, const QString &dbDir)
     QList<QPair<QString, ModelItem*>> newThumbnails;
     QMutex newThumbnailsMutex;
     try {
-        QtConcurrent::blockingMap(qAsConst(newFiles),
+        QtConcurrent::blockingMap(std::as_const(newFiles),
                                   [this, &newThumbnailsMutex, &newThumbnails](const QFileInfo & entry){
                                       ModelItem *item = new ModelItem(entry);
                                       newThumbnailsMutex.lock();
@@ -94,7 +94,7 @@ void Model::load(const QFileInfoList &files, const QString &dbDir)
     }
 
     // store new thumbnails
-    for (const QPair<QString, ModelItem*> &item : qAsConst(newThumbnails)) {
+    for (const QPair<QString, ModelItem*> &item : std::as_const(newThumbnails)) {
         images.append(item.second);
         QByteArray bytes;
         QBuffer buffer(&bytes);

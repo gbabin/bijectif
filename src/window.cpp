@@ -292,7 +292,7 @@ void Window::pasteIntoSelection()
                   [](const QModelIndex& a, const QModelIndex& b)
                   { return a.row() < b.row() && a.column() < b.column(); });
 
-        for (const QModelIndex index : qAsConst(indexes)) {
+        for (const QModelIndex index : std::as_const(indexes)) {
             undoStack->push(new PasteCommand(text, view.model(), index));
         }
     }
@@ -308,7 +308,7 @@ void Window::deleteSelection()
               [](const QModelIndex& a, const QModelIndex& b)
               { return a.row() < b.row() && a.column() > b.column(); });
 
-    for (const QModelIndex index : qAsConst(indexes)) {
+    for (const QModelIndex index : std::as_const(indexes)) {
         undoStack->push(new DeleteCommand(view.model(), index));
     }
 }
@@ -323,7 +323,7 @@ void Window::insertAtSelection()
               [](const QModelIndex& a, const QModelIndex& b)
               { return a.row() < b.row() && a.column() > b.column(); });
 
-    for (const QModelIndex index : qAsConst(indexes)) {
+    for (const QModelIndex index : std::as_const(indexes)) {
         undoStack->push(new InsertCommand(view.model(), index));
     }
 }
