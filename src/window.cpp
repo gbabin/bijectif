@@ -213,7 +213,7 @@ void Window::selectionChanged(const QItemSelection &selected, const QItemSelecti
         insertAct->setDisabled(true);
     } else {
         bool anyId = std::any_of(selectedIndexes.cbegin(), selectedIndexes.cend(),
-                                 [this](const QModelIndex &index){ return index.column() == 1; });
+                                 [](const QModelIndex &index){ return index.column() == 1; });
 
         pasteAct->setEnabled(selectedIndexes.size() == 1
                              || !anyId);
