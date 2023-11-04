@@ -33,6 +33,6 @@ package() {
   cd "$srcdir/bijectif"
 
   DESTDIR="$pkgdir" cmake --install build
-  install -Dm644 LICENSES/GPL-3.0-only.txt "$pkgdir"/usr/share/licenses/bijectif/COPYING
+  install -Dm644 LICENSE "$pkgdir"/usr/share/licenses/bijectif/COPYING
   install -Dm644 bijectif.desktop "$pkgdir"/usr/share/applications/bijectif.desktop
 }
