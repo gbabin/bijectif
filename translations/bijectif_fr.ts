@@ -50,7 +50,7 @@
         <source>The following caracters are not allowed:
 &lt; &gt; : &quot; / \ | ? *</source>
         <translation>Les caractères suivants ne sont pas autorisés :
-&lt; &gt; : \&quot; / \\ | ? *</translation>
+&lt; &gt; : &quot; / \ | ? *</translation>
     </message>
     <message>
         <location filename="../src/modelitem.cpp" line="207"/>
@@ -68,7 +68,8 @@
         <location filename="../src/modelitem.cpp" line="254"/>
         <source>Before : %1
 After : %2</source>
-        <translation>Avant : %1\nAprès : %2</translation>
+        <translation>Avant : %1
+Après : %2</translation>
     </message>
 </context>
 <context>
