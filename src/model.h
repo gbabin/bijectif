@@ -23,7 +23,7 @@ public:
     static const int maxNames = 8;
 
     ~Model();
-    void load(const QFileInfoList &files, const QString &dbDir = QString());
+    void load(const QFileInfoList &files, const QString &dbPath);
     Qt::ItemFlags flags(const QModelIndex &index) const override;
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     int columnCount(const QModelIndex &parent) const override;
@@ -33,7 +33,7 @@ public:
 
 signals:
     void loadingProgressed(int step = 1);
-    void loadingFinished();
+    void loadingFinished(qint64 dbFileSize = -1);
 
 private:
     QList<ModelItem*> images;

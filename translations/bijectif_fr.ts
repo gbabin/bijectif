@@ -4,7 +4,7 @@
 <context>
     <name>Delegate</name>
     <message>
-        <location filename="../src/delegate.cpp" line="25"/>
+        <location filename="../src/delegate.cpp" line="20"/>
         <source>TEMPORARY</source>
         <translation>TEMPORAIRE</translation>
     </message>
@@ -12,22 +12,22 @@
 <context>
     <name>Model</name>
     <message>
-        <location filename="../src/model.cpp" line="168"/>
+        <location filename="../src/model.cpp" line="181"/>
         <source>Thumbnail</source>
         <translation>Miniature</translation>
     </message>
     <message>
-        <location filename="../src/model.cpp" line="169"/>
+        <location filename="../src/model.cpp" line="182"/>
         <source>Identifier</source>
         <translation>Identifiant</translation>
     </message>
     <message>
-        <location filename="../src/model.cpp" line="170"/>
+        <location filename="../src/model.cpp" line="183"/>
         <source>Name %1</source>
         <translation>Nom %1</translation>
     </message>
     <message>
-        <location filename="../src/model.cpp" line="252"/>
+        <location filename="../src/model.cpp" line="265"/>
         <source>TEMPORARY</source>
         <translation>TEMPORAIRE</translation>
     </message>
@@ -158,39 +158,44 @@ Après : %2</translation>
         <translation>Commandes</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="139"/>
+        <location filename="../src/window.cpp" line="150"/>
         <source>Loading images...</source>
         <translation>Chargement des images...</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="139"/>
+        <location filename="../src/window.cpp" line="150"/>
         <source>Cancel</source>
         <translation>Annuler</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="171"/>
+        <location filename="../src/window.cpp" line="181"/>
         <source>Too many name parts</source>
         <translation>Trop d&apos;éléments de noms</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="172"/>
+        <location filename="../src/window.cpp" line="182"/>
         <source>The file &quot;%1&quot; has too many parts in its name.
 The maximum number allowed is %2.</source>
         <translation>Le fichier &quot;%1&quot; comporte trop d&apos;éléments dans son nom.
 Le nombre maximum autorisé est %2.</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="184"/>
+        <location filename="../src/window.cpp" line="195"/>
         <source>Load completed</source>
         <translation>Chargement terminé</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="266"/>
+        <location filename="../src/window.cpp" line="198"/>
+        <source>Load completed (Thumbnails database: %1)</source>
+        <translation>Chargement terminé (Base de données des miniatures : %1)</translation>
+    </message>
+    <message>
+        <location filename="../src/window.cpp" line="278"/>
         <source>Selection limitations</source>
         <translation>Restriction de sélection</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="267"/>
+        <location filename="../src/window.cpp" line="279"/>
         <source>Only one cell can be copied at a time.</source>
         <translation>Une seule cellule peut être copiée à la fois.</translation>
     </message>

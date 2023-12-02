@@ -9,123 +9,136 @@
 #include <QSqlQuery>
 #include <QtConcurrent>
 
-void Model::load(const QFileInfoList &files, const QString &dbDir)
+void Model::load(const QFileInfoList &files, const QString &dbPath)
 {
     images.reserve(files.count());
 
     // prepare database
-    QDir dir(dbDir.isEmpty() ? QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation) : dbDir);
-    QDir().mkpath(dir.path());
-    QString dbPath = dir.filePath("thumbnails.sqlite");
     if (QFile(dbPath).exists()) {
         qInfo() << "Thumbnails database already exists at" << dbPath;
     } else {
         qInfo() << "Thumbnails database does not exist at" << dbPath;
     }
-    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
-    db.setDatabaseName(dbPath);
-    if (db.open()) {
-        qInfo() << "Thumbnails database opened";
-    } else {
-        qWarning() << "Thumbnails database opening failure:" << db.lastError();
-    }
-    QSqlQuery query(db);
-    if (query.exec("CREATE TABLE IF NOT EXISTS thumbnails "
-                   "(path TEXT PRIMARY KEY, "
-                   " timestamp INTEGER, "
-                   " thumbnail BLOB)")) {
-        qInfo() << "Thumbnails database table created";
-    } else {
-        qWarning() << "Thumbnails database table creation failure:" << query.lastError();
-    }
 
-    QFileInfoList newFiles;
-
-    // retrieve thumbnails
-    for (const QFileInfo &file : files) {
-        qint64 timestamp = file.lastModified().toSecsSinceEpoch();
-        query.prepare("SELECT timestamp, thumbnail "
-                      "FROM thumbnails "
-                      "WHERE path = :path AND timestamp >= :timestamp");
-        query.bindValue(":path", file.filePath());
-        query.bindValue(":timestamp", timestamp);
-        if (query.exec()) {
-            qInfo() << "Thumbnail retrieval query succeeded:" << file.filePath();
+    {
+        QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
+        db.setDatabaseName(dbPath);
+        if (db.open()) {
+            qInfo() << "Thumbnails database opened";
         } else {
-            qWarning() << "Thumbnail retrieval query failed:" << file.filePath() << ":" << query.lastError();
+            qWarning() << "Thumbnails database opening failure:" << db.lastError();
         }
-        if (query.next()) {
-            qInfo() << "Thumbnail retrieval query has a result:" << file.filePath();
-            QByteArray bytes = query.value("thumbnail").toByteArray();
-            QPixmap pixmap = QPixmap();
-            pixmap.loadFromData(bytes);
-            if (pixmap.isNull()) {
-                qInfo() << "Thumbnail retrieval result is null:" << file.filePath();
-                newFiles.append(file);
+        QSqlQuery query(db);
+        if (query.exec("CREATE TABLE IF NOT EXISTS thumbnails "
+                       "(path TEXT PRIMARY KEY, "
+                       " timestamp INTEGER, "
+                       " thumbnail BLOB)")) {
+            qInfo() << "Thumbnails database table created";
+        } else {
+            qWarning() << "Thumbnails database table creation failure:" << query.lastError();
+        }
+
+        QFileInfoList newFiles;
+
+        // retrieve thumbnails
+        for (const QFileInfo &file : files) {
+            qint64 timestamp = file.lastModified().toSecsSinceEpoch();
+            query.prepare("SELECT timestamp, thumbnail "
+                          "FROM thumbnails "
+                          "WHERE path = :path AND timestamp >= :timestamp");
+            query.bindValue(":path", file.filePath());
+            query.bindValue(":timestamp", timestamp);
+            if (query.exec()) {
+                qInfo() << "Thumbnail retrieval query succeeded:" << file.filePath();
             } else {
-                qInfo() << "Thumbnail retrieval result is not null:" << file.filePath();
-                ModelItem *item = new ModelItem(file, pixmap);
-                images.append(item);
-                emit loadingProgressed(2);
+                qWarning() << "Thumbnail retrieval query failed:" << file.filePath() << ":" << query.lastError();
             }
-        } else {
-            qInfo() << "Thumbnail retrieval query has no result:" << file.filePath();
-            newFiles.append(file);
+            if (query.next()) {
+                qInfo() << "Thumbnail retrieval query has a result:" << file.filePath();
+                QByteArray bytes = query.value("thumbnail").toByteArray();
+                QPixmap pixmap = QPixmap();
+                pixmap.loadFromData(bytes);
+                if (pixmap.isNull()) {
+                    qInfo() << "Thumbnail retrieval result is null:" << file.filePath();
+                    newFiles.append(file);
+                } else {
+                    qInfo() << "Thumbnail retrieval result is not null:" << file.filePath();
+                    ModelItem *item = new ModelItem(file, pixmap);
+                    images.append(item);
+                    emit loadingProgressed(2);
+                }
+            } else {
+                qInfo() << "Thumbnail retrieval query has no result:" << file.filePath();
+                newFiles.append(file);
+            }
         }
-    }
 
-    // compute new thumbnails
-    qint64 timestamp = QDateTime::currentDateTime().toSecsSinceEpoch();
-    QList<QPair<QString, ModelItem*>> newThumbnails;
-    QMutex newThumbnailsMutex;
-    try {
-        QtConcurrent::blockingMap(std::as_const(newFiles),
-                                  [this, &newThumbnailsMutex, &newThumbnails](const QFileInfo & entry){
-                                      ModelItem *item = new ModelItem(entry);
-                                      newThumbnailsMutex.lock();
-                                      newThumbnails.append(QPair<QString, ModelItem*>(entry.filePath(), item));
-                                      newThumbnailsMutex.unlock();
-                                      emit loadingProgressed();
-                                  });
-    } catch (TooManyPartsError &e) {
-        qCritical() << "Too many name parts:" << e.path;
-        emit loadingFinished();
-        throw;
-    }
-
-    // store new thumbnails
-    for (const QPair<QString, ModelItem*> &item : std::as_const(newThumbnails)) {
-        images.append(item.second);
-        QByteArray bytes;
-        QBuffer buffer(&bytes);
-        buffer.open(QIODevice::WriteOnly);
-        item.second->getThumbnail().save(&buffer, "PNG");
-        query.prepare("INSERT OR REPLACE INTO thumbnails (path, timestamp, thumbnail) "
-                      "VALUES (:path, :timestamp, :thumbnail)");
-        query.bindValue(":path", item.first);
-        query.bindValue(":timestamp", timestamp);
-        query.bindValue(":thumbnail", bytes);
-        if (query.exec()) {
-            qInfo() << "Thumbnail storing query succeeded:" << item.first;
-        } else {
-            qWarning() << "Thumbnail storing query failed:" << item.first << ":" << query.lastError();
+        // compute new thumbnails
+        qint64 timestamp = QDateTime::currentDateTime().toSecsSinceEpoch();
+        QList<QPair<QString, ModelItem*>> newThumbnails;
+        QMutex newThumbnailsMutex;
+        try {
+            QtConcurrent::blockingMap(std::as_const(newFiles),
+                                      [this, &newThumbnailsMutex, &newThumbnails](const QFileInfo & entry){
+                                          ModelItem *item = new ModelItem(entry);
+                                          newThumbnailsMutex.lock();
+                                          newThumbnails.append(QPair<QString, ModelItem*>(entry.filePath(), item));
+                                          newThumbnailsMutex.unlock();
+                                          emit loadingProgressed();
+                                      });
+        } catch (TooManyPartsError &e) {
+            qCritical() << "Too many name parts:" << e.path;
+            emit loadingFinished();
+            throw;
         }
-        emit loadingProgressed();
+
+        // store new thumbnails
+        for (const QPair<QString, ModelItem*> &item : std::as_const(newThumbnails)) {
+            images.append(item.second);
+            QByteArray bytes;
+            QBuffer buffer(&bytes);
+            buffer.open(QIODevice::WriteOnly);
+            item.second->getThumbnail().save(&buffer, "PNG");
+            query.prepare("INSERT OR REPLACE INTO thumbnails (path, timestamp, thumbnail) "
+                          "VALUES (:path, :timestamp, :thumbnail)");
+            query.bindValue(":path", item.first);
+            query.bindValue(":timestamp", timestamp);
+            query.bindValue(":thumbnail", bytes);
+            if (query.exec()) {
+                qInfo() << "Thumbnail storing query succeeded:" << item.first;
+            } else {
+                qWarning() << "Thumbnail storing query failed:" << item.first << ":" << query.lastError();
+            }
+            emit loadingProgressed();
+        }
+
+        // limit database size
+        if (query.exec("DELETE FROM thumbnails "
+                       "WHERE path NOT IN (SELECT path FROM thumbnails ORDER BY timestamp DESC LIMIT 10000)")) {
+            qInfo() << "Thumbnails database size limiting query succeeded";
+        } else {
+            qWarning() << "Thumbnails database size limiting query failed:" << query.lastError();
+        }
+
+        // repacking database
+        if (query.exec("VACUUM")) {
+            qInfo() << "Thumbnails database repacking query succeeded";
+        } else {
+            qWarning() << "Thumbnails database repacking query failed:" << query.lastError();
+        }
+
+        db.close();
     }
 
-    // limit database size
-    if (query.exec("DELETE FROM thumbnails "
-                   "WHERE path NOT IN (SELECT path FROM thumbnails ORDER BY timestamp DESC LIMIT 10000);")) {
-        qInfo() << "Thumbnails database size limiting query succeeded";
-    } else {
-        qWarning() << "Thumbnails database size limiting query failed:" << query.lastError();
-    }
-
-    db.close();
+    for (const QString &name : QSqlDatabase::connectionNames())
+        QSqlDatabase::removeDatabase(name);
 
     images.squeeze();
 
-    emit loadingFinished();
+    qint64 dbFileSize = QFile(dbPath).size();
+    qInfo() << "Thumbnails database file size: " << dbFileSize;
+
+    emit loadingFinished(dbFileSize);
 }
 
 Model::~Model()

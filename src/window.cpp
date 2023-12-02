@@ -130,6 +130,17 @@ QFileInfoList Window::listFiles(const QDir &dir)
                              QDir::Name | QDir::LocaleAware);
 }
 
+QString Window::getThumbnailsDatabasePath() {
+    QDir dbDir(QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation));
+    if (! dbDir.exists()) {
+        if (! QDir().mkpath(dbDir.path())) {
+            qWarning() << "Thumbnails database folder creation failed: " << dbDir;
+        }
+    }
+    QString dbPath = dbDir.filePath("thumbnails.sqlite");
+    return dbPath;
+}
+
 void Window::modelLoadingStart()
 {
     QFileInfoList files = listFiles(dir);
@@ -144,14 +155,13 @@ void Window::modelLoadingStart()
     progressDialog->setValue(0);
     
     connect(&model, &Model::loadingProgressed,
-            this, &Window::modelLoadingProgressed,
-            Qt::QueuedConnection);
+            this, &Window::modelLoadingProgressed);
     
     connect(&model, &Model::loadingFinished,
             this, &Window::modelLoadingDone);
 
     future = QtConcurrent::run([this, files] {
-        model.load(files);
+        model.load(files, getThumbnailsDatabasePath());
     });
 }
 
@@ -160,7 +170,7 @@ void Window::modelLoadingProgressed(int step)
     progressDialog->setValue(progressDialog->value() + step);
 }
 
-void Window::modelLoadingDone()
+void Window::modelLoadingDone(qint64 dbFileSize)
 {
     progressDialog->cancel();
 
@@ -181,7 +191,14 @@ void Window::modelLoadingDone()
     proxyModel->sort(1, Qt::AscendingOrder);
     view.setModel(proxyModel);
 
-    statusBar()->showMessage(tr("Load completed"), 2000);
+    if (dbFileSize < 0) {
+        statusBar()->showMessage(tr("Load completed"),
+                                 3000);
+    } else {
+        statusBar()->showMessage(tr("Load completed (Thumbnails database: %1)")
+                                     .arg(locale().formattedDataSize(dbFileSize)),
+                                 3000);
+    }
 
     connect(view.selectionModel(), &QItemSelectionModel::selectionChanged,
             this, &Window::selectionChanged);
@@ -189,13 +206,8 @@ void Window::modelLoadingDone()
     connect(view.model(), &QAbstractItemModel::dataChanged,
             this, &Window::dataChanged);
 
-    for (const QString &name : QSqlDatabase::connectionNames())
-        QSqlDatabase::removeDatabase(name);
-    QDir dbDir(QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation));
-    QDir().mkpath(dbDir.path());
-    QString dbPath = dbDir.filePath("thumbnails.sqlite");
     db = QSqlDatabase::addDatabase("QSQLITE");
-    db.setDatabaseName(dbPath);
+    db.setDatabaseName(getThumbnailsDatabasePath());
     db.open();
 }
 

@@ -41,18 +41,16 @@ void ModelTest::initTestCase()
 void ModelTest::test_1()
 {
     const QFileInfoList files = Window::listFiles(filesDir);
+    const QString dbPath = dbDir.filePath("thumbnails.sqlite");
 
     QSortFilterProxyModel proxyModel;
     {
         Model* model = new Model;
-        model->load(files, dbDir.path());
+        model->load(files, dbPath);
         proxyModel.setSourceModel(model);
     }
     proxyModel.sort(1, Qt::AscendingOrder);
 
-    for (const QString &name : QSqlDatabase::connectionNames())
-        QSqlDatabase::removeDatabase(name);
-    QString dbPath = dbDir.filePath("thumbnails.sqlite");
     QVERIFY(QFile::exists(dbPath));
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
     db.setDatabaseName(dbPath);

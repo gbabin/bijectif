@@ -66,13 +66,11 @@ void RowTest::initTestCase()
     QImage(8, 8, QImage::Format_RGB888).save(filesDir.filePath("image.jpg"));
 
     const QFileInfoList files = Window::listFiles(filesDir);
+    const QString dbPath = dbDir.filePath("thumbnails.sqlite");
 
     Model* tableModel = new Model;
-    tableModel->load(files, dbDir.path());
+    tableModel->load(files, dbPath);
 
-    for (const QString &name : QSqlDatabase::connectionNames())
-        QSqlDatabase::removeDatabase(name);
-    QString dbPath = dbDir.filePath("thumbnails.sqlite");
     QVERIFY(QFile::exists(dbPath));
     db = QSqlDatabase::addDatabase("QSQLITE");
     db.setDatabaseName(dbPath);

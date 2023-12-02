@@ -29,7 +29,7 @@ public:
 public slots:
     void modelLoadingStart();
     void modelLoadingProgressed(int step);
-    void modelLoadingDone();
+    void modelLoadingDone(qint64 dbFileSize);
     void selectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
     void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QList<int> &roles = QList<int>());
     void copySelection();
@@ -41,6 +41,7 @@ private slots:
     void doubleClickedHandler(const QModelIndex &index);
 
 private:
+    static QString getThumbnailsDatabasePath();
     const QDir dir;
     QProgressDialog* progressDialog = nullptr;
     QTableView view;
