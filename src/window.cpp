@@ -150,7 +150,7 @@ void Window::modelLoadingStart()
 
     if (files.isEmpty()) return;
 
-    progressDialog = new QProgressDialog(tr("Loading images..."), tr("Cancel"), 0, 2 * files.count(), this);
+    progressDialog = new QProgressDialog(tr("Loading images..."), tr("Cancel"), 0, 11 * files.count(), this);
     progressDialog->setMinimumDuration(2000);
     progressDialog->setWindowModality(Qt::WindowModal);
     progressDialog->setAttribute(Qt::WA_DeleteOnClose);

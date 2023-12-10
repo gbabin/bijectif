@@ -33,7 +33,8 @@ QPixmap ModelItem::createThumbnail(const QFileInfo &path, const QPixmap &pixmap)
                     return QPixmap::fromImage(
                         image.scaled(Window::thumbnailSize,
                                      Window::thumbnailSize,
-                                     Qt::KeepAspectRatio));
+                                     Qt::KeepAspectRatio,
+                                     Qt::SmoothTransformation));
                 }
             } else {
                 qInfo() << "Pixmap creation ignored because of size:" << path.filePath();
@@ -88,7 +89,8 @@ QString ModelItem::getTooltip() const
             QBuffer buffer(&byteArray);
             QImage(path).scaled(Window::tooltipSize,
                                 Window::tooltipSize,
-                                Qt::KeepAspectRatio)
+                                Qt::KeepAspectRatio,
+                                Qt::SmoothTransformation)
                 .save(&buffer, "PNG");
             QString tmp = QString::fromLatin1(byteArray.toBase64().data());
             buffer.close();

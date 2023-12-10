@@ -65,7 +65,7 @@ void Model::load(const QFileInfoList &files, const QString &dbPath)
                     qInfo() << "Thumbnail retrieval result is not null:" << file.filePath();
                     ModelItem *item = new ModelItem(file, pixmap);
                     images.append(item);
-                    emit loadingProgressed(2);
+                    emit loadingProgressed(11);
                 }
             } else {
                 qInfo() << "Thumbnail retrieval query has no result:" << file.filePath();
@@ -73,18 +73,31 @@ void Model::load(const QFileInfoList &files, const QString &dbPath)
             }
         }
 
+        struct NewItem {
+            QString filePath;
+            ModelItem* modelItem;
+            QByteArray thumbnail;
+        } ;
+
         // compute new thumbnails
-        qint64 timestamp = QDateTime::currentDateTime().toSecsSinceEpoch();
-        QList<QPair<QString, ModelItem*>> newThumbnails;
+        const qint64 timestamp = QDateTime::currentDateTime().toSecsSinceEpoch();
+        QList<NewItem> newThumbnails;
         QMutex newThumbnailsMutex;
         try {
             QtConcurrent::blockingMap(std::as_const(newFiles),
                                       [this, &newThumbnailsMutex, &newThumbnails](const QFileInfo & entry){
                                           ModelItem *item = new ModelItem(entry);
+                                          QByteArray bytes;
+                                          QBuffer buffer(&bytes);
+                                          buffer.open(QIODevice::WriteOnly);
+                                          item->getThumbnail().save(&buffer, "PNG");
+                                          buffer.close();
                                           newThumbnailsMutex.lock();
-                                          newThumbnails.append(QPair<QString, ModelItem*>(entry.filePath(), item));
+                                          newThumbnails.append({.filePath = entry.filePath(),
+                                                                .modelItem = item,
+                                                                .thumbnail = bytes});
                                           newThumbnailsMutex.unlock();
-                                          emit loadingProgressed();
+                                          emit loadingProgressed(10);
                                       });
         } catch (TooManyPartsError &e) {
             qCritical() << "Too many name parts:" << e.path;
@@ -93,23 +106,33 @@ void Model::load(const QFileInfoList &files, const QString &dbPath)
         }
 
         // store new thumbnails
-        for (const QPair<QString, ModelItem*> &item : std::as_const(newThumbnails)) {
-            images.append(item.second);
-            QByteArray bytes;
-            QBuffer buffer(&bytes);
-            buffer.open(QIODevice::WriteOnly);
-            item.second->getThumbnail().save(&buffer, "PNG");
-            query.prepare("INSERT OR REPLACE INTO thumbnails (path, timestamp, thumbnail) "
-                          "VALUES (:path, :timestamp, :thumbnail)");
-            query.bindValue(":path", item.first);
-            query.bindValue(":timestamp", timestamp);
-            query.bindValue(":thumbnail", bytes);
-            if (query.exec()) {
-                qInfo() << "Thumbnail storing query succeeded:" << item.first;
+        if (query.exec("BEGIN TRANSACTION")) {
+            qInfo() << "Thumbnail storing transaction begin query succeeded";
+        } else {
+            qWarning() << "Thumbnail storing transaction begin query failed:" << query.lastError();
+        }
+        for (const NewItem &item : std::as_const(newThumbnails)) {
+            images.append(item.modelItem);
+            if (item.thumbnail.isNull()) {
+                qInfo() << "Thumbnail storing ignored (null):" << item.filePath;
             } else {
-                qWarning() << "Thumbnail storing query failed:" << item.first << ":" << query.lastError();
+                query.prepare("INSERT OR REPLACE INTO thumbnails (path, timestamp, thumbnail) "
+                              "VALUES (:path, :timestamp, :thumbnail)");
+                query.bindValue(":path", item.filePath);
+                query.bindValue(":timestamp", timestamp);
+                query.bindValue(":thumbnail", item.thumbnail);
+                if (query.exec()) {
+                    qInfo() << "Thumbnail storing query succeeded:" << item.filePath;
+                } else {
+                    qWarning() << "Thumbnail storing query failed:" << item.filePath << ":" << query.lastError();
+                }
             }
             emit loadingProgressed();
+        }
+        if (query.exec("END TRANSACTION")) {
+            qInfo() << "Thumbnail storing transaction end query succeeded";
+        } else {
+            qWarning() << "Thumbnail storing transaction end query failed:" << query.lastError();
         }
 
         // limit database size
@@ -136,7 +159,7 @@ void Model::load(const QFileInfoList &files, const QString &dbPath)
     images.squeeze();
 
     qint64 dbFileSize = QFile(dbPath).size();
-    qInfo() << "Thumbnails database file size: " << dbFileSize;
+    qInfo() << "Thumbnails database file size:" << dbFileSize << "bytes";
 
     emit loadingFinished(dbFileSize);
 }
