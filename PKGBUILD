@@ -1,5 +1,5 @@
 pkgname=bijectif
-pkgver=1.0.3
+pkgver=1.1
 pkgrel=1
 pkgdesc='Edit image titles in filenames'
 arch=('x86_64')
