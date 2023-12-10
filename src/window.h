@@ -31,6 +31,7 @@ public slots:
     void modelLoadingProgressed(int step);
     void modelLoadingDone(qint64 dbFileSize);
     void selectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
+    void clipboardChanged();
     void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QList<int> &roles = QList<int>());
     void copySelection();
     void pasteIntoSelection();

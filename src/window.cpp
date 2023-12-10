@@ -107,6 +107,9 @@ Window::Window()
 
     menuBar()->setFont(font);
 
+    connect(QApplication::clipboard(), &QClipboard::dataChanged,
+            this, &Window::clipboardChanged);
+
     // dock
 
     QDockWidget *undoDockWidget = new QDockWidget;
@@ -227,14 +230,19 @@ void Window::selectionChanged(const QItemSelection &selected, const QItemSelecti
         bool anyId = std::any_of(selectedIndexes.cbegin(), selectedIndexes.cend(),
                                  [](const QModelIndex &index){ return index.column() == 1; });
 
-        pasteAct->setEnabled(selectedIndexes.size() == 1
-                             || !anyId);
-
-        copyAct->setEnabled(selectedIndexes.size() == 1
-                            && ! view.model()->data(selectedIndexes.first()).isNull());
-
         bool anyEmpty = std::any_of(selectedIndexes.cbegin(), selectedIndexes.cend(),
                                     [this](const QModelIndex &index){ return view.model()->data(index).isNull(); });
+
+        QString mode = "plain";
+        pasteAct->setEnabled((! QApplication::clipboard()->text(mode).trimmed().isEmpty())
+                             && (selectedIndexes.size() == 1
+                                 || !anyId));
+
+        copyAct->setEnabled((selectedIndexes.size() == 1
+                             && ! view.model()->data(selectedIndexes.first()).isNull())
+                            || (selectedIndexes.size() > 1
+                                && !anyId
+                                && !anyEmpty));
 
         deleteAct->setDisabled(anyEmpty || anyId);
 
@@ -244,6 +252,11 @@ void Window::selectionChanged(const QItemSelection &selected, const QItemSelecti
                                               [this](const QModelIndex &index){
                                                   return ! view.model()->data(index.siblingAtColumn(Model::maxNames + 1)).isNull(); }));
     }
+}
+
+void Window::clipboardChanged()
+{
+    selectionChanged(QItemSelection(), QItemSelection());
 }
 
 void Window::dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QList<int> &roles)
@@ -273,20 +286,31 @@ void Window::copySelection()
     QItemSelectionModel* selection = view.selectionModel();
     if (selection == nullptr) return;
 
-    if (selection->selectedIndexes().size() > 1) {
-        QMessageBox::information(this,
-                                 tr("Selection limitations"),
-                                 tr("Only one cell can be copied at a time."));
-    } else {
-        if (selection->selectedIndexes().size() == 1) {
-            const QModelIndex index = selection->selectedIndexes().first();
+    if (selection->selectedIndexes().size() == 1) {
+        const QModelIndex index = selection->selectedIndexes().first();
+        if (index.column() > 0) {
+            const QVariant data = index.data(Qt::DisplayRole);
+            if (data.userType() == QMetaType::QString) {
+                QApplication::clipboard()->setText(data.toString());
+            }
+        }
+    }
+    else if (selection->selectedIndexes().size() > 1) {
+        QModelIndexList indexes = selection->selectedIndexes();
+        std::sort(indexes.begin(), indexes.end(),
+                  [](const QModelIndex& a, const QModelIndex& b) {
+                      return a.column() < b.column()
+                             || (a.column() == b.column() && a.row() < b.row()); });
+        QStringList names;
+        for (const QModelIndex index : std::as_const(indexes)) {
             if (index.column() > 1) {
                 const QVariant data = index.data(Qt::DisplayRole);
                 if (data.userType() == QMetaType::QString) {
-                    QApplication::clipboard()->setText(index.data(Qt::DisplayRole).toString());
+                    names.append(data.toString());
                 }
             }
         }
+        QApplication::clipboard()->setText(names.join(", "));
     }
 }
 
@@ -296,16 +320,50 @@ void Window::pasteIntoSelection()
     if (selection == nullptr) return;
 
     QString mode = "plain";
-    const QString text = QApplication::clipboard()->text(mode).trimmed();
+    QString text = QApplication::clipboard()->text(mode).trimmed();
 
     if (! text.isEmpty()) {
-        QModelIndexList indexes = selection->selectedIndexes();
-        std::sort(indexes.begin(), indexes.end(),
-                  [](const QModelIndex& a, const QModelIndex& b)
-                  { return a.row() < b.row() && a.column() < b.column(); });
+        static const QRegularExpression reCommaSpaces(" *, *");
+        text.replace(reCommaSpaces, ",");
+        QStringList texts = text.split(",");
 
-        for (const QModelIndex index : std::as_const(indexes)) {
-            undoStack->push(new PasteCommand(text, view.model(), index));
+        if (texts.size() == 1) {
+            QModelIndexList indexes = selection->selectedIndexes();
+            std::sort(indexes.begin(), indexes.end(),
+                      [](const QModelIndex& a, const QModelIndex& b) {
+                          return a.row() < b.row()
+                                 || (a.row() == b.row() && a.column() < b.column()); });
+
+            for (const QModelIndex index : std::as_const(indexes)) {
+                undoStack->push(new PasteCommand(text, view.model(), index));
+            }
+        }
+        else if (texts.size() > 1) {
+            if (selection->selectedIndexes().size() % texts.size() != 0) {
+                QMessageBox::information(this,
+                                         tr("Pasting multiple cells"),
+                                         tr("The pasted content has %1 parts. Therefore, each modifed row must have %1 selected cells.")
+                                             .arg(texts.size()));
+                return;
+            }
+
+            QModelIndexList indexes = selection->selectedIndexes();
+            std::sort(indexes.begin(), indexes.end(),
+                      [](const QModelIndex& a, const QModelIndex& b) {
+                          return a.row() < b.row()
+                                 || (a.row() == b.row() && a.column() < b.column()); });
+            for (int i = 0 ; i < indexes.size() ; i++) {
+                if (indexes[i].row() != indexes[i - i % texts.size()].row()) {
+                    QMessageBox::information(this,
+                                             tr("Pasting multiple cells"),
+                                             tr("The pasted content has %1 parts. Therefore, each modifed row must have %1 selected cells.")
+                                                 .arg(texts.size()));
+                    return;
+                }
+            }
+            for (int i = 0 ; i < indexes.size() ; i++) {
+                undoStack->push(new PasteCommand(texts[i % texts.size()], view.model(), indexes[i]));
+            }
         }
     }
 }
@@ -317,8 +375,9 @@ void Window::deleteSelection()
 
     QModelIndexList indexes = selection->selectedIndexes();
     std::sort(indexes.begin(), indexes.end(),
-              [](const QModelIndex& a, const QModelIndex& b)
-              { return a.row() < b.row() && a.column() > b.column(); });
+              [](const QModelIndex& a, const QModelIndex& b) {
+                  return a.row() < b.row()
+                         || (a.row() == b.row() && a.column() < b.column()); });
 
     for (const QModelIndex index : std::as_const(indexes)) {
         undoStack->push(new DeleteCommand(view.model(), index));
@@ -332,8 +391,9 @@ void Window::insertAtSelection()
 
     QModelIndexList indexes = selection->selectedIndexes();
     std::sort(indexes.begin(), indexes.end(),
-              [](const QModelIndex& a, const QModelIndex& b)
-              { return a.row() < b.row() && a.column() > b.column(); });
+              [](const QModelIndex& a, const QModelIndex& b) {
+                  return a.row() < b.row()
+                         || (a.row() == b.row() && a.column() < b.column()); });
 
     for (const QModelIndex index : std::as_const(indexes)) {
         undoStack->push(new InsertCommand(view.model(), index));

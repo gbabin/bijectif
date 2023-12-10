@@ -156,7 +156,7 @@ Qt::ItemFlags Model::flags(const QModelIndex &index) const
         if (images.at(index.row())->getNamesSize() > (index.column() - 3))
             return Qt::ItemIsEnabled | Qt::ItemNeverHasChildren | Qt::ItemIsSelectable | Qt::ItemIsEditable;
         else
-            return Qt::ItemNeverHasChildren;
+            return Qt::ItemIsEnabled | Qt::ItemNeverHasChildren | Qt::ItemIsSelectable;
     }
     else
         return Qt::ItemIsEnabled | Qt::ItemNeverHasChildren;
@@ -241,7 +241,8 @@ bool Model::setData(const QModelIndex &index, const QVariant &value, int role)
             QString valueStr = value.toString();
             valueStr = valueStr.trimmed();
             if (std::any_of(images.cbegin(), images.cend(),
-                            [&valueStr](const ModelItem *item){ return QString::compare(valueStr, item->getId()) == 0; }))
+                            [&valueStr](const ModelItem *item){
+                                return QString::compare(valueStr, item->getId()) == 0; }))
                 return false;
             if (images.at(index.row())->setId(valueStr)) {
                 emit dataChanged(index, index);
