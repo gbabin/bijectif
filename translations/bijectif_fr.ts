@@ -12,22 +12,22 @@
 <context>
     <name>Model</name>
     <message>
-        <location filename="../src/model.cpp" line="204"/>
+        <location filename="../src/model.cpp" line="207"/>
         <source>Thumbnail</source>
         <translation>Miniature</translation>
     </message>
     <message>
-        <location filename="../src/model.cpp" line="205"/>
+        <location filename="../src/model.cpp" line="208"/>
         <source>Identifier</source>
         <translation>Identifiant</translation>
     </message>
     <message>
-        <location filename="../src/model.cpp" line="206"/>
+        <location filename="../src/model.cpp" line="209"/>
         <source>Name %1</source>
         <translation>Nom %1</translation>
     </message>
     <message>
-        <location filename="../src/model.cpp" line="289"/>
+        <location filename="../src/model.cpp" line="292"/>
         <source>TEMPORARY</source>
         <translation>TEMPORAIRE</translation>
     </message>
@@ -35,9 +35,19 @@
 <context>
     <name>ModelItem</name>
     <message>
+        <location filename="../src/modelitem.cpp" line="30"/>
+        <source>Failure</source>
+        <translation>Échec</translation>
+    </message>
+    <message>
+        <location filename="../src/modelitem.cpp" line="41"/>
+        <source>File too large</source>
+        <translation>Fichier trop volumineux</translation>
+    </message>
+    <message>
         <location filename="../src/modelitem.cpp" line="83"/>
-        <source>Image unavailable or too large</source>
-        <translation>Image indisponible ou trop grande</translation>
+        <source>Thumbnail unavailable</source>
+        <translation>Miniature indisponible</translation>
     </message>
     <message>
         <location filename="../src/modelitem.cpp" line="200"/>

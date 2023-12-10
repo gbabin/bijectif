@@ -88,10 +88,13 @@ void Model::load(const QFileInfoList &files, const QString &dbPath)
                                       [this, &newThumbnailsMutex, &newThumbnails](const QFileInfo & entry){
                                           ModelItem *item = new ModelItem(entry);
                                           QByteArray bytes;
-                                          QBuffer buffer(&bytes);
-                                          buffer.open(QIODevice::WriteOnly);
-                                          item->getThumbnail().save(&buffer, "PNG");
-                                          buffer.close();
+                                          if (item->getThumbnail().userType() == QMetaType::QPixmap) {
+                                              const QPixmap thumbnail = item->getThumbnail().value<QPixmap>();
+                                              QBuffer buffer(&bytes);
+                                              buffer.open(QIODevice::WriteOnly);
+                                              thumbnail.save(&buffer, "PNG");
+                                              buffer.close();
+                                          }
                                           newThumbnailsMutex.lock();
                                           newThumbnails.append({.filePath = entry.filePath(),
                                                                 .modelItem = item,
@@ -224,7 +227,7 @@ QVariant Model::data(const QModelIndex &index, int role) const
     if (role == Qt::DisplayRole || role == Qt::EditRole) {
         int col = index.column();
         if (col == 0) {
-            return QVariant();
+            return images.at(index.row())->getThumbnail();
         } else if (col == 1) {
             return images.at(index.row())->getId();
         } else{

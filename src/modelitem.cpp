@@ -18,7 +18,7 @@ const QStringList ModelItem::imageExtensions = {"bmp",
 
 QCache<QString, QString> ModelItem::cache = QCache<QString, QString>(100);
 
-QPixmap ModelItem::createThumbnail(const QFileInfo &path, const QPixmap &pixmap)
+QVariant ModelItem::createThumbnail(const QFileInfo &path, const QPixmap &pixmap)
 {
     if (pixmap.isNull()) {
         qInfo() << "Pixmap argument is null:" << path.filePath();
@@ -27,7 +27,7 @@ QPixmap ModelItem::createThumbnail(const QFileInfo &path, const QPixmap &pixmap)
                 QImage image = QImage(path.filePath());
                 if (image.isNull()) {
                     qWarning() << "Image loading failed:" << path.filePath();
-                    return QPixmap();
+                    return tr("Failure");
                 } else {
                     qInfo() << "Image loading succeeded:" << path.filePath();
                     return QPixmap::fromImage(
@@ -38,11 +38,11 @@ QPixmap ModelItem::createThumbnail(const QFileInfo &path, const QPixmap &pixmap)
                 }
             } else {
                 qInfo() << "Pixmap creation ignored because of size:" << path.filePath();
-                return QPixmap();
+                return tr("File too large");
             }
         } else {
             qInfo() << "Pixmap creation ignored because of extension:" << path.filePath();
-            return QPixmap();
+            return path.suffix().toUpper();
         }
     } else {
         qInfo() << "Pixmap argument is not null:" << path.filePath();
@@ -79,8 +79,8 @@ QString ModelItem::getPath() const
 
 QString ModelItem::getTooltip() const
 {
-    if (thumbnail.isNull()) {
-        return QString(tr("Image unavailable or too large"));
+    if (thumbnail.isNull() || thumbnail.userType() != QMetaType::QPixmap) {
+        return QString(tr("Thumbnail unavailable"));
     } else {
         QString path = getPath();
         QString* imgBase64 = cache.object(path);
@@ -131,7 +131,7 @@ QString ModelItem::getName(int index) const
     return names.at(index);
 }
 
-QPixmap ModelItem::getThumbnail() const
+QVariant ModelItem::getThumbnail() const
 {
     return thumbnail;
 }
