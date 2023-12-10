@@ -193,20 +193,20 @@ bool ModelItem::isValidPathChars(const QString &str)
         || str.contains("\\")
         || str.contains("|")
         || str.contains("?")
-        || str.contains("*"))
+        || str.contains("*")
+        || str.contains(","))
     {
         QMessageBox::information(nullptr,
                                  tr("Forbidden characters"),
-                                 tr("The following caracters are not allowed:\n< > : \" / \\ | ? *"));
+                                 tr("The following characters are not allowed:\n< > : \" / \\ | ? * ,"));
         return false;
     }
 
-    if (str.contains(",")
-        || str.contains(" - "))
+    if (str.contains(" - "))
     {
         QMessageBox::information(nullptr,
-                                 tr("Forbidden characters"),
-                                 tr("The following caracters are not allowed: \",\" and \" - \""));
+                                 tr("Forbidden character sequence"),
+                                 tr("The following character sequence is not allowed: \" - \" (hyphen with surrounding spaces)"));
         return false;
     }
 
