@@ -12,8 +12,8 @@ class TooManyPartsError : public QException
 {
 public:
     TooManyPartsError(const QString &path) : path(path) {};
-    void raise() const override { throw *this; }
-    TooManyPartsError *clone() const override { return new TooManyPartsError(*this); }
+    void raise() const override { throw *this; };
+    TooManyPartsError *clone() const override { return new TooManyPartsError(*this); };
 
     const QString path;
 };
