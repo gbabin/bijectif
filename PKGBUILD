@@ -5,7 +5,7 @@ pkgdesc='Edit image titles in filenames'
 arch=('x86_64')
 url='https://github.com/gbabin/bijectif'
 license=('GPL3')
-depends=(qt6-base)
+depends=(qt6-base qt6-multimedia)
 makedepends=(cmake git make qt6-tools)
 optdepends=('qt6-imageformats: additional image formats')
 source=("git+https://github.com/gbabin/bijectif.git#tag=v${pkgver}")

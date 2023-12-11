@@ -42,6 +42,7 @@ public:
 
 private:
     static const QStringList imageExtensions;
+    static const QStringList videoExtensions;
     static QCache<QString, QString> cache;
 
     const QDir folder;

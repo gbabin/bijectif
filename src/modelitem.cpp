@@ -8,14 +8,20 @@
 #include <QBuffer>
 #include <QCache>
 #include <QImageReader>
+#include <QMediaPlayer>
 #include <QMessageBox>
 #include <QSqlQuery>
+#include <QTimer>
+#include <QVideoFrame>
+#include <QVideoSink>
 
 const QStringList ModelItem::imageExtensions = {"bmp",
                                                 "gif",
                                                 "jpg", "jpeg",
                                                 "png",
                                                 "tif", "tiff"};
+
+const QStringList ModelItem::videoExtensions = {"mov", "mp4"};
 
 QCache<QString, QString> ModelItem::cache = QCache<QString, QString>(100);
 
@@ -42,6 +48,73 @@ QVariant ModelItem::createThumbnail(const QFileInfo &path, const QPixmap &pixmap
             } else {
                 qInfo() << "Pixmap creation ignored because of size:" << path.filePath();
                 return tr("File too large");
+            }
+        } else if (videoExtensions.contains(path.suffix().toLower())) {
+            QImage image;
+            QVideoSink videoSink;
+            QMediaPlayer mediaPlayer;
+            mediaPlayer.setVideoSink(&videoSink);
+
+            {
+                QEventLoop eventLoop;
+                QTimer::singleShot(3000, &eventLoop,
+                                   [&eventLoop](){ eventLoop.exit(1); });
+                connect(&mediaPlayer, &QMediaPlayer::mediaStatusChanged,
+                        &eventLoop,
+                        [&eventLoop](QMediaPlayer::MediaStatus status){
+                            switch (status) {
+                            case QMediaPlayer::LoadingMedia:
+                                break;
+                            case QMediaPlayer::LoadedMedia:
+                                eventLoop.exit();
+                                break;
+                            default:
+                                eventLoop.exit(1);
+                                break;
+                            }
+                        });
+                mediaPlayer.setSource(QUrl::fromLocalFile(path.filePath()));
+                QThreadPool::globalInstance()->releaseThread();
+                int returnCode = eventLoop.exec();
+                QThreadPool::globalInstance()->reserveThread();
+                mediaPlayer.disconnect();
+                if (returnCode) {
+                    qWarning() << "Video loading failed (setSource):" << path.filePath() << mediaPlayer.mediaStatus() << mediaPlayer.error() << mediaPlayer.errorString();
+                    return tr("Failure");
+                }
+            }
+
+            {
+                QEventLoop eventLoop;
+                QTimer::singleShot(3000, &eventLoop,
+                                   [&eventLoop](){ eventLoop.exit(1); });
+                connect(&videoSink, &QVideoSink::videoFrameChanged,
+                        &eventLoop,
+                        [&eventLoop, &image](const QVideoFrame &frame){
+                            if (image.isNull()) image = frame.toImage();
+                            eventLoop.exit();
+                        });
+                mediaPlayer.play();
+                QThreadPool::globalInstance()->releaseThread();
+                int returnCode = eventLoop.exec();
+                QThreadPool::globalInstance()->reserveThread();
+                videoSink.disconnect();
+                mediaPlayer.stop();
+                if (returnCode) {
+                    qWarning() << "Video loading failed (play):" << path.filePath() << mediaPlayer.mediaStatus() << mediaPlayer.error() << mediaPlayer.errorString();
+                    return tr("Failure");
+                }
+            }
+
+            if (image.isNull()) {
+                qWarning() << "Video loading failed (null):" << path.filePath();
+                return tr("Failure");
+            } else {
+                return QPixmap::fromImage(
+                    image.scaled(Window::thumbnailSize,
+                                 Window::thumbnailSize,
+                                 Qt::KeepAspectRatio,
+                                 Qt::SmoothTransformation));
             }
         } else {
             qInfo() << "Pixmap creation ignored because of extension:" << path.filePath();
@@ -84,6 +157,8 @@ QString ModelItem::getTooltip() const
 {
     if (thumbnail.isNull() || thumbnail.userType() != QMetaType::QPixmap) {
         return tr("Thumbnail unavailable");
+    } else if (videoExtensions.contains(QFileInfo(getPath()).suffix().toLower())) {
+        return tr("Video");
     } else {
         QString path = getPath();
         QString* imgBase64 = cache.object(path);

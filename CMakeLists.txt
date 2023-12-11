@@ -5,7 +5,7 @@ project(bijectif LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Concurrent Core Gui LinguistTools Sql Widgets)
+find_package(Qt6 REQUIRED COMPONENTS Concurrent Core Gui LinguistTools Multimedia Sql Widgets)
 qt_standard_project_setup()
 
 qt_add_executable(bijectif
@@ -30,6 +30,7 @@ target_link_libraries(bijectif PRIVATE
     Qt6::Concurrent
     Qt6::Core
     Qt6::Gui
+    Qt6::Multimedia
     Qt6::Sql
     Qt6::Widgets
 )

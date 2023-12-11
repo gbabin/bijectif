@@ -12,22 +12,22 @@
 <context>
     <name>Model</name>
     <message>
-        <location filename="../src/model.cpp" line="207"/>
+        <location filename="../src/model.cpp" line="208"/>
         <source>Thumbnail</source>
         <translation>Miniature</translation>
     </message>
     <message>
-        <location filename="../src/model.cpp" line="208"/>
+        <location filename="../src/model.cpp" line="209"/>
         <source>Identifier</source>
         <translation>Identifiant</translation>
     </message>
     <message>
-        <location filename="../src/model.cpp" line="209"/>
+        <location filename="../src/model.cpp" line="210"/>
         <source>Name %1</source>
         <translation>Nom %1</translation>
     </message>
     <message>
-        <location filename="../src/model.cpp" line="292"/>
+        <location filename="../src/model.cpp" line="293"/>
         <source>TEMPORARY</source>
         <translation>TEMPORAIRE</translation>
     </message>
@@ -35,51 +35,59 @@
 <context>
     <name>ModelItem</name>
     <message>
-        <location filename="../src/modelitem.cpp" line="30"/>
+        <location filename="../src/modelitem.cpp" line="39"/>
+        <location filename="../src/modelitem.cpp" line="83"/>
+        <location filename="../src/modelitem.cpp" line="105"/>
+        <location filename="../src/modelitem.cpp" line="111"/>
         <source>Failure</source>
         <translation>Échec</translation>
     </message>
     <message>
-        <location filename="../src/modelitem.cpp" line="41"/>
+        <location filename="../src/modelitem.cpp" line="50"/>
         <source>File too large</source>
         <translation>Fichier trop volumineux</translation>
     </message>
     <message>
-        <location filename="../src/modelitem.cpp" line="83"/>
+        <location filename="../src/modelitem.cpp" line="159"/>
         <source>Thumbnail unavailable</source>
         <translation>Miniature indisponible</translation>
     </message>
     <message>
-        <location filename="../src/modelitem.cpp" line="200"/>
+        <location filename="../src/modelitem.cpp" line="161"/>
+        <source>Video</source>
+        <translation>Vidéo</translation>
+    </message>
+    <message>
+        <location filename="../src/modelitem.cpp" line="284"/>
         <source>Forbidden characters</source>
         <translation>Caractères interdits</translation>
     </message>
     <message>
-        <location filename="../src/modelitem.cpp" line="201"/>
+        <location filename="../src/modelitem.cpp" line="285"/>
         <source>The following characters are not allowed:
 &lt; &gt; : &quot; / \ | ? * ,</source>
         <translation>Les caractères suivants ne sont pas autorisés :
 &lt; &gt; : &quot; / \ | ? * ,</translation>
     </message>
     <message>
-        <location filename="../src/modelitem.cpp" line="208"/>
+        <location filename="../src/modelitem.cpp" line="292"/>
         <source>Forbidden character sequence</source>
         <translation>Séquence de caractères interdite</translation>
     </message>
     <message>
-        <location filename="../src/modelitem.cpp" line="209"/>
+        <location filename="../src/modelitem.cpp" line="293"/>
         <source>The following character sequence is not allowed: &quot; - &quot; (hyphen with surrounding spaces)</source>
         <translation>Cette séquence de caractères est interdite : &quot; - &quot; (trait d&apos;union entouré d&apos;espaces)</translation>
     </message>
     <message>
-        <location filename="../src/modelitem.cpp" line="233"/>
-        <location filename="../src/modelitem.cpp" line="255"/>
+        <location filename="../src/modelitem.cpp" line="317"/>
+        <location filename="../src/modelitem.cpp" line="339"/>
         <source>Unable to rename file</source>
         <translation>Impossible de renommer le fichier</translation>
     </message>
     <message>
-        <location filename="../src/modelitem.cpp" line="234"/>
-        <location filename="../src/modelitem.cpp" line="256"/>
+        <location filename="../src/modelitem.cpp" line="318"/>
+        <location filename="../src/modelitem.cpp" line="340"/>
         <source>Before : %1
 After : %2</source>
         <translation>Avant : %1
@@ -173,13 +181,13 @@ Après : %2</translation>
     </message>
     <message>
         <location filename="../src/window.cpp" line="153"/>
-        <source>Loading images...</source>
-        <translation>Chargement des images...</translation>
+        <source>Cancel</source>
+        <translation>Annuler</translation>
     </message>
     <message>
         <location filename="../src/window.cpp" line="153"/>
-        <source>Cancel</source>
-        <translation>Annuler</translation>
+        <source>Loading thumbnails...</source>
+        <translation>Chargement des miniatures...</translation>
     </message>
     <message>
         <location filename="../src/window.cpp" line="184"/>
@@ -204,14 +212,14 @@ Le nombre maximum autorisé est %2.</translation>
         <translation>Chargement terminé (Base de données des miniatures : %1)</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="344"/>
-        <location filename="../src/window.cpp" line="358"/>
+        <location filename="../src/window.cpp" line="346"/>
+        <location filename="../src/window.cpp" line="360"/>
         <source>Pasting multiple cells</source>
         <translation>Coller plusieurs cellules</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="345"/>
-        <location filename="../src/window.cpp" line="359"/>
+        <location filename="../src/window.cpp" line="347"/>
+        <location filename="../src/window.cpp" line="361"/>
         <source>The pasted content has %1 parts. Therefore, each modifed row must have %1 selected cells.</source>
         <translation>Le contenu collé comporte %1 parties. Par conséquent, chaque ligne modifiée doit avoir %1 cellules sélectionnées.</translation>
     </message>
