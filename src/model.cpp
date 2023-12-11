@@ -76,7 +76,7 @@ void Model::load(const QFileInfoList &files, const QString &dbPath)
         struct NewItem {
             QString filePath;
             ModelItem* modelItem;
-            QByteArray thumbnail;
+            QByteArray* thumbnail;
         } ;
 
         // compute new thumbnails
@@ -87,10 +87,10 @@ void Model::load(const QFileInfoList &files, const QString &dbPath)
             QtConcurrent::blockingMap(std::as_const(newFiles),
                                       [this, &newThumbnailsMutex, &newThumbnails](const QFileInfo & entry){
                                           ModelItem *item = new ModelItem(entry);
-                                          QByteArray bytes;
+                                          QByteArray *bytes = new QByteArray();
                                           if (item->getThumbnail().userType() == QMetaType::QPixmap) {
                                               const QPixmap thumbnail = item->getThumbnail().value<QPixmap>();
-                                              QBuffer buffer(&bytes);
+                                              QBuffer buffer(bytes);
                                               buffer.open(QIODevice::WriteOnly);
                                               thumbnail.save(&buffer, "PNG");
                                               buffer.close();
@@ -116,14 +116,14 @@ void Model::load(const QFileInfoList &files, const QString &dbPath)
         }
         for (const NewItem &item : std::as_const(newThumbnails)) {
             images.append(item.modelItem);
-            if (item.thumbnail.isNull()) {
+            if (item.thumbnail->isNull()) {
                 qInfo() << "Thumbnail storing ignored (null):" << item.filePath;
             } else {
                 query.prepare("INSERT OR REPLACE INTO thumbnails (path, timestamp, thumbnail) "
                               "VALUES (:path, :timestamp, :thumbnail)");
                 query.bindValue(":path", item.filePath);
                 query.bindValue(":timestamp", timestamp);
-                query.bindValue(":thumbnail", item.thumbnail);
+                query.bindValue(":thumbnail", *item.thumbnail);
                 if (query.exec()) {
                     qInfo() << "Thumbnail storing query succeeded:" << item.filePath;
                 } else {
@@ -131,6 +131,7 @@ void Model::load(const QFileInfoList &files, const QString &dbPath)
                 }
             }
             emit loadingProgressed();
+            delete item.thumbnail;
         }
         if (query.exec("END TRANSACTION")) {
             qInfo() << "Thumbnail storing transaction end query succeeded";
