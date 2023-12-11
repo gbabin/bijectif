@@ -7,6 +7,7 @@
 
 #include <QBuffer>
 #include <QCache>
+#include <QImageReader>
 #include <QMessageBox>
 #include <QSqlQuery>
 
@@ -24,7 +25,9 @@ QVariant ModelItem::createThumbnail(const QFileInfo &path, const QPixmap &pixmap
         qInfo() << "Pixmap argument is null:" << path.filePath();
         if (imageExtensions.contains(path.suffix().toLower())) {
             if (path.size() <= maxFileSize) {
-                QImage image = QImage(path.filePath());
+                QImageReader reader(path.filePath());
+                reader.setAutoTransform(true);
+                QImage image = reader.read();
                 if (image.isNull()) {
                     qWarning() << "Image loading failed:" << path.filePath();
                     return tr("Failure");
@@ -80,20 +83,26 @@ QString ModelItem::getPath() const
 QString ModelItem::getTooltip() const
 {
     if (thumbnail.isNull() || thumbnail.userType() != QMetaType::QPixmap) {
-        return QString(tr("Thumbnail unavailable"));
+        return tr("Thumbnail unavailable");
     } else {
         QString path = getPath();
         QString* imgBase64 = cache.object(path);
         if (imgBase64 == nullptr) {
+            QImageReader reader(path);
+            reader.setAutoTransform(true);
+            const QImage image = reader.read();
+
             QByteArray byteArray;
             QBuffer buffer(&byteArray);
-            QImage(path).scaled(Window::tooltipSize,
-                                Window::tooltipSize,
-                                Qt::KeepAspectRatio,
-                                Qt::SmoothTransformation)
+            buffer.open(QIODevice::WriteOnly);
+            image.scaled(Window::tooltipSize,
+                         Window::tooltipSize,
+                         Qt::KeepAspectRatio,
+                         Qt::SmoothTransformation)
                 .save(&buffer, "PNG");
-            QString tmp = QString::fromLatin1(byteArray.toBase64().data());
             buffer.close();
+
+            const QString tmp = QString::fromLatin1(byteArray.toBase64().data());
             imgBase64 = new QString(tmp);
             cache.insert(path, imgBase64, 1);
         }
