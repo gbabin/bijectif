@@ -219,6 +219,8 @@ void Window::selectionChanged(const QItemSelection &selected, const QItemSelecti
     Q_UNUSED(selected);
     Q_UNUSED(deselected);
 
+    if (! view.selectionModel()) return;
+
     const QModelIndexList selectedIndexes = view.selectionModel()->selectedIndexes();
 
     if (selectedIndexes.isEmpty()) {
