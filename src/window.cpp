@@ -39,7 +39,7 @@ Window::Window()
 
     statusBar()->setFont(font);
 
-    QLabel* dirLabel = new QLabel(tr("Folder: %1").arg(dir.path()));
+    QLabel* dirLabel = new QLabel(tr("Folder: %1").arg(QDir::toNativeSeparators(dir.path())));
     dirLabel->setFont(font);
 
     QLabel* versionLabel = new QLabel("v1.1");
