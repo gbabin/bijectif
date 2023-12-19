@@ -22,6 +22,18 @@
 #include <QVBoxLayout>
 #include <QtConcurrent>
 
+static const char* versionString = "v1.2";
+static const char* websiteString = "https://github.com/gbabin/bijectif";
+static const char* aboutString =
+    QT_TRANSLATE_NOOP("Window",
+                      "Bijectif %1\n"
+                      "Edit titles in filenames\n"
+                      "%2\n"
+                      "Licensed under the terms of the GNU General Public License v3.0\n"
+                      "\n"
+                      "Thumbnails database:\n"
+                      "%3");
+
 Window::Window()
     : QMainWindow()
     , dir(QFileDialog::getExistingDirectory(nullptr,
@@ -42,7 +54,7 @@ Window::Window()
     QLabel* dirLabel = new QLabel(tr("Folder: %1").arg(QDir::toNativeSeparators(dir.path())));
     dirLabel->setFont(font);
 
-    QLabel* versionLabel = new QLabel("v1.2");
+    QLabel* versionLabel = new QLabel(versionString);
     versionLabel->setFont(font);
 
     statusBar()->addWidget(dirLabel);
@@ -65,45 +77,70 @@ Window::Window()
 
     // menu & actions
 
-    QAction* undoAct = undoStack->createUndoAction(this, tr("Undo"));
+    QAction* undoAct = undoStack->createUndoAction(this, tr("&Undo"));
     undoAct->setShortcut(QKeySequence::Undo);
     menuBar()->addAction(undoAct);
 
-    QAction* redoAct = undoStack->createRedoAction(this, tr("Redo"));
+    QAction* redoAct = undoStack->createRedoAction(this, tr("&Redo"));
     redoAct->setShortcut(QKeySequence::Redo);
     menuBar()->addAction(redoAct);
 
-    QAction* sepAct = new QAction("|", this);
-    sepAct->setDisabled(true);
-    menuBar()->addAction(sepAct);
+    QAction* sepAct1 = new QAction("|", this);
+    sepAct1->setDisabled(true);
+    menuBar()->addAction(sepAct1);
 
-    copyAct = new QAction(tr("Copy"), this);
+    copyAct = new QAction(tr("&Copy"), this);
     copyAct->setShortcut(QKeySequence::Copy);
     copyAct->setEnabled(false);
     connect(copyAct, &QAction::triggered,
             this, &Window::copySelection);
     menuBar()->addAction(copyAct);
 
-    pasteAct = new QAction(tr("Paste"), this);
+    pasteAct = new QAction(tr("&Paste"), this);
     pasteAct->setShortcut(QKeySequence::Paste);
     pasteAct->setEnabled(false);
     connect(pasteAct, &QAction::triggered,
             this, &Window::pasteIntoSelection);
     menuBar()->addAction(pasteAct);
 
-    insertAct = new QAction(tr("Insert"), this);
+    insertAct = new QAction(tr("&Insert"), this);
     insertAct->setShortcut(Qt::Key_Insert);
     insertAct->setEnabled(false);
     connect(insertAct, &QAction::triggered,
             this, &Window::insertAtSelection);
     menuBar()->addAction(insertAct);
 
-    deleteAct = new QAction(tr("Delete"), this);
+    deleteAct = new QAction(tr("&Delete"), this);
     deleteAct->setShortcut(QKeySequence::Delete);
     deleteAct->setEnabled(false);
     connect(deleteAct, &QAction::triggered,
             this, &Window::deleteSelection);
     menuBar()->addAction(deleteAct);
+
+    QAction* sepAct2 = new QAction("|", this);
+    sepAct2->setDisabled(true);
+    menuBar()->addAction(sepAct2);
+
+    QMenu* helpMenu = menuBar()->addMenu(tr("&Help"));
+
+    QAction* websiteAct = new QAction(tr("&Website"), this);
+    connect(websiteAct, &QAction::triggered,
+            this, []{ QDesktopServices::openUrl(QUrl(websiteString)); });
+    helpMenu->addAction(websiteAct);
+
+    QAction* aboutAct = new QAction(tr("&About"), this);
+    connect(aboutAct, &QAction::triggered,
+            this, [this]{ QMessageBox::about(this, "About",
+                                             tr(aboutString)
+                                             .arg(versionString,
+                                                  websiteString,
+                                                  QDir::toNativeSeparators(this->getThumbnailsDatabasePath()))); });
+    helpMenu->addAction(aboutAct);
+
+    QAction* aboutQtAct = new QAction(tr("About &Qt"), this);
+    connect(aboutQtAct, &QAction::triggered,
+            this, &QApplication::aboutQt);
+    helpMenu->addAction(aboutQtAct);
 
     menuBar()->setFont(font);
 
@@ -156,10 +193,10 @@ void Window::modelLoadingStart()
     progressDialog->setAttribute(Qt::WA_DeleteOnClose);
     progressDialog->setCancelButton(nullptr);
     progressDialog->setValue(0);
-    
+
     connect(&model, &Model::loadingProgressed,
             this, &Window::modelLoadingProgressed);
-    
+
     connect(&model, &Model::loadingFinished,
             this, &Window::modelLoadingDone);
 

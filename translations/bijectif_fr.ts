@@ -136,90 +136,127 @@ Après : %2</translation>
     <name>Window</name>
     <message>
         <location filename="../src/window.cpp" line="28"/>
+        <source>Bijectif %1
+Edit titles in filenames
+%2
+Licensed under the terms of the GNU General Public License v3.0
+
+Thumbnails database:
+%3</source>
+        <translation>Bijectif %1
+Modifier les titres dans les noms de fichiers
+%2
+Sous licence selon les termes de la GNU General Public License v3.0
+
+Base de données des miniatures :
+%3</translation>
+    </message>
+    <message>
+        <location filename="../src/window.cpp" line="40"/>
         <source>Choose image folder</source>
         <translation>Choisissez le dossier des images</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="42"/>
+        <location filename="../src/window.cpp" line="54"/>
         <source>Folder: %1</source>
         <translation>Dossier : %1</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="68"/>
-        <source>Undo</source>
-        <translation>Annuler</translation>
-    </message>
-    <message>
-        <location filename="../src/window.cpp" line="72"/>
-        <source>Redo</source>
-        <translation>Refaire</translation>
-    </message>
-    <message>
         <location filename="../src/window.cpp" line="80"/>
-        <source>Copy</source>
-        <translation>Copier</translation>
+        <source>&amp;Undo</source>
+        <translation>&amp;Annuler</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="87"/>
-        <source>Paste</source>
-        <translation>Coller</translation>
+        <location filename="../src/window.cpp" line="84"/>
+        <source>&amp;Redo</source>
+        <translation>&amp;Refaire</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="94"/>
-        <source>Insert</source>
-        <translation>Insérer</translation>
+        <location filename="../src/window.cpp" line="92"/>
+        <source>&amp;Copy</source>
+        <translation>Co&amp;pier</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="101"/>
-        <source>Delete</source>
-        <translation>Supprimer</translation>
+        <location filename="../src/window.cpp" line="99"/>
+        <source>&amp;Paste</source>
+        <translation>C&amp;oller</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="116"/>
+        <location filename="../src/window.cpp" line="106"/>
+        <source>&amp;Insert</source>
+        <translation>&amp;Insérer</translation>
+    </message>
+    <message>
+        <location filename="../src/window.cpp" line="113"/>
+        <source>&amp;Delete</source>
+        <translation>&amp;Supprimer</translation>
+    </message>
+    <message>
+        <location filename="../src/window.cpp" line="124"/>
+        <source>&amp;Help</source>
+        <translation>Ai&amp;de</translation>
+    </message>
+    <message>
+        <location filename="../src/window.cpp" line="126"/>
+        <source>&amp;Website</source>
+        <translation>&amp;Site web</translation>
+    </message>
+    <message>
+        <location filename="../src/window.cpp" line="131"/>
+        <source>&amp;About</source>
+        <translation>À &amp;propos</translation>
+    </message>
+    <message>
+        <location filename="../src/window.cpp" line="140"/>
+        <source>About &amp;Qt</source>
+        <translation>À propos de &amp;Qt</translation>
+    </message>
+    <message>
+        <location filename="../src/window.cpp" line="153"/>
         <source>Commands</source>
         <translation>Commandes</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="153"/>
+        <location filename="../src/window.cpp" line="190"/>
         <source>Cancel</source>
         <translation>Annuler</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="153"/>
+        <location filename="../src/window.cpp" line="190"/>
         <source>Loading thumbnails...</source>
         <translation>Chargement des miniatures...</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="184"/>
+        <location filename="../src/window.cpp" line="221"/>
         <source>Too many name parts</source>
         <translation>Trop d&apos;éléments de noms</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="185"/>
+        <location filename="../src/window.cpp" line="222"/>
         <source>The file &quot;%1&quot; has too many parts in its name.
 The maximum number allowed is %2.</source>
         <translation>Le fichier &quot;%1&quot; comporte trop d&apos;éléments dans son nom.
 Le nombre maximum autorisé est %2.</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="198"/>
+        <location filename="../src/window.cpp" line="235"/>
         <source>Load completed</source>
         <translation>Chargement terminé</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="201"/>
+        <location filename="../src/window.cpp" line="238"/>
         <source>Load completed (Thumbnails database: %1)</source>
         <translation>Chargement terminé (Base de données des miniatures : %1)</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="346"/>
-        <location filename="../src/window.cpp" line="360"/>
+        <location filename="../src/window.cpp" line="383"/>
+        <location filename="../src/window.cpp" line="397"/>
         <source>Pasting multiple cells</source>
         <translation>Coller plusieurs cellules</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="347"/>
-        <location filename="../src/window.cpp" line="361"/>
+        <location filename="../src/window.cpp" line="384"/>
+        <location filename="../src/window.cpp" line="398"/>
         <source>The pasted content has %1 parts. Therefore, each modifed row must have %1 selected cells.</source>
         <translation>Le contenu collé comporte %1 parties. Par conséquent, chaque ligne modifiée doit avoir %1 cellules sélectionnées.</translation>
     </message>
