@@ -1,4 +1,4 @@
-// Copyright (C) 2023 gbabin
+// Copyright (C) 2023, 2024 gbabin
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include "model.h"
@@ -289,8 +289,6 @@ bool Model::setData(const QModelIndex &index, const QVariant &value, int role)
         }
         else if (role == InsertRole) {
             QString valueStr = value.toString();
-            if (valueStr.isEmpty())
-                valueStr = tr("TEMPORARY");
             if (images.at(index.row())->insertName(nameIdx, valueStr)) {
                 emit dataChanged(index, index.siblingAtColumn(maxNames+1));
                 return true;

@@ -1,4 +1,4 @@
-// Copyright (C) 2023 gbabin
+// Copyright (C) 2023, 2024 gbabin
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include "test_row.h"
@@ -115,8 +115,8 @@ void RowTest::test_0()
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 0);
 
-    undoStack.push(new InsertCommand(model, model->index(0, 2)));
-    compare_row(*model, "image", "TEMPORARY", "", "", "", "", "", "", "");
+    undoStack.push(new InsertCommand("thing", model, model->index(0, 2)));
+    compare_row(*model, "image", "thing", "", "", "", "", "", "", "");
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 1);
 
@@ -125,7 +125,7 @@ void RowTest::test_0()
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 0);
 
-    undoStack.push(new InsertCommand(model, model->index(0, 3)));
+    undoStack.push(new InsertCommand("nothing", model, model->index(0, 3)));
     compare_row(*model, "image", "", "", "", "", "", "", "", "");
     QCOMPARE(spy.count(), 0);
 
@@ -196,8 +196,8 @@ void RowTest::test_1()
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 1);
 
-    undoStack.push(new InsertCommand(model, model->index(0, 2)));
-    compare_row(*model, "image", "TEMPORARY", "text1", "", "", "", "", "", "");
+    undoStack.push(new InsertCommand("thing", model, model->index(0, 2)));
+    compare_row(*model, "image", "thing", "text1", "", "", "", "", "", "");
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 2);
 
@@ -206,8 +206,8 @@ void RowTest::test_1()
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 1);
 
-    undoStack.push(new InsertCommand(model, model->index(0, 3)));
-    compare_row(*model, "image", "text1", "TEMPORARY", "", "", "", "", "", "");
+    undoStack.push(new InsertCommand("thing", model, model->index(0, 3)));
+    compare_row(*model, "image", "text1", "thing", "", "", "", "", "", "");
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 2);
 
@@ -340,8 +340,8 @@ void RowTest::test_7()
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 7);
 
-    undoStack.push(new InsertCommand(model, model->index(0, 7)));
-    compare_row(*model, "image", "text1", "text2", "text3", "text4", "text5", "TEMPORARY", "text6", "text7");
+    undoStack.push(new InsertCommand("thing", model, model->index(0, 7)));
+    compare_row(*model, "image", "text1", "text2", "text3", "text4", "text5", "thing", "text6", "text7");
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 8);
 
@@ -350,8 +350,8 @@ void RowTest::test_7()
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 7);
 
-    undoStack.push(new InsertCommand(model, model->index(0, 8)));
-    compare_row(*model, "image", "text1", "text2", "text3", "text4", "text5", "text6", "TEMPORARY", "text7");
+    undoStack.push(new InsertCommand("thing", model, model->index(0, 8)));
+    compare_row(*model, "image", "text1", "text2", "text3", "text4", "text5", "text6", "thing", "text7");
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 8);
 
@@ -360,8 +360,8 @@ void RowTest::test_7()
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 7);
 
-    undoStack.push(new InsertCommand(model, model->index(0, 9)));
-    compare_row(*model, "image", "text1", "text2", "text3", "text4", "text5", "text6", "text7", "TEMPORARY");
+    undoStack.push(new InsertCommand("thing", model, model->index(0, 9)));
+    compare_row(*model, "image", "text1", "text2", "text3", "text4", "text5", "text6", "text7", "thing");
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 8);
 
@@ -434,15 +434,15 @@ void RowTest::test_8()
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 8);
 
-    undoStack.push(new InsertCommand(model, model->index(0, 7)));
+    undoStack.push(new InsertCommand("nothing", model, model->index(0, 7)));
     compare_row(*model, "image", "text1", "text2", "text3", "text4", "text5", "text6", "text7", "text8");
     QCOMPARE(spy.count(), 0);
 
-    undoStack.push(new InsertCommand(model, model->index(0, 9)));
+    undoStack.push(new InsertCommand("nothing", model, model->index(0, 9)));
     compare_row(*model, "image", "text1", "text2", "text3", "text4", "text5", "text6", "text7", "text8");
     QCOMPARE(spy.count(), 0);
 
-    undoStack.push(new InsertCommand(model, model->index(0, 10)));
+    undoStack.push(new InsertCommand("nothing", model, model->index(0, 10)));
     compare_row(*model, "image", "text1", "text2", "text3", "text4", "text5", "text6", "text7", "text8");
     QCOMPARE(spy.count(), 0);
 

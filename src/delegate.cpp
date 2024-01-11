@@ -14,20 +14,6 @@ Delegate::Delegate(QUndoStack *undoStack, QObject *parent)
 {
 }
 
-void Delegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
-{
-    if (index.column() > 1
-        && QString::compare(index.data().toString(), tr("TEMPORARY")) == 0)
-    {
-        QStyleOptionViewItem opt = option;
-        initStyleOption(&opt, index);
-        opt.font.setItalic(true);
-        QStyledItemDelegate::paint(painter, opt, index);
-    }
-    else
-        QStyledItemDelegate::paint(painter, option, index);
-}
-
 void Delegate::setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const
 {
     QByteArray name = editor->metaObject()->userProperty().name();

@@ -1,4 +1,4 @@
-// Copyright (C) 2023 gbabin
+// Copyright (C) 2023, 2024 gbabin
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include "modelitem.h"
@@ -256,13 +256,18 @@ bool ModelItem::deleteName(int index)
 
 bool ModelItem::insertName(int index, const QString &name)
 {
+    if (! isValidPathChars(name)) return false;
+
+    QString nameT = name.trimmed();
+
+    if (nameT.isEmpty()) return false;
     if (index > names.size()) return false;
     if (names.size() == Model::maxNames) return false;
 
     QString oldPath = getPath();
     QStringList oldNames(names);
 
-    names.insert(index, name);
+    names.insert(index, nameT);
 
     return syncFilename(oldPath, oldNames);
 }

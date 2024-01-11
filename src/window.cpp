@@ -1,4 +1,4 @@
-// Copyright (C) 2023 gbabin
+// Copyright (C) 2023, 2024 gbabin
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include "window.h"
@@ -13,6 +13,7 @@
 #include <QDockWidget>
 #include <QFileDialog>
 #include <QHeaderView>
+#include <QInputDialog>
 #include <QLabel>
 #include <QMenuBar>
 #include <QMessageBox>
@@ -428,6 +429,9 @@ void Window::insertAtSelection()
     QItemSelectionModel* selection = view.selectionModel();
     if (selection == nullptr) return;
 
+    const QString text = QInputDialog::getText(this, tr("Insertion"), tr("Name:"));
+    if (text.isEmpty()) return;
+
     QModelIndexList indexes = selection->selectedIndexes();
     std::sort(indexes.begin(), indexes.end(),
               [](const QModelIndex& a, const QModelIndex& b) {
@@ -435,6 +439,6 @@ void Window::insertAtSelection()
                          || (a.row() == b.row() && a.column() < b.column()); });
 
     for (const QModelIndex index : std::as_const(indexes)) {
-        undoStack->push(new InsertCommand(view.model(), index));
+        undoStack->push(new InsertCommand(text, view.model(), index));
     }
 }
