@@ -417,7 +417,7 @@ void Window::deleteSelection()
     std::sort(indexes.begin(), indexes.end(),
               [](const QModelIndex& a, const QModelIndex& b) {
                   return a.row() < b.row()
-                         || (a.row() == b.row() && a.column() < b.column()); });
+                         || (a.row() == b.row() && a.column() > b.column()); });
 
     for (const QModelIndex index : std::as_const(indexes)) {
         undoStack->push(new DeleteCommand(view.model(), index));
@@ -436,7 +436,7 @@ void Window::insertAtSelection()
     std::sort(indexes.begin(), indexes.end(),
               [](const QModelIndex& a, const QModelIndex& b) {
                   return a.row() < b.row()
-                         || (a.row() == b.row() && a.column() < b.column()); });
+                         || (a.row() == b.row() && a.column() > b.column()); });
 
     for (const QModelIndex index : std::as_const(indexes)) {
         undoStack->push(new InsertCommand(text, view.model(), index));
