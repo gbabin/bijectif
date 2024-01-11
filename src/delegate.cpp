@@ -1,4 +1,4 @@
-// Copyright (C) 2023 gbabin
+// Copyright (C) 2023, 2024 gbabin
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include "delegate.h"
@@ -42,9 +42,6 @@ void Delegate::setModelData(QWidget *editor, QAbstractItemModel *model, const QM
                 undoStack->push(new ChangeIdCommand(v.toString(), model, index));
             else
                 undoStack->push(new EditCommand(v.toString(), model, index));
-            return;
         }
     }
-
-    QStyledItemDelegate::setModelData(editor, model, index);
 }
