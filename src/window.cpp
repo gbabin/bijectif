@@ -23,7 +23,7 @@
 #include <QVBoxLayout>
 #include <QtConcurrent>
 
-static const char* versionString = "v1.3";
+static const char* versionString = "v1.4";
 static const char* websiteString = "https://github.com/gbabin/bijectif";
 static const char* aboutString =
     QT_TRANSLATE_NOOP("Window",
