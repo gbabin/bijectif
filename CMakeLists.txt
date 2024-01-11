@@ -8,18 +8,14 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(Qt6 REQUIRED COMPONENTS Concurrent Core Gui LinguistTools Multimedia Sql Widgets)
 qt_standard_project_setup()
 
-qt_add_executable(bijectif
-    src/main.cpp
-    src/command_delete.h src/command_delete.cpp
-    src/command_edit.h src/command_edit.cpp
-    src/command_id.h src/command_id.cpp
-    src/command_insert.h src/command_insert.cpp
-    src/command_paste.h src/command_paste.cpp
-    src/delegate.h src/delegate.cpp
-    src/model.h src/model.cpp
-    src/modelitem.h src/modelitem.cpp
-    src/window.h src/window.cpp
-)
+file(GLOB SRC_FILES src/*)
+
+if (WIN32)
+    set(app_icon_resource_windows "resources/bijectif.rc")
+    qt_add_executable(bijectif ${SRC_FILES} ${app_icon_resource_windows})
+else()
+    qt_add_executable(bijectif ${SRC_FILES})
+endif()
 
 set_target_properties(bijectif PROPERTIES
     WIN32_EXECUTABLE TRUE
