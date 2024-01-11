@@ -21,7 +21,7 @@ const QStringList ModelItem::imageExtensions = {"bmp",
                                                 "png",
                                                 "tif", "tiff"};
 
-const QStringList ModelItem::videoExtensions = {"mov", "mp4"};
+const QStringList ModelItem::videoExtensions = {"avi", "mkv", "mov", "mp4", "mpg", "mts", "vob", "wmv"};
 
 QCache<QString, QString> ModelItem::cache = QCache<QString, QString>(100);
 

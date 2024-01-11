@@ -166,7 +166,7 @@ QFileInfoList Window::listFiles(const QDir &dir)
     return dir.entryInfoList({"*.bmp", "*.gif", "*.jpg", "*.jpeg", "*.png", "*.tif", "*.tiff",
                               "*.dng", "*.nef", "*.rw2",
                               "*.psd", "*.svg",
-                              "*.avi", "*.mkv", "*.mov", "*.mp4", "*.vob", "*.wmv"},
+                              "*.avi", "*.mkv", "*.mov", "*.mp4", "*.mpg", "*.mts", "*.vob", "*.wmv"},
                              QDir::Files | QDir::Readable,
                              QDir::Name | QDir::LocaleAware);
 }
