@@ -8,10 +8,26 @@
 
 Use `PKGBUILD`.
 
-### Debian
+### Debian / Ubuntu
 
 ```
-sudo apt install cmake make g++ qt6-base-dev qt6-l10n-tools qt6-multimedia-dev qt6-tools-dev
+sudo apt install cmake make g++ qt6-base-dev qt6-multimedia-dev qt6-tools-dev
+cmake -DCMAKE_BUILD_TYPE=Release . -B build
+cmake --build build
+```
+
+### Fedora
+
+```
+sudo dnf install cmake make gcc-c++ qt6-qtbase-devel qt6-qtmultimedia-devel qt6-qttools-devel
+cmake -DCMAKE_BUILD_TYPE=Release . -B build
+cmake --build build
+```
+
+### openSUSE
+
+```
+sudo zypper install cmake make gcc-c++ qt6-base-devel qt6-multimedia-devel qt6-linguist-devel
 cmake -DCMAKE_BUILD_TYPE=Release . -B build
 cmake --build build
 ```
