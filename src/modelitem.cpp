@@ -141,17 +141,18 @@ QVariant ModelItem::createThumbnail(const QFileInfo &path, const QPixmap &pixmap
     }
 }
 
-ModelItem::ModelItem(const QFileInfo &path, const QPixmap &pixmap)
-    : folder(path.dir())
+ModelItem::ModelItem(const QFileInfo &path, const QPixmap &pixmap, QObject *parent)
+    : QObject(parent)
+    , folder(path.dir())
     , extension(path.suffix())
     , thumbnail(createThumbnail(path, pixmap))
 {
     QString basename = path.completeBaseName();
-    qsizetype index_sep = basename.indexOf(" - ");
+    qsizetype index_sep = basename.indexOf(QStringLiteral(" - "));
 
     if (index_sep != -1) {
         id = basename.sliced(0, index_sep);
-        names = basename.sliced(index_sep+3).split(", ", Qt::SkipEmptyParts);
+        names = basename.sliced(index_sep+3).split(QStringLiteral(", "), Qt::SkipEmptyParts);
         if (names.size() > Model::maxNames) {
             throw TooManyPartsError(path.filePath());
         }
@@ -165,7 +166,7 @@ QString ModelItem::getPath() const
     if (names.isEmpty())
         return folder.filePath(id + "." + extension);
     else
-        return folder.filePath(id + " - " + names.join(", ") + "." + extension);
+        return folder.filePath(id + " - " + names.join(QStringLiteral(", ")) + "." + extension);
 }
 
 QString ModelItem::getTooltip() const
@@ -197,7 +198,7 @@ QString ModelItem::getTooltip() const
             cache.insert(path, imgBase64, 1);
         }
 
-        return QString("<img src='data:image/png;base64, %1'>").arg(*imgBase64);
+        return QStringLiteral("<img src='data:image/png;base64, %1'>").arg(*imgBase64);
     }
 }
 
@@ -289,16 +290,16 @@ bool ModelItem::insertName(int index, const QString &name)
 
 bool ModelItem::isValidPathChars(const QString &str)
 {
-    if (str.contains("<")
-        || str.contains(">")
-        || str.contains(":")
-        || str.contains("\"")
-        || str.contains("/")
-        || str.contains("\\")
-        || str.contains("|")
-        || str.contains("?")
-        || str.contains("*")
-        || str.contains(","))
+    if (str.contains(QStringLiteral("<"))
+        || str.contains(QStringLiteral(">"))
+        || str.contains(QStringLiteral(":"))
+        || str.contains(QStringLiteral("\""))
+        || str.contains(QStringLiteral("/"))
+        || str.contains(QStringLiteral("\\"))
+        || str.contains(QStringLiteral("|"))
+        || str.contains(QStringLiteral("?"))
+        || str.contains(QStringLiteral("*"))
+        || str.contains(QStringLiteral(",")))
     {
         QMessageBox::information(nullptr,
                                  tr("Forbidden characters"),
@@ -306,7 +307,7 @@ bool ModelItem::isValidPathChars(const QString &str)
         return false;
     }
 
-    if (str.contains(" - "))
+    if (str.contains(QStringLiteral(" - ")))
     {
         QMessageBox::information(nullptr,
                                  tr("Forbidden character sequence"),
@@ -326,8 +327,8 @@ bool ModelItem::syncFilename(const QString &oldPath, const QStringList &oldNames
         query.prepare("UPDATE thumbnails "
                       "SET path = :newPath "
                       "WHERE path = :oldPath");
-        query.bindValue(":newPath", newPath);
-        query.bindValue(":oldPath", oldPath);
+        query.bindValue(QStringLiteral(":newPath"), newPath);
+        query.bindValue(QStringLiteral(":oldPath"), oldPath);
         query.exec();
         return true;
     } else {
@@ -349,8 +350,8 @@ bool ModelItem::syncFilename(const QString &oldPath, const QString &oldId)
         query.prepare("UPDATE thumbnails "
                       "SET path = :newPath "
                       "WHERE path = :oldPath");
-        query.bindValue(":newPath", newPath);
-        query.bindValue(":oldPath", oldPath);
+        query.bindValue(QStringLiteral(":newPath"), newPath);
+        query.bindValue(QStringLiteral(":oldPath"), oldPath);
         query.exec();
         return true;
     } else {

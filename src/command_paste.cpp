@@ -1,10 +1,10 @@
-// Copyright (C) 2023 gbabin
+// Copyright (C) 2023, 2024 gbabin
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include "command_paste.h"
 #include "model.h"
 
-PasteCommand::PasteCommand(QString text, QAbstractItemModel *model, const QModelIndex &index, QUndoCommand *parent)
+PasteCommand::PasteCommand(const QString &text, QAbstractItemModel *model, const QModelIndex &index, QUndoCommand *parent)
     : QUndoCommand(parent)
     , model(model)
     , index(index)

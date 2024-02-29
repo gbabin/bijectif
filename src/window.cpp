@@ -35,8 +35,8 @@ static const char* aboutString =
                       "Thumbnails database:\n"
                       "%3");
 
-Window::Window()
-    : QMainWindow()
+Window::Window(QWidget *parent)
+    : QMainWindow(parent)
     , dir(QFileDialog::getExistingDirectory(nullptr,
                                             tr("Choose image folder")))
     , undoStack(new QUndoStack(this))
@@ -86,7 +86,7 @@ Window::Window()
     redoAct->setShortcut(QKeySequence::Redo);
     menuBar()->addAction(redoAct);
 
-    QAction* sepAct1 = new QAction("|", this);
+    QAction* sepAct1 = new QAction(QStringLiteral("|"), this);
     sepAct1->setDisabled(true);
     menuBar()->addAction(sepAct1);
 
@@ -118,7 +118,7 @@ Window::Window()
             this, &Window::deleteSelection);
     menuBar()->addAction(deleteAct);
 
-    QAction* sepAct2 = new QAction("|", this);
+    QAction* sepAct2 = new QAction(QStringLiteral("|"), this);
     sepAct2->setDisabled(true);
     menuBar()->addAction(sepAct2);
 
@@ -131,7 +131,7 @@ Window::Window()
 
     QAction* aboutAct = new QAction(tr("&About"), this);
     connect(aboutAct, &QAction::triggered,
-            this, [this]{ QMessageBox::about(this, "About",
+            this, [this]{ QMessageBox::about(this, QStringLiteral("About"),
                                              tr(aboutString)
                                              .arg(versionString,
                                                   websiteString,
@@ -178,7 +178,7 @@ QString Window::getThumbnailsDatabasePath() {
             qWarning() << "Thumbnails database folder creation failed: " << dbDir;
         }
     }
-    QString dbPath = dbDir.filePath("thumbnails.sqlite");
+    QString dbPath = dbDir.filePath(QStringLiteral("thumbnails.sqlite"));
     return dbPath;
 }
 
@@ -247,7 +247,7 @@ void Window::modelLoadingDone(qint64 dbFileSize)
     connect(view.model(), &QAbstractItemModel::dataChanged,
             this, &Window::dataChanged);
 
-    db = QSqlDatabase::addDatabase("QSQLITE");
+    db = QSqlDatabase::addDatabase(QStringLiteral("QSQLITE"));
     db.setDatabaseName(getThumbnailsDatabasePath());
     db.open();
 }
@@ -273,7 +273,7 @@ void Window::selectionChanged(const QItemSelection &selected, const QItemSelecti
         bool anyEmpty = std::any_of(selectedIndexes.cbegin(), selectedIndexes.cend(),
                                     [this](const QModelIndex &index){ return view.model()->data(index).isNull(); });
 
-        QString mode = "plain";
+        QString mode = QStringLiteral("plain");
         pasteAct->setEnabled((! QApplication::clipboard()->text(mode).trimmed().isEmpty())
                              && (selectedIndexes.size() == 1
                                  || !anyId));
@@ -350,7 +350,7 @@ void Window::copySelection()
                 }
             }
         }
-        QApplication::clipboard()->setText(names.join(", "));
+        QApplication::clipboard()->setText(names.join(QStringLiteral(", ")));
     }
 }
 
@@ -359,13 +359,13 @@ void Window::pasteIntoSelection()
     QItemSelectionModel* selection = view.selectionModel();
     if (selection == nullptr) return;
 
-    QString mode = "plain";
+    QString mode = QStringLiteral("plain");
     QString text = QApplication::clipboard()->text(mode).trimmed();
 
     if (! text.isEmpty()) {
-        static const QRegularExpression reCommaSpaces(" *, *");
-        text.replace(reCommaSpaces, ",");
-        QStringList texts = text.split(",");
+        static const QRegularExpression reCommaSpaces(QStringLiteral(" *, *"));
+        text.replace(reCommaSpaces, QStringLiteral(","));
+        QStringList texts = text.split(QStringLiteral(","));
 
         if (texts.size() == 1) {
             QModelIndexList indexes = selection->selectedIndexes();

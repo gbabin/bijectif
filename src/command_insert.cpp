@@ -4,7 +4,7 @@
 #include "command_insert.h"
 #include "model.h"
 
-InsertCommand::InsertCommand(QString text, QAbstractItemModel *model, const QModelIndex &index, QUndoCommand *parent)
+InsertCommand::InsertCommand(const QString &text, QAbstractItemModel *model, const QModelIndex &index, QUndoCommand *parent)
     : QUndoCommand(parent)
     , model(model)
     , index(index)

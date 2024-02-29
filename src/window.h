@@ -23,7 +23,7 @@ public:
     static const int tooltipSize = 512;
     static QFileInfoList listFiles(const QDir &dir);
 
-    Window();
+    Window(QWidget *parent = nullptr);
     ~Window() override;
 
 public slots:

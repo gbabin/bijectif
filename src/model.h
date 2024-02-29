@@ -22,6 +22,7 @@ class Model : public QAbstractTableModel
 public:
     static const int maxNames = 8;
 
+    Model(QObject *parent = nullptr);
     ~Model() override;
     void load(const QFileInfoList &files, const QString &dbPath);
     Qt::ItemFlags flags(const QModelIndex &index) const override;

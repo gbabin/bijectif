@@ -9,6 +9,17 @@
 #include <QSqlQuery>
 #include <QtConcurrent>
 
+Model::Model(QObject *parent)
+    : QAbstractTableModel(parent)
+{
+}
+
+Model::~Model()
+{
+    qDeleteAll(images);
+    images.clear();
+}
+
 void Model::load(const QFileInfoList &files, const QString &dbPath)
 {
     images.reserve(files.count());
@@ -21,7 +32,7 @@ void Model::load(const QFileInfoList &files, const QString &dbPath)
     }
 
     {
-        QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
+        QSqlDatabase db = QSqlDatabase::addDatabase(QStringLiteral("QSQLITE"));
         db.setDatabaseName(dbPath);
         if (db.open()) {
             qInfo() << "Thumbnails database opened";
@@ -46,8 +57,8 @@ void Model::load(const QFileInfoList &files, const QString &dbPath)
             query.prepare("SELECT timestamp, thumbnail "
                           "FROM thumbnails "
                           "WHERE path = :path AND timestamp >= :timestamp");
-            query.bindValue(":path", file.filePath());
-            query.bindValue(":timestamp", timestamp);
+            query.bindValue(QStringLiteral(":path"), file.filePath());
+            query.bindValue(QStringLiteral(":timestamp"), timestamp);
             if (query.exec()) {
                 qInfo() << "Thumbnail retrieval query succeeded:" << file.filePath();
             } else {
@@ -55,7 +66,7 @@ void Model::load(const QFileInfoList &files, const QString &dbPath)
             }
             if (query.next()) {
                 qInfo() << "Thumbnail retrieval query has a result:" << file.filePath();
-                QByteArray bytes = query.value("thumbnail").toByteArray();
+                QByteArray bytes = query.value(QStringLiteral("thumbnail")).toByteArray();
                 QPixmap pixmap = QPixmap();
                 pixmap.loadFromData(bytes);
                 if (pixmap.isNull()) {
@@ -107,7 +118,7 @@ void Model::load(const QFileInfoList &files, const QString &dbPath)
         }
 
         // store new thumbnails
-        if (query.exec("BEGIN TRANSACTION")) {
+        if (query.exec(QStringLiteral("BEGIN TRANSACTION"))) {
             qInfo() << "Thumbnail storing transaction begin query succeeded";
         } else {
             qWarning() << "Thumbnail storing transaction begin query failed:" << query.lastError();
@@ -119,9 +130,9 @@ void Model::load(const QFileInfoList &files, const QString &dbPath)
             } else {
                 query.prepare("INSERT OR REPLACE INTO thumbnails (path, timestamp, thumbnail) "
                               "VALUES (:path, :timestamp, :thumbnail)");
-                query.bindValue(":path", item.filePath);
-                query.bindValue(":timestamp", timestamp);
-                query.bindValue(":thumbnail", *item.thumbnail);
+                query.bindValue(QStringLiteral(":path"), item.filePath);
+                query.bindValue(QStringLiteral(":timestamp"), timestamp);
+                query.bindValue(QStringLiteral(":thumbnail"), *item.thumbnail);
                 if (query.exec()) {
                     qInfo() << "Thumbnail storing query succeeded:" << item.filePath;
                 } else {
@@ -131,22 +142,22 @@ void Model::load(const QFileInfoList &files, const QString &dbPath)
             emit loadingProgressed();
             delete item.thumbnail;
         }
-        if (query.exec("END TRANSACTION")) {
+        if (query.exec(QStringLiteral("END TRANSACTION"))) {
             qInfo() << "Thumbnail storing transaction end query succeeded";
         } else {
             qWarning() << "Thumbnail storing transaction end query failed:" << query.lastError();
         }
 
         // limit database size
-        if (query.exec("DELETE FROM thumbnails "
-                       "WHERE path NOT IN (SELECT path FROM thumbnails ORDER BY timestamp DESC LIMIT 10000)")) {
+        if (query.exec(QStringLiteral("DELETE FROM thumbnails "
+                                      "WHERE path NOT IN (SELECT path FROM thumbnails ORDER BY timestamp DESC LIMIT 10000)"))) {
             qInfo() << "Thumbnails database size limiting query succeeded";
         } else {
             qWarning() << "Thumbnails database size limiting query failed:" << query.lastError();
         }
 
         // repacking database
-        if (query.exec("VACUUM")) {
+        if (query.exec(QStringLiteral("VACUUM"))) {
             qInfo() << "Thumbnails database repacking query succeeded";
         } else {
             qWarning() << "Thumbnails database repacking query failed:" << query.lastError();
@@ -164,12 +175,6 @@ void Model::load(const QFileInfoList &files, const QString &dbPath)
     qInfo() << "Thumbnails database file size:" << dbFileSize << "bytes";
 
     emit loadingFinished(dbFileSize);
-}
-
-Model::~Model()
-{
-    qDeleteAll(images);
-    images.clear();
 }
 
 Qt::ItemFlags Model::flags(const QModelIndex &index) const

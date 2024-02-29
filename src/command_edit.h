@@ -1,4 +1,4 @@
-// Copyright (C) 2023 gbabin
+// Copyright (C) 2023, 2024 gbabin
 // SPDX-License-Identifier: GPL-3.0-only
 
 #ifndef EDITCOMMAND_H
@@ -11,7 +11,7 @@
 class EditCommand : public QUndoCommand
 {
 public:
-    explicit EditCommand(QString text, QAbstractItemModel *model, const QModelIndex &index, QUndoCommand *parent = nullptr);
+    explicit EditCommand(const QString &text, QAbstractItemModel *model, const QModelIndex &index, QUndoCommand *parent = nullptr);
     void redo() override;
     void undo() override;
 

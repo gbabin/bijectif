@@ -26,7 +26,7 @@ public:
     static const int maxFileSize = 20*1024*1024;
     static QVariant createThumbnail(const QFileInfo &path, const QPixmap &pixmap = QPixmap());
 
-    explicit ModelItem(const QFileInfo &path, const QPixmap &pixmap = QPixmap());
+    explicit ModelItem(const QFileInfo &path, const QPixmap &pixmap = QPixmap(), QObject *parent = nullptr);
     QString getPath() const;
     QString getTooltip() const;
     QString getId() const;

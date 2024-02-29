@@ -1,10 +1,10 @@
-// Copyright (C) 2023 gbabin
+// Copyright (C) 2023, 2024 gbabin
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include "command_id.h"
 #include "model.h"
 
-ChangeIdCommand::ChangeIdCommand(QString text, QAbstractItemModel *model, const QModelIndex &index, QUndoCommand *parent)
+ChangeIdCommand::ChangeIdCommand(const QString &text, QAbstractItemModel *model, const QModelIndex &index, QUndoCommand *parent)
     : QUndoCommand(parent)
     , model(model)
     , index(index)
