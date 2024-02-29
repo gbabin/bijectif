@@ -1,4 +1,4 @@
-// Copyright (C) 2023 gbabin
+// Copyright (C) 2023, 2024 gbabin
 // SPDX-License-Identifier: GPL-3.0-only
 
 #ifndef WINDOW_H
@@ -24,7 +24,7 @@ public:
     static QFileInfoList listFiles(const QDir &dir);
 
     Window();
-    ~Window();
+    ~Window() override;
 
 public slots:
     void modelLoadingStart();

@@ -25,6 +25,21 @@ const QStringList ModelItem::videoExtensions = {"avi", "mkv", "mov", "mp4", "mpg
 
 QCache<QString, QString> ModelItem::cache = QCache<QString, QString>(100);
 
+TooManyPartsError::TooManyPartsError(const QString &path)
+    : path(path)
+{
+}
+
+void TooManyPartsError::raise() const
+{
+    throw *this;
+}
+
+TooManyPartsError* TooManyPartsError::clone() const
+{
+    return new TooManyPartsError(*this);
+}
+
 QVariant ModelItem::createThumbnail(const QFileInfo &path, const QPixmap &pixmap)
 {
     if (pixmap.isNull()) {

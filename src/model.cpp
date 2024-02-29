@@ -96,9 +96,7 @@ void Model::load(const QFileInfoList &files, const QString &dbPath)
                                               buffer.close();
                                           }
                                           newThumbnailsMutex.lock();
-                                          newThumbnails.append({.filePath = entry.filePath(),
-                                                                .modelItem = item,
-                                                                .thumbnail = bytes});
+                                          newThumbnails.append(NewItem{entry.filePath(), item, bytes});
                                           newThumbnailsMutex.unlock();
                                           emit loadingProgressed(10);
                                       });
@@ -191,13 +189,15 @@ Qt::ItemFlags Model::flags(const QModelIndex &index) const
 
 int Model::rowCount(const QModelIndex &parent) const
 {
-    Q_UNUSED(parent);
+    Q_UNUSED(parent)
+
     return images.count();
 }
 
 int Model::columnCount(const QModelIndex &parent) const
 {
-    Q_UNUSED(parent);
+    Q_UNUSED(parent)
+
     return maxNames+2;
 }
 

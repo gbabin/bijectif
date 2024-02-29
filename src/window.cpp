@@ -254,8 +254,8 @@ void Window::modelLoadingDone(qint64 dbFileSize)
 
 void Window::selectionChanged(const QItemSelection &selected, const QItemSelection &deselected)
 {
-    Q_UNUSED(selected);
-    Q_UNUSED(deselected);
+    Q_UNUSED(selected)
+    Q_UNUSED(deselected)
 
     if (! view.selectionModel()) return;
 
@@ -301,9 +301,9 @@ void Window::clipboardChanged()
 
 void Window::dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QList<int> &roles)
 {
-    Q_UNUSED(topLeft);
-    Q_UNUSED(bottomRight);
-    Q_UNUSED(roles);
+    Q_UNUSED(topLeft)
+    Q_UNUSED(bottomRight)
+    Q_UNUSED(roles)
 
     selectionChanged(QItemSelection(), QItemSelection());
 }

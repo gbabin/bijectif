@@ -1,4 +1,4 @@
-// Copyright (C) 2023 gbabin
+// Copyright (C) 2023, 2024 gbabin
 // SPDX-License-Identifier: GPL-3.0-only
 
 #ifndef MODELITEM_H
@@ -11,9 +11,9 @@
 class TooManyPartsError : public QException
 {
 public:
-    TooManyPartsError(const QString &path) : path(path) {};
-    void raise() const override { throw *this; };
-    TooManyPartsError *clone() const override { return new TooManyPartsError(*this); };
+    TooManyPartsError(const QString &path);
+    void raise() const override;
+    TooManyPartsError* clone() const override;
 
     const QString path;
 };

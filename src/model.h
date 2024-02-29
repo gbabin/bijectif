@@ -1,4 +1,4 @@
-// Copyright (C) 2023 gbabin
+// Copyright (C) 2023, 2024 gbabin
 // SPDX-License-Identifier: GPL-3.0-only
 
 #ifndef MODEL_H
@@ -22,7 +22,7 @@ class Model : public QAbstractTableModel
 public:
     static const int maxNames = 8;
 
-    ~Model();
+    ~Model() override;
     void load(const QFileInfoList &files, const QString &dbPath);
     Qt::ItemFlags flags(const QModelIndex &index) const override;
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
