@@ -15,13 +15,22 @@
 #include <QVideoFrame>
 #include <QVideoSink>
 
-const QStringList ModelItem::imageExtensions = {"bmp",
-                                                "gif",
-                                                "jpg", "jpeg",
-                                                "png",
-                                                "tif", "tiff"};
+const QStringList ModelItem::imageExtensions = {QStringLiteral("bmp"),
+                                                QStringLiteral("gif"),
+                                                QStringLiteral("jpg"),
+                                                QStringLiteral("jpeg"),
+                                                QStringLiteral("png"),
+                                                QStringLiteral("tif"),
+                                                QStringLiteral("tiff")};
 
-const QStringList ModelItem::videoExtensions = {"avi", "mkv", "mov", "mp4", "mpg", "mts", "vob", "wmv"};
+const QStringList ModelItem::videoExtensions = {QStringLiteral("avi"),
+                                                QStringLiteral("mkv"),
+                                                QStringLiteral("mov"),
+                                                QStringLiteral("mp4"),
+                                                QStringLiteral("mpg"),
+                                                QStringLiteral("mts"),
+                                                QStringLiteral("vob"),
+                                                QStringLiteral("wmv")};
 
 QCache<QString, QString> ModelItem::cache = QCache<QString, QString>(100);
 
@@ -164,9 +173,11 @@ ModelItem::ModelItem(const QFileInfo &path, const QPixmap &pixmap, QObject *pare
 QString ModelItem::getPath() const
 {
     if (names.isEmpty())
-        return folder.filePath(id + "." + extension);
+        return folder.filePath(id + QStringLiteral(".") + extension);
     else
-        return folder.filePath(id + " - " + names.join(QStringLiteral(", ")) + "." + extension);
+        return folder.filePath(id + QStringLiteral(" - ")
+                               + names.join(QStringLiteral(", "))
+                               + QStringLiteral(".") + extension);
 }
 
 QString ModelItem::getTooltip() const
@@ -324,9 +335,9 @@ bool ModelItem::syncFilename(const QString &oldPath, const QStringList &oldNames
 
     if (QFile::rename(oldPath, newPath)) {
         QSqlQuery query;
-        query.prepare("UPDATE thumbnails "
-                      "SET path = :newPath "
-                      "WHERE path = :oldPath");
+        query.prepare(QStringLiteral("UPDATE thumbnails "
+                                     "SET path = :newPath "
+                                     "WHERE path = :oldPath"));
         query.bindValue(QStringLiteral(":newPath"), newPath);
         query.bindValue(QStringLiteral(":oldPath"), oldPath);
         query.exec();
@@ -347,9 +358,9 @@ bool ModelItem::syncFilename(const QString &oldPath, const QString &oldId)
 
     if (QFile::rename(oldPath, newPath)) {
         QSqlQuery query;
-        query.prepare("UPDATE thumbnails "
-                      "SET path = :newPath "
-                      "WHERE path = :oldPath");
+        query.prepare(QStringLiteral("UPDATE thumbnails "
+                                     "SET path = :newPath "
+                                     "WHERE path = :oldPath"));
         query.bindValue(QStringLiteral(":newPath"), newPath);
         query.bindValue(QStringLiteral(":oldPath"), oldPath);
         query.exec();

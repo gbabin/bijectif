@@ -40,10 +40,10 @@ void Model::load(const QFileInfoList &files, const QString &dbPath)
             qWarning() << "Thumbnails database opening failure:" << db.lastError();
         }
         QSqlQuery query(db);
-        if (query.exec("CREATE TABLE IF NOT EXISTS thumbnails "
-                       "(path TEXT PRIMARY KEY, "
-                       " timestamp INTEGER, "
-                       " thumbnail BLOB)")) {
+        if (query.exec(QStringLiteral("CREATE TABLE IF NOT EXISTS thumbnails "
+                                      "(path TEXT PRIMARY KEY, "
+                                      " timestamp INTEGER, "
+                                      " thumbnail BLOB)"))) {
             qInfo() << "Thumbnails database table created";
         } else {
             qWarning() << "Thumbnails database table creation failure:" << query.lastError();
@@ -54,9 +54,9 @@ void Model::load(const QFileInfoList &files, const QString &dbPath)
         // retrieve thumbnails
         for (const QFileInfo &file : files) {
             qint64 timestamp = file.lastModified().toSecsSinceEpoch();
-            query.prepare("SELECT timestamp, thumbnail "
-                          "FROM thumbnails "
-                          "WHERE path = :path AND timestamp >= :timestamp");
+            query.prepare(QStringLiteral("SELECT timestamp, thumbnail "
+                                         "FROM thumbnails "
+                                         "WHERE path = :path AND timestamp >= :timestamp"));
             query.bindValue(QStringLiteral(":path"), file.filePath());
             query.bindValue(QStringLiteral(":timestamp"), timestamp);
             if (query.exec()) {
@@ -128,8 +128,8 @@ void Model::load(const QFileInfoList &files, const QString &dbPath)
             if (item.thumbnail->isNull()) {
                 qInfo() << "Thumbnail storing ignored (null):" << item.filePath;
             } else {
-                query.prepare("INSERT OR REPLACE INTO thumbnails (path, timestamp, thumbnail) "
-                              "VALUES (:path, :timestamp, :thumbnail)");
+                query.prepare(QStringLiteral("INSERT OR REPLACE INTO thumbnails (path, timestamp, thumbnail) "
+                                             "VALUES (:path, :timestamp, :thumbnail)"));
                 query.bindValue(QStringLiteral(":path"), item.filePath);
                 query.bindValue(QStringLiteral(":timestamp"), timestamp);
                 query.bindValue(QStringLiteral(":thumbnail"), *item.thumbnail);

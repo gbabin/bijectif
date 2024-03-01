@@ -23,17 +23,16 @@
 #include <QVBoxLayout>
 #include <QtConcurrent>
 
-static const char* versionString = "v1.4";
-static const char* websiteString = "https://github.com/gbabin/bijectif";
-static const char* aboutString =
-    QT_TRANSLATE_NOOP("Window",
-                      "Bijectif %1\n"
-                      "Edit titles in filenames\n"
-                      "%2\n"
-                      "Licensed under the terms of the GNU General Public License v3.0\n"
-                      "\n"
-                      "Thumbnails database:\n"
-                      "%3");
+static const QString versionString = QStringLiteral("v1.4");
+static const QString websiteString = QStringLiteral("https://github.com/gbabin/bijectif");
+static const QString aboutString =
+    Window::tr("Bijectif %1\n"
+               "Edit titles in filenames\n"
+               "%2\n"
+               "Licensed under the terms of the GNU General Public License v3.0\n"
+               "\n"
+               "Thumbnails database:\n"
+               "%3");
 
 Window::Window(QWidget *parent)
     : QMainWindow(parent)
@@ -132,7 +131,7 @@ Window::Window(QWidget *parent)
     QAction* aboutAct = new QAction(tr("&About"), this);
     connect(aboutAct, &QAction::triggered,
             this, [this]{ QMessageBox::about(this, QStringLiteral("About"),
-                                             tr(aboutString)
+                                             aboutString
                                              .arg(versionString,
                                                   websiteString,
                                                   QDir::toNativeSeparators(this->getThumbnailsDatabasePath()))); });
@@ -163,10 +162,30 @@ Window::~Window()
 
 QFileInfoList Window::listFiles(const QDir &dir)
 {
-    return dir.entryInfoList({"*.bmp", "*.gif", "*.jpg", "*.jpeg", "*.png", "*.tif", "*.tiff",
-                              "*.dng", "*.nef", "*.rw2",
-                              "*.psd", "*.svg",
-                              "*.avi", "*.mkv", "*.mov", "*.mp4", "*.mpg", "*.mts", "*.vob", "*.wmv"},
+    return dir.entryInfoList({// images
+                              QStringLiteral("*.bmp"),
+                              QStringLiteral("*.gif"),
+                              QStringLiteral("*.jpg"),
+                              QStringLiteral("*.jpeg"),
+                              QStringLiteral("*.png"),
+                              QStringLiteral("*.tif"),
+                              QStringLiteral("*.tiff"),
+                              // raw
+                              QStringLiteral("*.dng"),
+                              QStringLiteral("*.nef"),
+                              QStringLiteral("*.rw2"),
+                              // others
+                              QStringLiteral("*.psd"),
+                              QStringLiteral("*.svg"),
+                              // videos
+                              QStringLiteral("*.avi"),
+                              QStringLiteral("*.mkv"),
+                              QStringLiteral("*.mov"),
+                              QStringLiteral("*.mp4"),
+                              QStringLiteral("*.mpg"),
+                              QStringLiteral("*.mts"),
+                              QStringLiteral("*.vob"),
+                              QStringLiteral("*.wmv")},
                              QDir::Files | QDir::Readable,
                              QDir::Name | QDir::LocaleAware);
 }

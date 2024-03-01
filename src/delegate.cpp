@@ -22,7 +22,7 @@ void Delegate::setModelData(QWidget *editor, QAbstractItemModel *model, const QM
             model->data(index,
                         Qt::EditRole).userType());
     if (!name.isEmpty()) {
-        QVariant v = editor->property(name);
+        QVariant v = editor->property(name.constData());
         if (v.userType() == QMetaType::QString) {
             if (index.column() == 1)
                 undoStack->push(new ChangeIdCommand(v.toString(), model, index));

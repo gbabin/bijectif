@@ -6,7 +6,16 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(Qt6 REQUIRED COMPONENTS Concurrent Core Gui LinguistTools Multimedia Sql Widgets)
+
 qt_standard_project_setup()
+
+add_compile_definitions(
+    QT_NO_CAST_FROM_ASCII
+    QT_NO_CAST_FROM_BYTEARRAY
+    QT_NO_CAST_TO_ASCII
+    QT_NO_URL_CAST_FROM_STRING
+    QT_USE_QSTRINGBUILDER
+)
 
 file(GLOB SRC_FILES src/*)
 
