@@ -42,6 +42,10 @@ private slots:
 
 private:
     static QString getThumbnailsDatabasePath();
+    static const QString versionString;
+    static const QString websiteString;
+    static const QString aboutString;
+
     const Settings &settings;
     const QDir dir;
     QProgressDialog* progressDialog = nullptr;

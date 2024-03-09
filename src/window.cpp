@@ -23,9 +23,9 @@
 #include <QVBoxLayout>
 #include <QtConcurrent>
 
-static const QString versionString = QStringLiteral("v1.4");
-static const QString websiteString = QStringLiteral("https://github.com/gbabin/bijectif");
-static const QString aboutString =
+const QString Window::versionString = QStringLiteral("v1.4");
+const QString Window::websiteString = QStringLiteral("https://github.com/gbabin/bijectif");
+const QString Window::aboutString =
     Window::tr("Bijectif %1\n"
                "Edit titles in filenames\n"
                "%2\n"

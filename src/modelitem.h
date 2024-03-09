@@ -42,6 +42,7 @@ public:
     bool syncFilename(const QString &oldPath, const QString &oldId);
 
 private:
+    static bool isValidPathChars(const QString &str);
     static const QStringList imageExtensions;
     static const QStringList videoExtensions;
 
@@ -52,8 +53,6 @@ private:
     QStringList names;
     const QString extension;
     const QVariant thumbnail;
-
-    static bool isValidPathChars(const QString &str);
 };
 
 #endif // MODELITEM_H
