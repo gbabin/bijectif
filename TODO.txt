@@ -1,3 +1,2 @@
 - video file preview in tooltip
-- move hard-coded settings to QSettings
 - rename once for multiple cell changes

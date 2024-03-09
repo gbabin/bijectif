@@ -4,6 +4,8 @@
 #ifndef MODELITEM_H
 #define MODELITEM_H
 
+#include "settings.h"
+
 #include <QDir>
 #include <QException>
 #include <QPixmap>
@@ -23,10 +25,9 @@ class ModelItem : public QObject
     Q_OBJECT
 
 public:
-    static const int maxFileSize = 20*1024*1024;
-    static QVariant createThumbnail(const QFileInfo &path, const QPixmap &pixmap = QPixmap());
+    static QVariant createThumbnail(const Settings &settings, const QFileInfo &path, const QPixmap &pixmap = QPixmap());
 
-    explicit ModelItem(const QFileInfo &path, const QPixmap &pixmap = QPixmap(), QObject *parent = nullptr);
+    explicit ModelItem(const Settings &settings, QCache<QString, QString> &thumbnailCache, const QFileInfo &path, const QPixmap &pixmap = QPixmap(), QObject *parent = nullptr);
     QString getPath() const;
     QString getTooltip() const;
     QString getId() const;
@@ -43,8 +44,9 @@ public:
 private:
     static const QStringList imageExtensions;
     static const QStringList videoExtensions;
-    static QCache<QString, QString> cache;
 
+    const Settings &settings;
+    QCache<QString, QString> &thumbnailCache;
     const QDir folder;
     QString id;
     QStringList names;

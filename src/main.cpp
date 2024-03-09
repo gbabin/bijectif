@@ -1,6 +1,7 @@
 // Copyright (C) 2023, 2024 gbabin
 // SPDX-License-Identifier: GPL-3.0-only
 
+#include "settings.h"
 #include "window.h"
 
 #include <QApplication>
@@ -39,8 +40,10 @@ int main(int argc, char *argv[])
         }
         qWarning() << "No app translation found for" << locale;
     }
+
+    const Settings settings;
     
-    Window window;
+    Window window(settings);
     window.show();
     
     QTimer::singleShot(0, &window, &Window::modelLoadingStart);

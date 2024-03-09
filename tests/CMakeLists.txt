@@ -18,8 +18,10 @@ qt_add_executable(tester
     ../src/delegate.h ../src/delegate.cpp
     ../src/model.h ../src/model.cpp
     ../src/modelitem.h ../src/modelitem.cpp
+    ../src/settings.h
     ../src/window.h ../src/window.cpp
     main.cpp
+    settings.cpp
     test_model.h test_model.cpp
     test_row.h test_row.cpp
 )

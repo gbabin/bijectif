@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include "modelitem.h"
-#include "model.h"
-#include "window.h"
 
 #include <QBuffer>
 #include <QCache>
@@ -11,6 +9,7 @@
 #include <QMediaPlayer>
 #include <QMessageBox>
 #include <QSqlQuery>
+#include <QThreadPool>
 #include <QTimer>
 #include <QVideoFrame>
 #include <QVideoSink>
@@ -32,8 +31,6 @@ const QStringList ModelItem::videoExtensions = {QStringLiteral("avi"),
                                                 QStringLiteral("vob"),
                                                 QStringLiteral("wmv")};
 
-QCache<QString, QString> ModelItem::cache = QCache<QString, QString>(100);
-
 TooManyPartsError::TooManyPartsError(const QString &path)
     : path(path)
 {
@@ -49,12 +46,12 @@ TooManyPartsError* TooManyPartsError::clone() const
     return new TooManyPartsError(*this);
 }
 
-QVariant ModelItem::createThumbnail(const QFileInfo &path, const QPixmap &pixmap)
+QVariant ModelItem::createThumbnail(const Settings &settings, const QFileInfo &path, const QPixmap &pixmap)
 {
     if (pixmap.isNull()) {
         qInfo() << "Pixmap argument is null:" << path.filePath();
         if (imageExtensions.contains(path.suffix().toLower())) {
-            if (path.size() <= maxFileSize) {
+            if (path.size() <= settings.maxFileSize) {
                 QImageReader reader(path.filePath());
                 reader.setAutoTransform(true);
                 QImage image = reader.read();
@@ -64,8 +61,8 @@ QVariant ModelItem::createThumbnail(const QFileInfo &path, const QPixmap &pixmap
                 } else {
                     qInfo() << "Image loading succeeded:" << path.filePath();
                     return QPixmap::fromImage(
-                        image.scaled(Window::thumbnailSize,
-                                     Window::thumbnailSize,
+                        image.scaled(settings.thumbnailSize,
+                                     settings.thumbnailSize,
                                      Qt::KeepAspectRatio,
                                      Qt::SmoothTransformation));
                 }
@@ -135,8 +132,8 @@ QVariant ModelItem::createThumbnail(const QFileInfo &path, const QPixmap &pixmap
                 return tr("Failure");
             } else {
                 return QPixmap::fromImage(
-                    image.scaled(Window::thumbnailSize,
-                                 Window::thumbnailSize,
+                    image.scaled(settings.thumbnailSize,
+                                 settings.thumbnailSize,
                                  Qt::KeepAspectRatio,
                                  Qt::SmoothTransformation));
             }
@@ -150,11 +147,13 @@ QVariant ModelItem::createThumbnail(const QFileInfo &path, const QPixmap &pixmap
     }
 }
 
-ModelItem::ModelItem(const QFileInfo &path, const QPixmap &pixmap, QObject *parent)
+ModelItem::ModelItem(const Settings &settings, QCache<QString, QString> &thumbnailCache, const QFileInfo &path, const QPixmap &pixmap, QObject *parent)
     : QObject(parent)
+    , settings(settings)
+    , thumbnailCache(thumbnailCache)
     , folder(path.dir())
     , extension(path.suffix())
-    , thumbnail(createThumbnail(path, pixmap))
+    , thumbnail(createThumbnail(settings, path, pixmap))
 {
     QString basename = path.completeBaseName();
     qsizetype index_sep = basename.indexOf(QStringLiteral(" - "));
@@ -162,7 +161,7 @@ ModelItem::ModelItem(const QFileInfo &path, const QPixmap &pixmap, QObject *pare
     if (index_sep != -1) {
         id = basename.sliced(0, index_sep);
         names = basename.sliced(index_sep+3).split(QStringLiteral(", "), Qt::SkipEmptyParts);
-        if (names.size() > Model::maxNames) {
+        if (names.size() > settings.maxNames) {
             throw TooManyPartsError(path.filePath());
         }
     } else {
@@ -188,7 +187,7 @@ QString ModelItem::getTooltip() const
         return tr("Video");
     } else {
         QString path = getPath();
-        QString* imgBase64 = cache.object(path);
+        QString* imgBase64 = thumbnailCache.object(path);
         if (imgBase64 == nullptr) {
             QImageReader reader(path);
             reader.setAutoTransform(true);
@@ -197,8 +196,8 @@ QString ModelItem::getTooltip() const
             QByteArray byteArray;
             QBuffer buffer(&byteArray);
             buffer.open(QIODevice::WriteOnly);
-            image.scaled(Window::tooltipSize,
-                         Window::tooltipSize,
+            image.scaled(settings.tooltipSize,
+                         settings.tooltipSize,
                          Qt::KeepAspectRatio,
                          Qt::SmoothTransformation)
                 .save(&buffer, "PNG");
@@ -206,7 +205,7 @@ QString ModelItem::getTooltip() const
 
             const QString tmp = QString::fromLatin1(byteArray.toBase64().data());
             imgBase64 = new QString(tmp);
-            cache.insert(path, imgBase64, 1);
+            thumbnailCache.insert(path, imgBase64, 1);
         }
 
         return QStringLiteral("<img src='data:image/png;base64, %1'>").arg(*imgBase64);
@@ -289,7 +288,7 @@ bool ModelItem::insertName(int index, const QString &name)
 
     if (nameT.isEmpty()) return false;
     if (index > names.size()) return false;
-    if (names.size() == Model::maxNames) return false;
+    if (names.size() == settings.maxNames) return false;
 
     QString oldPath = getPath();
     QStringList oldNames(names);

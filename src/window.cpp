@@ -32,20 +32,24 @@ static const QString aboutString =
                "Licensed under the terms of the GNU General Public License v3.0\n"
                "\n"
                "Thumbnails database:\n"
-               "%3");
+               "%3\n"
+               "Settings file:\n"
+               "%4");
 
-Window::Window(QWidget *parent)
+Window::Window(const Settings &settings, QWidget *parent)
     : QMainWindow(parent)
+    , settings(settings)
     , dir(QFileDialog::getExistingDirectory(nullptr,
                                             tr("Choose image folder")))
+    , model(settings)
     , undoStack(new QUndoStack(this))
 {
     if (! dir.exists()) exit(1);
 
-    setMinimumSize(800, 600);
+    setMinimumSize(settings.minWidth, settings.minHeight);
 
     QFont font = this->font();
-    font.setPixelSize(16);
+    font.setPixelSize(settings.fontSize);
 
     // status bar
 
@@ -67,7 +71,7 @@ Window::Window(QWidget *parent)
     view.horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
     view.horizontalHeader()->setFont(font);
     view.verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
-    view.verticalHeader()->setDefaultSectionSize(thumbnailSize+4);
+    view.verticalHeader()->setDefaultSectionSize(settings.thumbnailSize + 4);
     view.setAlternatingRowColors(true);
 
     connect(&view, &QTableView::doubleClicked,
@@ -134,7 +138,8 @@ Window::Window(QWidget *parent)
                                              aboutString
                                              .arg(versionString,
                                                   websiteString,
-                                                  QDir::toNativeSeparators(this->getThumbnailsDatabasePath()))); });
+                                                  QDir::toNativeSeparators(this->getThumbnailsDatabasePath()),
+                                                  QDir::toNativeSeparators(this->settings.fileName))); });
     helpMenu->addAction(aboutAct);
 
     QAction* aboutQtAct = new QAction(tr("About &Qt"), this);
@@ -143,6 +148,7 @@ Window::Window(QWidget *parent)
     helpMenu->addAction(aboutQtAct);
 
     menuBar()->setFont(font);
+    helpMenu->setFont(font);
 
     connect(QApplication::clipboard(), &QClipboard::dataChanged,
             this, &Window::clipboardChanged);
@@ -241,7 +247,7 @@ void Window::modelLoadingDone(qint64 dbFileSize)
                               tr("Too many name parts"),
                               tr("The file \"%1\" has too many parts in its name.\n"
                                  "The maximum number allowed is %2.")
-                                  .arg(e.path, QString::number(Model::maxNames)));
+                                  .arg(e.path, QString::number(settings.maxNames)));
         exit(2);
     }
 
@@ -309,7 +315,7 @@ void Window::selectionChanged(const QItemSelection &selected, const QItemSelecti
                                || anyId
                                || std::any_of(selectedIndexes.cbegin(), selectedIndexes.cend(),
                                               [this](const QModelIndex &index){
-                                                  return ! view.model()->data(index.siblingAtColumn(Model::maxNames + 1)).isNull(); }));
+                                                  return ! view.model()->data(index.siblingAtColumn(settings.maxNames + 1)).isNull(); }));
     }
 }
 

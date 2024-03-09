@@ -9,8 +9,10 @@
 #include <QSqlQuery>
 #include <QtConcurrent>
 
-Model::Model(QObject *parent)
+Model::Model(const Settings &settings, QObject *parent)
     : QAbstractTableModel(parent)
+    , settings(settings)
+    , thumbnailCache(settings.thumbnailCacheSize)
 {
 }
 
@@ -74,7 +76,7 @@ void Model::load(const QFileInfoList &files, const QString &dbPath)
                     newFiles.append(file);
                 } else {
                     qInfo() << "Thumbnail retrieval result is not null:" << file.filePath();
-                    ModelItem *item = new ModelItem(file, pixmap);
+                    ModelItem *item = new ModelItem(settings, thumbnailCache, file, pixmap);
                     images.append(item);
                     emit loadingProgressed(11);
                 }
@@ -97,7 +99,7 @@ void Model::load(const QFileInfoList &files, const QString &dbPath)
         try {
             QtConcurrent::blockingMap(std::as_const(newFiles),
                                       [this, &newThumbnailsMutex, &newThumbnails](const QFileInfo & entry){
-                                          ModelItem *item = new ModelItem(entry);
+                                          ModelItem *item = new ModelItem(settings, thumbnailCache, entry);
                                           QByteArray *bytes = new QByteArray();
                                           if (item->getThumbnail().userType() == QMetaType::QPixmap) {
                                               const QPixmap thumbnail = item->getThumbnail().value<QPixmap>();
@@ -150,7 +152,7 @@ void Model::load(const QFileInfoList &files, const QString &dbPath)
 
         // limit database size
         if (query.exec(QStringLiteral("DELETE FROM thumbnails "
-                                      "WHERE path NOT IN (SELECT path FROM thumbnails ORDER BY timestamp DESC LIMIT 10000)"))) {
+                                      "WHERE path NOT IN (SELECT path FROM thumbnails ORDER BY timestamp DESC LIMIT %1)").arg(settings.thumbnailDatabaseLimit))) {
             qInfo() << "Thumbnails database size limiting query succeeded";
         } else {
             qWarning() << "Thumbnails database size limiting query failed:" << query.lastError();
@@ -203,7 +205,7 @@ int Model::columnCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent)
 
-    return maxNames+2;
+    return settings.maxNames + 2;
 }
 
 QVariant Model::headerData(int section, Qt::Orientation orientation, int role) const
@@ -227,7 +229,7 @@ QVariant Model::data(const QModelIndex &index, int role) const
     if (index.row() >= images.count())
         return QVariant();
 
-    if (index.column() > maxNames+1)
+    if (index.column() > settings.maxNames + 1)
         return QVariant();
 
     if (role == Qt::DisplayRole || role == Qt::EditRole) {
@@ -295,13 +297,13 @@ bool Model::setData(const QModelIndex &index, const QVariant &value, int role)
         else if (role == InsertRole) {
             QString valueStr = value.toString();
             if (images.at(index.row())->insertName(nameIdx, valueStr)) {
-                emit dataChanged(index, index.siblingAtColumn(maxNames+1));
+                emit dataChanged(index, index.siblingAtColumn(settings.maxNames + 1));
                 return true;
             }
         }
         else if (role == DeleteRole) {
             if (images.at(index.row())->deleteName(nameIdx)) {
-                emit dataChanged(index, index.siblingAtColumn(maxNames+1));
+                emit dataChanged(index, index.siblingAtColumn(settings.maxNames + 1));
                 return true;
             }
         }

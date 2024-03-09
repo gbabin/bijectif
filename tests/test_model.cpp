@@ -1,4 +1,4 @@
-// Copyright (C) 2023 gbabin
+// Copyright (C) 2023, 2024 gbabin
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include "test_model.h"
@@ -13,6 +13,12 @@
 #include <QSortFilterProxyModel>
 #include <QStandardPaths>
 
+ModelTest::ModelTest(const Settings &settings, QObject *parent)
+    : QObject(parent)
+    , settings(settings)
+{
+}
+
 void ModelTest::initTestCase()
 {
     QDir tmpDir(QStandardPaths::writableLocation(QStandardPaths::TempLocation));
@@ -23,7 +29,7 @@ void ModelTest::initTestCase()
     filesDir = rootDir.filePath("files");
     QDir().mkpath(filesDir.path());
     for (int i = 99; i >= 0; i--) {
-        QList<int> numbers(i%(1+Model::maxNames));
+        QList<int> numbers(i%(1+settings.maxNames));
         std::iota(numbers.begin(), numbers.end(), 1);
         QStringList namesPart;
         std::transform(numbers.cbegin(), numbers.cend(),
@@ -45,7 +51,7 @@ void ModelTest::test_1()
 
     QSortFilterProxyModel proxyModel;
     {
-        Model* model = new Model;
+        Model* model = new Model(settings);
         model->load(files, dbPath);
         proxyModel.setSourceModel(model);
     }
@@ -56,15 +62,15 @@ void ModelTest::test_1()
     db.setDatabaseName(dbPath);
     QVERIFY(db.open());
 
-    QCOMPARE(proxyModel.columnCount(), 2 + Model::maxNames);
+    QCOMPARE(proxyModel.columnCount(), 2 + settings.maxNames);
     QCOMPARE(proxyModel.rowCount(), 100);
 
     for (int row = 0; row < 100; row++) {
         QCOMPARE(proxyModel.data(proxyModel.index(row, 1), Qt::DisplayRole),
                  QVariant(QString::asprintf("IMG_%04d", row)));
 
-        for (int name = 1; name <= Model::maxNames; name++) {
-            if (name <= row%(1+Model::maxNames)) {
+        for (int name = 1; name <= settings.maxNames; name++) {
+            if (name <= row%(1+settings.maxNames)) {
                 QCOMPARE(proxyModel.data(proxyModel.index(row, name+1), Qt::DisplayRole),
                          QVariant(QString::number(name)));
             } else {
@@ -76,16 +82,16 @@ void ModelTest::test_1()
 
     QUndoStack undoStack;
 
-    for (int row = 0; row <= Model::maxNames; row++) {
+    for (int row = 0; row <= settings.maxNames; row++) {
         undoStack.push(new DeleteCommand(&proxyModel, proxyModel.index(row, 2)));
     }
 
-    for (int row = 0; row <= Model::maxNames; row++) {
+    for (int row = 0; row <= settings.maxNames; row++) {
         QCOMPARE(proxyModel.data(proxyModel.index(row, 1), Qt::DisplayRole),
                  QVariant(QString::asprintf("IMG_%04d", row)));
 
-        for (int name = 1; name <= Model::maxNames; name++) {
-            if (name < row%(1+Model::maxNames)) {
+        for (int name = 1; name <= settings.maxNames; name++) {
+            if (name < row%(1+settings.maxNames)) {
                 QCOMPARE(proxyModel.data(proxyModel.index(row, name+1), Qt::DisplayRole),
                          QVariant(QString::number(name+1)));
             } else {
@@ -95,8 +101,8 @@ void ModelTest::test_1()
         }
     }
 
-    QCOMPARE(undoStack.index(), Model::maxNames);
-    for (int row = 0; row < Model::maxNames; row++) {
+    QCOMPARE(undoStack.index(), settings.maxNames);
+    for (int row = 0; row < settings.maxNames; row++) {
         QVERIFY(undoStack.canUndo());
         undoStack.undo();
     }
@@ -106,8 +112,8 @@ void ModelTest::test_1()
         QCOMPARE(proxyModel.data(proxyModel.index(row, 1), Qt::DisplayRole),
                  QVariant(QString::asprintf("IMG_%04d", row)));
 
-        for (int name = 1; name <= Model::maxNames; name++) {
-            if (name <= row%(1+Model::maxNames)) {
+        for (int name = 1; name <= settings.maxNames; name++) {
+            if (name <= row%(1+settings.maxNames)) {
                 QCOMPARE(proxyModel.data(proxyModel.index(row, name+1), Qt::DisplayRole),
                          QVariant(QString::number(name)));
             } else {
@@ -166,8 +172,8 @@ void ModelTest::test_1()
         QCOMPARE(proxyModel.data(proxyModel.index(row, 1), Qt::DisplayRole),
                  QVariant(QString::asprintf("IMG_%04d", row)));
 
-        for (int name = 1; name <= Model::maxNames; name++) {
-            if (name <= row%(1+Model::maxNames)) {
+        for (int name = 1; name <= settings.maxNames; name++) {
+            if (name <= row%(1+settings.maxNames)) {
                 QCOMPARE(proxyModel.data(proxyModel.index(row, name+1), Qt::DisplayRole),
                          QVariant(QString::number(name)));
             } else {

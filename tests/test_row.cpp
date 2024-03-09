@@ -14,6 +14,12 @@
 #include <QSignalSpy>
 #include <QStandardPaths>
 
+RowTest::RowTest(const Settings &settings, QObject *parent)
+    : QObject(parent)
+    , settings(settings)
+{
+}
+
 void RowTest::compare_row(const QAbstractItemModel &model,
                           const QString &id,
                           const QString &name1,
@@ -25,7 +31,7 @@ void RowTest::compare_row(const QAbstractItemModel &model,
                           const QString &name7,
                           const QString &name8)
 {
-    QCOMPARE(Model::maxNames, 8);
+    QCOMPARE(settings.maxNames, 8);
 
     QStringList names = QStringList{name1, name2, name3, name4, name5, name6, name7, name8};
     int indexFirstEmpty = names.indexOf("");
@@ -68,7 +74,7 @@ void RowTest::initTestCase()
     const QFileInfoList files = Window::listFiles(filesDir);
     const QString dbPath = dbDir.filePath("thumbnails.sqlite");
 
-    Model* tableModel = new Model;
+    Model* tableModel = new Model(settings);
     tableModel->load(files, dbPath);
 
     QVERIFY(QFile::exists(dbPath));
@@ -81,7 +87,7 @@ void RowTest::initTestCase()
     proxyModel->sort(1, Qt::AscendingOrder);
     model = proxyModel;
 
-    QCOMPARE(model->columnCount(), 2 + Model::maxNames);
+    QCOMPARE(model->columnCount(), 2 + settings.maxNames);
     QCOMPARE(model->rowCount(), 1);
 
     compare_row(*model, "image", "", "", "", "", "", "", "", "");

@@ -5,6 +5,7 @@
 #define WINDOW_H
 
 #include "model.h"
+#include "settings.h"
 
 #include <QDir>
 #include <QFuture>
@@ -19,11 +20,9 @@ class Window : public QMainWindow
     Q_OBJECT
 
 public:
-    static const int thumbnailSize = 128;
-    static const int tooltipSize = 512;
     static QFileInfoList listFiles(const QDir &dir);
 
-    Window(QWidget *parent = nullptr);
+    Window(const Settings &settings, QWidget *parent = nullptr);
     ~Window() override;
 
 public slots:
@@ -43,6 +42,7 @@ private slots:
 
 private:
     static QString getThumbnailsDatabasePath();
+    const Settings &settings;
     const QDir dir;
     QProgressDialog* progressDialog = nullptr;
     QTableView view;

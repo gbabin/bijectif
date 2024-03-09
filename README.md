@@ -36,6 +36,22 @@ cmake --build build
 
 Use `build-msys2.sh` in [MSYS2](https://www.msys2.org/) UCRT64 environment.
 
+## Settings
+
+Default `bijectif.ini`:
+
+```
+thumbnail size = 128
+tooltip size = 512
+min width = 800
+min height = 600
+max names = 8
+max file size = 20971520
+font size = 16
+thumbnail cache size = 100
+thumbnail database limit = 10000
+```
+
 ## License
 
 This project is licensed under the terms of the GNU General Public License v3.0. See `LICENSE`.

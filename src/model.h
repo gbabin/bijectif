@@ -5,8 +5,10 @@
 #define MODEL_H
 
 #include "modelitem.h"
+#include "settings.h"
 
 #include <QAbstractTableModel>
+#include <QCache>
 
 enum UserRole {
     InsertRole = Qt::UserRole,
@@ -20,9 +22,7 @@ class Model : public QAbstractTableModel
     Q_OBJECT
 
 public:
-    static const int maxNames = 8;
-
-    Model(QObject *parent = nullptr);
+    Model(const Settings &settings, QObject *parent = nullptr);
     ~Model() override;
     void load(const QFileInfoList &files, const QString &dbPath);
     Qt::ItemFlags flags(const QModelIndex &index) const override;
@@ -37,6 +37,8 @@ signals:
     void loadingFinished(qint64 dbFileSize = -1);
 
 private:
+    const Settings &settings;
+    QCache<QString, QString> thumbnailCache;
     QList<ModelItem*> images;
 };
 
