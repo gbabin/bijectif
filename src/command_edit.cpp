@@ -4,12 +4,12 @@
 #include "command_edit.h"
 #include "model.h"
 
-EditCommand::EditCommand(const QString &text, QAbstractItemModel *model, const QModelIndex &index, QUndoCommand *parent)
+EditCommand::EditCommand(QString text, QAbstractItemModel *model, const QModelIndex &index, QUndoCommand *parent)
     : QUndoCommand(parent)
     , model(model)
     , index(index)
     , oldValue(index.data().toString())
-    , newValue(text)
+    , newValue(std::move(text))
 {
     setText(QObject::tr("Edit (%1) [%2] \"%3\" > \"%4\"\n")
                 .arg(model->data(index.siblingAtColumn(1)).toString(),

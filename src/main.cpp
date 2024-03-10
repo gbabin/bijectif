@@ -12,7 +12,7 @@
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
-    app.setApplicationDisplayName(QStringLiteral("Bijectif"));
+    QApplication::setApplicationDisplayName(QStringLiteral("Bijectif"));
 
     const QStringList uiLanguages = QLocale::system().uiLanguages();
 
@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
     for (const QString &locale : uiLanguages) {
         if (qtTranslator.load(QLocale(locale), QStringLiteral("qt"), QStringLiteral("_"), QLibraryInfo::path(QLibraryInfo::TranslationsPath))) {
             qDebug() << "Loaded translation" << qtTranslator.filePath();
-            app.installTranslator(&qtTranslator);
+            QApplication::installTranslator(&qtTranslator);
             break;
         }
         qWarning() << "No Qt translation found for" << locale;
@@ -30,12 +30,12 @@ int main(int argc, char *argv[])
     for (const QString &locale : uiLanguages) {
         if (appTranslator.load(QLocale(locale), QStringLiteral("bijectif"), QStringLiteral("_"))) {
             qDebug() << "Loaded translation" << appTranslator.filePath();
-            app.installTranslator(&appTranslator);
+            QApplication::installTranslator(&appTranslator);
             break;
         }
         if (appTranslator.load(QLocale(locale), QStringLiteral("bijectif"), QStringLiteral("_"), QStringLiteral("/usr/share/bijectif/translations/"))) {
             qDebug() << "Loaded translation" << appTranslator.filePath();
-            app.installTranslator(&appTranslator);
+            QApplication::installTranslator(&appTranslator);
             break;
         }
         qWarning() << "No app translation found for" << locale;
@@ -48,5 +48,5 @@ int main(int argc, char *argv[])
     
     QTimer::singleShot(0, &window, &Window::modelLoadingStart);
 
-    return app.exec();
+    return QApplication::exec();
 }

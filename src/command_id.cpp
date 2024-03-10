@@ -4,12 +4,12 @@
 #include "command_id.h"
 #include "model.h"
 
-ChangeIdCommand::ChangeIdCommand(const QString &text, QAbstractItemModel *model, const QModelIndex &index, QUndoCommand *parent)
+ChangeIdCommand::ChangeIdCommand(QString text, QAbstractItemModel *model, const QModelIndex &index, QUndoCommand *parent)
     : QUndoCommand(parent)
     , model(model)
     , index(index)
     , oldValue(index.data().toString())
-    , newValue(text)
+    , newValue(std::move(text))
 {
     setText(QObject::tr("Id (%1) > (%2)\n")
                 .arg(oldValue,

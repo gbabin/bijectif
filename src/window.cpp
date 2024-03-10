@@ -44,7 +44,7 @@ Window::Window(const Settings &settings, QWidget *parent)
     , model(settings)
     , undoStack(new QUndoStack(this))
 {
-    if (! dir.exists()) exit(1);
+    if (! dir.exists()) QApplication::exit(1);
 
     setMinimumSize(settings.minWidth, settings.minHeight);
 
@@ -138,7 +138,7 @@ Window::Window(const Settings &settings, QWidget *parent)
                                              aboutString
                                              .arg(versionString,
                                                   websiteString,
-                                                  QDir::toNativeSeparators(this->getThumbnailsDatabasePath()),
+                                                  QDir::toNativeSeparators(getThumbnailsDatabasePath()),
                                                   QDir::toNativeSeparators(this->settings.fileName))); });
     helpMenu->addAction(aboutAct);
 
@@ -248,7 +248,7 @@ void Window::modelLoadingDone(qint64 dbFileSize)
                               tr("The file \"%1\" has too many parts in its name.\n"
                                  "The maximum number allowed is %2.")
                                   .arg(e.path, QString::number(settings.maxNames)));
-        exit(2);
+        QApplication::exit(2);
     }
 
     QSortFilterProxyModel* proxyModel = new QSortFilterProxyModel(&view);
@@ -282,7 +282,8 @@ void Window::selectionChanged(const QItemSelection &selected, const QItemSelecti
     Q_UNUSED(selected)
     Q_UNUSED(deselected)
 
-    if (! view.selectionModel()) return;
+    if (view.selectionModel() == nullptr)
+        return;
 
     const QModelIndexList selectedIndexes = view.selectionModel()->selectedIndexes();
 

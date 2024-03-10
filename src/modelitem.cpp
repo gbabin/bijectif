@@ -31,8 +31,8 @@ const QStringList ModelItem::videoExtensions = {QStringLiteral("avi"),
                                                 QStringLiteral("vob"),
                                                 QStringLiteral("wmv")};
 
-TooManyPartsError::TooManyPartsError(const QString &path)
-    : path(path)
+TooManyPartsError::TooManyPartsError(QString path)
+    : path(std::move(path))
 {
 }
 
@@ -99,7 +99,7 @@ QVariant ModelItem::createThumbnail(const Settings &settings, const QFileInfo &p
                 int returnCode = eventLoop.exec();
                 QThreadPool::globalInstance()->reserveThread();
                 mediaPlayer.disconnect();
-                if (returnCode) {
+                if (returnCode != 0) {
                     qWarning() << "Video loading failed (setSource):" << path.filePath() << mediaPlayer.mediaStatus() << mediaPlayer.error() << mediaPlayer.errorString();
                     return tr("Failure");
                 }
@@ -121,7 +121,7 @@ QVariant ModelItem::createThumbnail(const Settings &settings, const QFileInfo &p
                 QThreadPool::globalInstance()->reserveThread();
                 videoSink.disconnect();
                 mediaPlayer.stop();
-                if (returnCode) {
+                if (returnCode != 0) {
                     qWarning() << "Video loading failed (play):" << path.filePath() << mediaPlayer.mediaStatus() << mediaPlayer.error() << mediaPlayer.errorString();
                     return tr("Failure");
                 }

@@ -13,9 +13,9 @@
 class TooManyPartsError : public QException
 {
 public:
-    TooManyPartsError(const QString &path);
+    TooManyPartsError(QString path);
     void raise() const override;
-    TooManyPartsError* clone() const override;
+    [[nodiscard]] TooManyPartsError* clone() const override;
 
     const QString path;
 };
@@ -28,13 +28,13 @@ public:
     static QVariant createThumbnail(const Settings &settings, const QFileInfo &path, const QPixmap &pixmap = QPixmap());
 
     explicit ModelItem(const Settings &settings, QCache<QString, QString> &thumbnailCache, const QFileInfo &path, const QPixmap &pixmap = QPixmap(), QObject *parent = nullptr);
-    QString getPath() const;
-    QString getTooltip() const;
-    QString getId() const;
+    [[nodiscard]] QString getPath() const;
+    [[nodiscard]] QString getTooltip() const;
+    [[nodiscard]] QString getId() const;
     bool setId(const QString &id);
     int getNamesSize();
-    QString getName(int index) const;
-    QVariant getThumbnail() const;
+    [[nodiscard]] QString getName(int index) const;
+    [[nodiscard]] QVariant getThumbnail() const;
     bool setName(int index, const QString &name);
     bool deleteName(int index);
     bool insertName(int index, const QString &name);

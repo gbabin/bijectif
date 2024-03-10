@@ -11,7 +11,7 @@
 class EditCommand : public QUndoCommand
 {
 public:
-    explicit EditCommand(const QString &text, QAbstractItemModel *model, const QModelIndex &index, QUndoCommand *parent = nullptr);
+    explicit EditCommand(QString text, QAbstractItemModel *model, const QModelIndex &index, QUndoCommand *parent = nullptr);
     void redo() override;
     void undo() override;
 

@@ -240,24 +240,24 @@ Le nombre maximum autorisé est %2.</translation>
         <translation>Chargement terminé (Base de données des miniatures : %1)</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="409"/>
-        <location filename="../src/window.cpp" line="423"/>
+        <location filename="../src/window.cpp" line="410"/>
+        <location filename="../src/window.cpp" line="424"/>
         <source>Pasting multiple cells</source>
         <translation>Coller plusieurs cellules</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="410"/>
-        <location filename="../src/window.cpp" line="424"/>
+        <location filename="../src/window.cpp" line="411"/>
+        <location filename="../src/window.cpp" line="425"/>
         <source>The pasted content has %1 parts. Therefore, each modifed row must have %1 selected cells.</source>
         <translation>Le contenu collé comporte %1 parties. Par conséquent, chaque ligne modifiée doit avoir %1 cellules sélectionnées.</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="457"/>
+        <location filename="../src/window.cpp" line="458"/>
         <source>Insertion</source>
         <translation>Insertion</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="457"/>
+        <location filename="../src/window.cpp" line="458"/>
         <source>Name:</source>
         <translation>Nom :</translation>
     </message>

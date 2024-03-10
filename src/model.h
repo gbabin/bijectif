@@ -20,6 +20,7 @@ enum UserRole {
 class Model : public QAbstractTableModel
 {
     Q_OBJECT
+    Q_DISABLE_COPY_MOVE(Model)
 
 public:
     Model(const Settings &settings, QObject *parent = nullptr);

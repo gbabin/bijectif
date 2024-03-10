@@ -18,6 +18,7 @@
 class Window : public QMainWindow
 {
     Q_OBJECT
+    Q_DISABLE_COPY_MOVE(Window)
 
 public:
     static QFileInfoList listFiles(const QDir &dir);
@@ -38,7 +39,7 @@ public slots:
     void insertAtSelection();
 
 private slots:
-    void doubleClickedHandler(const QModelIndex &index);
+    static void doubleClickedHandler(const QModelIndex &index);
 
 private:
     static QString getThumbnailsDatabasePath();
