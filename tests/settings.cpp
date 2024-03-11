@@ -14,6 +14,7 @@ Settings::Settings()
     , fontSize(16)
     , thumbnailCacheSize(100)
     , thumbnailDatabaseLimit(10000)
+    , logVerbosity(2)
 {
 }
 

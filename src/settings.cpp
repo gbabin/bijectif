@@ -21,5 +21,6 @@ Settings::Settings(const QSettings &settings)
     , fontSize(settings.value("font size", 16).toInt())
     , thumbnailCacheSize(settings.value("thumbnail cache size", 100).toInt())
     , thumbnailDatabaseLimit(settings.value("thumbnail database limit", 10000).toInt())
+    , logVerbosity(settings.value("log verbosity", 2).toInt())
 {
 }

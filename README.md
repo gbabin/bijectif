@@ -50,7 +50,10 @@ max file size = 20971520
 font size = 16
 thumbnail cache size = 100
 thumbnail database limit = 10000
+log verbosity = 2
 ```
+
+See [`settings.h`](src/settings.h).
 
 ## License
 

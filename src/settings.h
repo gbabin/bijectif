@@ -42,6 +42,9 @@ public:
     /// Max number of thumbnails in database cache
     const int thumbnailDatabaseLimit;
 
+    /// Log verbosity (0 to 4, 4 is most verbose)
+    const int logVerbosity;
+
 private:
     Settings(const QSettings &settings);
 };
