@@ -32,17 +32,17 @@ public:
     [[nodiscard]] QString getTooltip() const;
     [[nodiscard]] QString getId() const;
     bool setId(const QString &id);
-    int getNamesSize();
+    [[nodiscard]] int getNamesSize() const;
     [[nodiscard]] QString getName(int index) const;
     [[nodiscard]] QVariant getThumbnail() const;
     bool setName(int index, const QString &name);
     bool deleteName(int index);
     bool insertName(int index, const QString &name);
-    bool syncFilename(const QString &oldPath, const QStringList &oldNames);
-    bool syncFilename(const QString &oldPath, const QString &oldId);
 
 private:
-    static bool isValidPathChars(const QString &str);
+    [[nodiscard]] static bool isValidPathChars(const QString &str);
+    [[nodiscard]] static QString computePath(const ModelItem &item, const QString &id, const QStringList &names);
+    static bool syncFilename(const QString &oldPath, const QString &newPath);
     static const QStringList imageExtensions;
     static const QStringList videoExtensions;
 

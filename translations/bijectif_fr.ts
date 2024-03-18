@@ -35,46 +35,44 @@
         <translation>Fichier trop volumineux</translation>
     </message>
     <message>
-        <location filename="../src/modelitem.cpp" line="185"/>
+        <location filename="../src/modelitem.cpp" line="180"/>
         <source>Thumbnail unavailable</source>
         <translation>Miniature indisponible</translation>
     </message>
     <message>
-        <location filename="../src/modelitem.cpp" line="187"/>
+        <location filename="../src/modelitem.cpp" line="182"/>
         <source>Video</source>
         <translation>Vidéo</translation>
     </message>
     <message>
-        <location filename="../src/modelitem.cpp" line="315"/>
+        <location filename="../src/modelitem.cpp" line="330"/>
         <source>Forbidden characters</source>
         <translation>Caractères interdits</translation>
     </message>
     <message>
-        <location filename="../src/modelitem.cpp" line="316"/>
+        <location filename="../src/modelitem.cpp" line="331"/>
         <source>The following characters are not allowed:
 &lt; &gt; : &quot; / \ | ? * ,</source>
         <translation>Les caractères suivants ne sont pas autorisés :
 &lt; &gt; : &quot; / \ | ? * ,</translation>
     </message>
     <message>
-        <location filename="../src/modelitem.cpp" line="323"/>
+        <location filename="../src/modelitem.cpp" line="338"/>
         <source>Forbidden character sequence</source>
         <translation>Séquence de caractères interdite</translation>
     </message>
     <message>
-        <location filename="../src/modelitem.cpp" line="324"/>
+        <location filename="../src/modelitem.cpp" line="339"/>
         <source>The following character sequence is not allowed: &quot; - &quot; (hyphen with surrounding spaces)</source>
         <translation>Cette séquence de caractères est interdite : &quot; - &quot; (trait d&apos;union entouré d&apos;espaces)</translation>
     </message>
     <message>
-        <location filename="../src/modelitem.cpp" line="348"/>
-        <location filename="../src/modelitem.cpp" line="370"/>
+        <location filename="../src/modelitem.cpp" line="369"/>
         <source>Unable to rename file</source>
         <translation>Impossible de renommer le fichier</translation>
     </message>
     <message>
-        <location filename="../src/modelitem.cpp" line="349"/>
-        <location filename="../src/modelitem.cpp" line="371"/>
+        <location filename="../src/modelitem.cpp" line="370"/>
         <source>Before : %1
 After : %2</source>
         <translation>Avant : %1
