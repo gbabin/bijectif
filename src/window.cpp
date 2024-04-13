@@ -23,7 +23,7 @@
 #include <QVBoxLayout>
 #include <QtConcurrent>
 
-const QString Window::versionString = QStringLiteral("v1.4");
+const QString Window::versionString = QStringLiteral("v1.5");
 const QString Window::websiteString = QStringLiteral("https://github.com/gbabin/bijectif");
 const QString Window::aboutString =
     Window::tr("Bijectif %1\n"
