@@ -1,0 +1,9 @@
+#!/bin/bash
+
+yay -S --needed include-what-you-use
+wget 'https://github.com/include-what-you-use/include-what-you-use/raw/master/mapgen/iwyu-mapgen-qt.py'
+python iwyu-mapgen-qt.py /usr/include/qt6 > qt6.imp
+CC="clang" CXX="clang++" cmake -DCMAKE_CXX_INCLUDE_WHAT_YOU_USE="include-what-you-use;-Xiwyu;--mapping_file=$(pwd)/qt6.imp" -DCMAKE_BUILD_TYPE=Release . -B build/iwyu
+cmake --build build/iwyu 2> iwyu-report.txt
+iwyu-fix-includes --blank_lines --nocomments --nosafe_headers --reorder < iwyu-report.txt
+rm -r iwyu-mapgen-qt.py qt6.imp build/iwyu iwyu-report.txt
