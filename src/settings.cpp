@@ -3,10 +3,12 @@
 
 #include "settings.h"
 
+using namespace Qt::Literals::StringLiterals;
+
 Settings::Settings()
     : Settings(QSettings(QSettings::IniFormat,
                          QSettings::UserScope,
-                         QStringLiteral("bijectif")))
+                         u"bijectif"_s))
 {
 }
 

@@ -10,29 +10,31 @@
 #include <QTimer>
 #include <QTranslator>
 
+using namespace Qt::Literals::StringLiterals;
+
 void setLogVerbosity(const Settings &settings)
 {
     QString rules;
 
     if (settings.logVerbosity > 0)
-        rules += QStringLiteral("default.critical=true\n");
+        rules += u"default.critical=true\n"_s;
     else
-        rules += QStringLiteral("default.critical=false\n");
+        rules += u"default.critical=false\n"_s;
 
     if (settings.logVerbosity > 1)
-        rules += QStringLiteral("default.warning=true\n");
+        rules += u"default.warning=true\n"_s;
     else
-        rules += QStringLiteral("default.warning=false\n");
+        rules += u"default.warning=false\n"_s;
 
     if (settings.logVerbosity > 2)
-        rules += QStringLiteral("default.info=true\n");
+        rules += u"default.info=true\n"_s;
     else
-        rules += QStringLiteral("default.info=false\n");
+        rules += u"default.info=false\n"_s;
 
     if (settings.logVerbosity > 3)
-        rules += QStringLiteral("default.debug=true");
+        rules += u"default.debug=true"_s;
     else
-        rules += QStringLiteral("default.debug=false");
+        rules += u"default.debug=false"_s;
 
     QLoggingCategory::setFilterRules(rules);
 }
@@ -40,7 +42,7 @@ void setLogVerbosity(const Settings &settings)
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
-    QApplication::setApplicationDisplayName(QStringLiteral("Bijectif"));
+    QApplication::setApplicationDisplayName(u"Bijectif"_s);
 
     const Settings settings;
 
@@ -50,7 +52,7 @@ int main(int argc, char *argv[])
 
     QTranslator qtTranslator;
     for (const QString &locale : uiLanguages) {
-        if (qtTranslator.load(QLocale(locale), QStringLiteral("qt"), QStringLiteral("_"), QLibraryInfo::path(QLibraryInfo::TranslationsPath))) {
+        if (qtTranslator.load(QLocale(locale), u"qt"_s, u"_"_s, QLibraryInfo::path(QLibraryInfo::TranslationsPath))) {
             if (QApplication::installTranslator(&qtTranslator))
                 qDebug() << "Translator install succeeded:" << qtTranslator.filePath();
             else
@@ -62,14 +64,14 @@ int main(int argc, char *argv[])
 
     QTranslator appTranslator;
     for (const QString &locale : uiLanguages) {
-        if (appTranslator.load(QLocale(locale), QStringLiteral("bijectif"), QStringLiteral("_"))) {
+        if (appTranslator.load(QLocale(locale), u"bijectif"_s, u"_"_s)) {
             if (QApplication::installTranslator(&appTranslator))
                 qDebug() << "Translator install succeeded:" << appTranslator.filePath();
             else
                 qWarning() << "Translator install failed:" << appTranslator.filePath();
             break;
         }
-        if (appTranslator.load(QLocale(locale), QStringLiteral("bijectif"), QStringLiteral("_"), QStringLiteral("/usr/share/bijectif/translations/"))) {
+        if (appTranslator.load(QLocale(locale), u"bijectif"_s, u"_"_s, u"/usr/share/bijectif/translations/"_s)) {
             if (QApplication::installTranslator(&appTranslator))
                 qDebug() << "Translator install succeeded:" << appTranslator.filePath();
             else

@@ -23,8 +23,10 @@
 #include <QVBoxLayout>
 #include <QtConcurrent>
 
-const QString Window::versionString = QStringLiteral("v1.5");
-const QString Window::websiteString = QStringLiteral("https://github.com/gbabin/bijectif");
+using namespace Qt::Literals::StringLiterals;
+
+const QString Window::versionString = u"v1.5"_s;
+const QString Window::websiteString = u"https://github.com/gbabin/bijectif"_s;
 const QString Window::aboutString =
     Window::tr("Bijectif %1\n"
                "Edit titles in filenames\n"
@@ -89,7 +91,7 @@ Window::Window(const Settings &settings, QWidget *parent)
     redoAct->setShortcut(QKeySequence::Redo);
     menuBar()->addAction(redoAct);
 
-    QAction* sepAct1 = new QAction(QStringLiteral("|"), this);
+    QAction* sepAct1 = new QAction(u"|"_s, this);
     sepAct1->setDisabled(true);
     menuBar()->addAction(sepAct1);
 
@@ -121,7 +123,7 @@ Window::Window(const Settings &settings, QWidget *parent)
             this, &Window::deleteSelection);
     menuBar()->addAction(deleteAct);
 
-    QAction* sepAct2 = new QAction(QStringLiteral("|"), this);
+    QAction* sepAct2 = new QAction(u"|"_s, this);
     sepAct2->setDisabled(true);
     menuBar()->addAction(sepAct2);
 
@@ -134,7 +136,7 @@ Window::Window(const Settings &settings, QWidget *parent)
 
     QAction* aboutAct = new QAction(tr("&About"), this);
     connect(aboutAct, &QAction::triggered,
-            this, [this]{ QMessageBox::about(this, QStringLiteral("About"),
+            this, [this]{ QMessageBox::about(this, u"About"_s,
                                              aboutString
                                              .arg(versionString,
                                                   websiteString,
@@ -169,29 +171,29 @@ Window::~Window()
 QFileInfoList Window::listFiles(const QDir &dir)
 {
     return dir.entryInfoList({// images
-                              QStringLiteral("*.bmp"),
-                              QStringLiteral("*.gif"),
-                              QStringLiteral("*.jpg"),
-                              QStringLiteral("*.jpeg"),
-                              QStringLiteral("*.png"),
-                              QStringLiteral("*.tif"),
-                              QStringLiteral("*.tiff"),
+                              u"*.bmp"_s,
+                              u"*.gif"_s,
+                              u"*.jpg"_s,
+                              u"*.jpeg"_s,
+                              u"*.png"_s,
+                              u"*.tif"_s,
+                              u"*.tiff"_s,
                               // raw
-                              QStringLiteral("*.dng"),
-                              QStringLiteral("*.nef"),
-                              QStringLiteral("*.rw2"),
+                              u"*.dng"_s,
+                              u"*.nef"_s,
+                              u"*.rw2"_s,
                               // others
-                              QStringLiteral("*.psd"),
-                              QStringLiteral("*.svg"),
+                              u"*.psd"_s,
+                              u"*.svg"_s,
                               // videos
-                              QStringLiteral("*.avi"),
-                              QStringLiteral("*.mkv"),
-                              QStringLiteral("*.mov"),
-                              QStringLiteral("*.mp4"),
-                              QStringLiteral("*.mpg"),
-                              QStringLiteral("*.mts"),
-                              QStringLiteral("*.vob"),
-                              QStringLiteral("*.wmv")},
+                              u"*.avi"_s,
+                              u"*.mkv"_s,
+                              u"*.mov"_s,
+                              u"*.mp4"_s,
+                              u"*.mpg"_s,
+                              u"*.mts"_s,
+                              u"*.vob"_s,
+                              u"*.wmv"_s},
                              QDir::Files | QDir::Readable,
                              QDir::Name | QDir::LocaleAware);
 }
@@ -203,7 +205,7 @@ QString Window::getThumbnailsDatabasePath() {
             qWarning() << "Thumbnails database folder creation failed: " << dbDir;
         }
     }
-    QString dbPath = dbDir.filePath(QStringLiteral("thumbnails.sqlite"));
+    QString dbPath = dbDir.filePath(u"thumbnails.sqlite"_s);
     return dbPath;
 }
 
@@ -272,7 +274,7 @@ void Window::modelLoadingDone(qint64 dbFileSize)
     connect(view.model(), &QAbstractItemModel::dataChanged,
             this, &Window::dataChanged);
 
-    db = QSqlDatabase::addDatabase(QStringLiteral("QSQLITE"));
+    db = QSqlDatabase::addDatabase(u"QSQLITE"_s);
     db.setDatabaseName(getThumbnailsDatabasePath());
     db.open();
 }
@@ -299,7 +301,7 @@ void Window::selectionChanged(const QItemSelection &selected, const QItemSelecti
         bool anyEmpty = std::any_of(selectedIndexes.cbegin(), selectedIndexes.cend(),
                                     [this](const QModelIndex &index){ return view.model()->data(index).isNull(); });
 
-        QString mode = QStringLiteral("plain");
+        QString mode = u"plain"_s;
         pasteAct->setEnabled((! QApplication::clipboard()->text(mode).trimmed().isEmpty())
                              && (selectedIndexes.size() == 1
                                  || !anyId));
@@ -376,7 +378,7 @@ void Window::copySelection()
                 }
             }
         }
-        QApplication::clipboard()->setText(names.join(QStringLiteral(", ")));
+        QApplication::clipboard()->setText(names.join(u", "_s));
     }
 }
 
@@ -385,13 +387,13 @@ void Window::pasteIntoSelection()
     QItemSelectionModel* selection = view.selectionModel();
     if (selection == nullptr) return;
 
-    QString mode = QStringLiteral("plain");
+    QString mode = u"plain"_s;
     QString text = QApplication::clipboard()->text(mode).trimmed();
 
     if (! text.isEmpty()) {
-        static const QRegularExpression reCommaSpaces(QStringLiteral(" *, *"));
-        text.replace(reCommaSpaces, QStringLiteral(","));
-        QStringList texts = text.split(QStringLiteral(","));
+        static const QRegularExpression reCommaSpaces(u" *, *"_s);
+        text.replace(reCommaSpaces, u","_s);
+        QStringList texts = text.split(u","_s);
 
         if (texts.size() == 1) {
             QModelIndexList indexes = selection->selectedIndexes();

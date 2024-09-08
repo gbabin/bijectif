@@ -9,6 +9,8 @@
 #include <QSqlQuery>
 #include <QtConcurrent>
 
+using namespace Qt::Literals::StringLiterals;
+
 Model::Model(const Settings &settings, QObject *parent)
     : QAbstractTableModel(parent)
     , settings(settings)
@@ -34,7 +36,7 @@ void Model::load(const QFileInfoList &files, const QString &dbPath)
     }
 
     {
-        QSqlDatabase db = QSqlDatabase::addDatabase(QStringLiteral("QSQLITE"));
+        QSqlDatabase db = QSqlDatabase::addDatabase(u"QSQLITE"_s);
         db.setDatabaseName(dbPath);
         if (db.open()) {
             qInfo() << "Thumbnails database opened";
@@ -42,10 +44,10 @@ void Model::load(const QFileInfoList &files, const QString &dbPath)
             qWarning() << "Thumbnails database opening failure:" << db.lastError();
         }
         QSqlQuery query(db);
-        if (query.exec(QStringLiteral("CREATE TABLE IF NOT EXISTS thumbnails "
-                                      "(path TEXT PRIMARY KEY, "
-                                      " timestamp INTEGER, "
-                                      " thumbnail BLOB)"))) {
+        if (query.exec(u"CREATE TABLE IF NOT EXISTS thumbnails "
+                        "(path TEXT PRIMARY KEY, "
+                        " timestamp INTEGER, "
+                        " thumbnail BLOB)"_s)) {
             qInfo() << "Thumbnails database table created";
         } else {
             qWarning() << "Thumbnails database table creation failure:" << query.lastError();
@@ -56,11 +58,11 @@ void Model::load(const QFileInfoList &files, const QString &dbPath)
         // retrieve thumbnails
         for (const QFileInfo &file : files) {
             qint64 timestamp = file.lastModified().toSecsSinceEpoch();
-            query.prepare(QStringLiteral("SELECT timestamp, thumbnail "
-                                         "FROM thumbnails "
-                                         "WHERE path = :path AND timestamp >= :timestamp"));
-            query.bindValue(QStringLiteral(":path"), file.filePath());
-            query.bindValue(QStringLiteral(":timestamp"), timestamp);
+            query.prepare(u"SELECT timestamp, thumbnail "
+                           "FROM thumbnails "
+                           "WHERE path = :path AND timestamp >= :timestamp"_s);
+            query.bindValue(u":path"_s, file.filePath());
+            query.bindValue(u":timestamp"_s, timestamp);
             if (query.exec()) {
                 qInfo() << "Thumbnail retrieval query succeeded:" << file.filePath();
             } else {
@@ -68,7 +70,7 @@ void Model::load(const QFileInfoList &files, const QString &dbPath)
             }
             if (query.next()) {
                 qInfo() << "Thumbnail retrieval query has a result:" << file.filePath();
-                QByteArray bytes = query.value(QStringLiteral("thumbnail")).toByteArray();
+                QByteArray bytes = query.value(u"thumbnail"_s).toByteArray();
                 QPixmap pixmap = QPixmap();
                 pixmap.loadFromData(bytes);
                 if (pixmap.isNull()) {
@@ -120,7 +122,7 @@ void Model::load(const QFileInfoList &files, const QString &dbPath)
         }
 
         // store new thumbnails
-        if (query.exec(QStringLiteral("BEGIN TRANSACTION"))) {
+        if (query.exec(u"BEGIN TRANSACTION"_s)) {
             qInfo() << "Thumbnail storing transaction begin query succeeded";
         } else {
             qWarning() << "Thumbnail storing transaction begin query failed:" << query.lastError();
@@ -130,11 +132,11 @@ void Model::load(const QFileInfoList &files, const QString &dbPath)
             if (item.thumbnail->isNull()) {
                 qInfo() << "Thumbnail storing ignored (null):" << item.filePath;
             } else {
-                query.prepare(QStringLiteral("INSERT OR REPLACE INTO thumbnails (path, timestamp, thumbnail) "
-                                             "VALUES (:path, :timestamp, :thumbnail)"));
-                query.bindValue(QStringLiteral(":path"), item.filePath);
-                query.bindValue(QStringLiteral(":timestamp"), timestamp);
-                query.bindValue(QStringLiteral(":thumbnail"), *item.thumbnail);
+                query.prepare(u"INSERT OR REPLACE INTO thumbnails (path, timestamp, thumbnail) "
+                               "VALUES (:path, :timestamp, :thumbnail)"_s);
+                query.bindValue(u":path"_s, item.filePath);
+                query.bindValue(u":timestamp"_s, timestamp);
+                query.bindValue(u":thumbnail"_s, *item.thumbnail);
                 if (query.exec()) {
                     qInfo() << "Thumbnail storing query succeeded:" << item.filePath;
                 } else {
@@ -144,22 +146,22 @@ void Model::load(const QFileInfoList &files, const QString &dbPath)
             emit loadingProgressed();
             delete item.thumbnail;
         }
-        if (query.exec(QStringLiteral("END TRANSACTION"))) {
+        if (query.exec(u"END TRANSACTION"_s)) {
             qInfo() << "Thumbnail storing transaction end query succeeded";
         } else {
             qWarning() << "Thumbnail storing transaction end query failed:" << query.lastError();
         }
 
         // limit database size
-        if (query.exec(QStringLiteral("DELETE FROM thumbnails "
-                                      "WHERE path NOT IN (SELECT path FROM thumbnails ORDER BY timestamp DESC LIMIT %1)").arg(settings.thumbnailDatabaseLimit))) {
+        if (query.exec(u"DELETE FROM thumbnails "
+                        "WHERE path NOT IN (SELECT path FROM thumbnails ORDER BY timestamp DESC LIMIT %1)"_s.arg(settings.thumbnailDatabaseLimit))) {
             qInfo() << "Thumbnails database size limiting query succeeded";
         } else {
             qWarning() << "Thumbnails database size limiting query failed:" << query.lastError();
         }
 
         // repacking database
-        if (query.exec(QStringLiteral("VACUUM"))) {
+        if (query.exec(u"VACUUM"_s)) {
             qInfo() << "Thumbnails database repacking query succeeded";
         } else {
             qWarning() << "Thumbnails database repacking query failed:" << query.lastError();

@@ -14,22 +14,24 @@
 #include <QVideoFrame>
 #include <QVideoSink>
 
-const QStringList ModelItem::imageExtensions = {QStringLiteral("bmp"),
-                                                QStringLiteral("gif"),
-                                                QStringLiteral("jpg"),
-                                                QStringLiteral("jpeg"),
-                                                QStringLiteral("png"),
-                                                QStringLiteral("tif"),
-                                                QStringLiteral("tiff")};
+using namespace Qt::Literals::StringLiterals;
 
-const QStringList ModelItem::videoExtensions = {QStringLiteral("avi"),
-                                                QStringLiteral("mkv"),
-                                                QStringLiteral("mov"),
-                                                QStringLiteral("mp4"),
-                                                QStringLiteral("mpg"),
-                                                QStringLiteral("mts"),
-                                                QStringLiteral("vob"),
-                                                QStringLiteral("wmv")};
+const QStringList ModelItem::imageExtensions = {u"bmp"_s,
+                                                u"gif"_s,
+                                                u"jpg"_s,
+                                                u"jpeg"_s,
+                                                u"png"_s,
+                                                u"tif"_s,
+                                                u"tiff"_s};
+
+const QStringList ModelItem::videoExtensions = {u"avi"_s,
+                                                u"mkv"_s,
+                                                u"mov"_s,
+                                                u"mp4"_s,
+                                                u"mpg"_s,
+                                                u"mts"_s,
+                                                u"vob"_s,
+                                                u"wmv"_s};
 
 TooManyPartsError::TooManyPartsError(QString path)
     : path(std::move(path))
@@ -156,11 +158,11 @@ ModelItem::ModelItem(const Settings &settings, QCache<QString, QString> &thumbna
     , thumbnail(createThumbnail(settings, path, pixmap))
 {
     QString basename = path.completeBaseName();
-    qsizetype index_sep = basename.indexOf(QStringLiteral(" - "));
+    qsizetype index_sep = basename.indexOf(u" - "_s);
 
     if (index_sep != -1) {
         id = basename.sliced(0, index_sep);
-        names = basename.sliced(index_sep+3).split(QStringLiteral(", "), Qt::SkipEmptyParts);
+        names = basename.sliced(index_sep+3).split(u", "_s, Qt::SkipEmptyParts);
         if (names.size() > settings.maxNames) {
             throw TooManyPartsError(path.filePath());
         }
@@ -203,7 +205,7 @@ QString ModelItem::getTooltip() const
             thumbnailCache.insert(path, imgBase64, 1);
         }
 
-        return QStringLiteral("<img src='data:image/png;base64, %1'>").arg(*imgBase64);
+        return u"<img src='data:image/png;base64, %1'>"_s.arg(*imgBase64);
     }
 }
 
@@ -315,16 +317,16 @@ bool ModelItem::insertName(int index, const QString &name)
 
 bool ModelItem::isValidPathChars(const QString &str)
 {
-    if (str.contains(QStringLiteral("<"))
-        || str.contains(QStringLiteral(">"))
-        || str.contains(QStringLiteral(":"))
-        || str.contains(QStringLiteral("\""))
-        || str.contains(QStringLiteral("/"))
-        || str.contains(QStringLiteral("\\"))
-        || str.contains(QStringLiteral("|"))
-        || str.contains(QStringLiteral("?"))
-        || str.contains(QStringLiteral("*"))
-        || str.contains(QStringLiteral(",")))
+    if (str.contains(u"<"_s)
+        || str.contains(u">"_s)
+        || str.contains(u":"_s)
+        || str.contains(u"\""_s)
+        || str.contains(u"/"_s)
+        || str.contains(u"\\"_s)
+        || str.contains(u"|"_s)
+        || str.contains(u"?"_s)
+        || str.contains(u"*"_s)
+        || str.contains(u","_s))
     {
         QMessageBox::information(nullptr,
                                  tr("Forbidden characters"),
@@ -332,7 +334,7 @@ bool ModelItem::isValidPathChars(const QString &str)
         return false;
     }
 
-    if (str.contains(QStringLiteral(" - ")))
+    if (str.contains(u" - "_s))
     {
         QMessageBox::information(nullptr,
                                  tr("Forbidden character sequence"),
@@ -346,22 +348,22 @@ bool ModelItem::isValidPathChars(const QString &str)
 QString ModelItem::computePath(const ModelItem &item, const QString &id, const QStringList &names)
 {
     if (names.isEmpty())
-        return item.folder.filePath(id + QStringLiteral(".") + item.extension);
+        return item.folder.filePath(id + u"."_s + item.extension);
     else
-        return item.folder.filePath(id + QStringLiteral(" - ")
-                                    + names.join(QStringLiteral(", "))
-                                    + QStringLiteral(".") + item.extension);
+        return item.folder.filePath(id + u" - "_s
+                                    + names.join(u", "_s)
+                                    + u"."_s + item.extension);
 }
 
 bool ModelItem::syncFilename(const QString &oldPath, const QString &newPath)
 {
     if (QFile::rename(oldPath, newPath)) {
         QSqlQuery query;
-        query.prepare(QStringLiteral("UPDATE thumbnails "
-                                     "SET path = :newPath "
-                                     "WHERE path = :oldPath"));
-        query.bindValue(QStringLiteral(":newPath"), newPath);
-        query.bindValue(QStringLiteral(":oldPath"), oldPath);
+        query.prepare(u"UPDATE thumbnails "
+                       "SET path = :newPath "
+                       "WHERE path = :oldPath"_s);
+        query.bindValue(u":newPath"_s, newPath);
+        query.bindValue(u":oldPath"_s, oldPath);
         query.exec();
         return true;
     } else {

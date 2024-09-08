@@ -7,6 +7,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(Qt6 REQUIRED COMPONENTS Concurrent Core Gui LinguistTools Multimedia Sql Widgets)
 
+if (Qt6_VERSION VERSION_LESS 6.4)
+    message(FATAL_ERROR "Qt 6.4 or higher is required. You are using version ${Qt6_VERSION}.")
+endif()
+
 qt_standard_project_setup()
 
 add_compile_definitions(
