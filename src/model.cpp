@@ -54,6 +54,7 @@ void Model::load(const QFileInfoList &files, const QString &dbPath)
         }
 
         QFileInfoList newFiles;
+        newFiles.reserve(files.size());
 
         // retrieve thumbnails
         for (const QFileInfo &file : files) {
@@ -88,6 +89,8 @@ void Model::load(const QFileInfoList &files, const QString &dbPath)
             }
         }
 
+        newFiles.squeeze();
+
         struct NewItem {
             QString filePath;
             ModelItem* modelItem;
@@ -95,7 +98,7 @@ void Model::load(const QFileInfoList &files, const QString &dbPath)
         } ;
 
         // compute new thumbnails
-        const qint64 timestamp = QDateTime::currentDateTime().toSecsSinceEpoch();
+        const qint64 timestamp = QDateTime::currentSecsSinceEpoch();
         QList<NewItem> newThumbnails;
         QMutex newThumbnailsMutex;
         try {
