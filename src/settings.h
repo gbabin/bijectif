@@ -45,6 +45,9 @@ public:
     /// Log verbosity (0 to 4, 4 is most verbose)
     const int logVerbosity;
 
+    /// Resizable columns (true (manually resizable) or false (content size))
+    const bool resizableColumns;
+
 private:
     Settings(const QSettings &settings);
 };

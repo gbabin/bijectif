@@ -70,11 +70,14 @@ Window::Window(const Settings &settings, QWidget *parent)
 
     view.setItemDelegate(new Delegate(undoStack, this));
     view.setFont(font);
-    view.horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    if (! settings.resizableColumns) {
+        view.horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    }
     view.horizontalHeader()->setFont(font);
     view.verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
     view.verticalHeader()->setDefaultSectionSize(settings.thumbnailSize + 4);
     view.setAlternatingRowColors(true);
+    view.setWordWrap(true);
 
     connect(&view, &QTableView::doubleClicked,
             this, &Window::doubleClickedHandler);
@@ -304,6 +307,10 @@ void Window::modelLoadingDone(qint64 dbFileSize)
     proxyModel->setSourceModel(&model);
     proxyModel->sort(1, Qt::AscendingOrder);
     view.setModel(proxyModel);
+    if (settings.resizableColumns) {
+        view.horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
+        view.horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
+    }
 
     if (dbFileSize < 0) {
         statusBar()->showMessage(tr("Load completed"),

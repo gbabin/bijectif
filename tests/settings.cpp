@@ -15,6 +15,7 @@ Settings::Settings()
     , thumbnailCacheSize(100)
     , thumbnailDatabaseLimit(10000)
     , logVerbosity(2)
+    , resizableColumns(false)
 {
 }
 

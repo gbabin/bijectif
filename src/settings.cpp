@@ -24,5 +24,6 @@ Settings::Settings(const QSettings &settings)
     , thumbnailCacheSize(settings.value("thumbnail cache size", 100).toInt())
     , thumbnailDatabaseLimit(settings.value("thumbnail database limit", 10000).toInt())
     , logVerbosity(settings.value("log verbosity", 2).toInt())
+    , resizableColumns(settings.value("resizable columns", false).toBool())
 {
 }
