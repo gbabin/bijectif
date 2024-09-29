@@ -6,13 +6,13 @@ arch=('x86_64')
 url='https://github.com/gbabin/bijectif'
 license=('GPL3')
 depends=(qt6-base qt6-multimedia)
-makedepends=(cmake git make qt6-tools)
+makedepends=(cmake make qt6-tools)
 optdepends=('qt6-imageformats: additional image formats')
-source=("git+https://github.com/gbabin/bijectif.git#tag=v${pkgver}")
+source=("${pkgname}-${pkgver}.tar.gz::https://github.com/gbabin/bijectif/archive/v${pkgver}.tar.gz")
 sha256sums=('SKIP')
 
 build() {
-  cd "$srcdir/bijectif"
+  cd "${pkgname}-${pkgver}"
 
   cmake -B build -G 'Unix Makefiles' \
         -DCMAKE_INSTALL_PREFIX=/usr \
@@ -21,7 +21,7 @@ build() {
 }
 
 check() {
-  cd "$srcdir/bijectif"
+  cd "${pkgname}-${pkgver}"
 
   cd tests
   cmake -B build -G 'Unix Makefiles'
@@ -30,7 +30,7 @@ check() {
 }
 
 package() {
-  cd "$srcdir/bijectif"
+  cd "${pkgname}-${pkgver}"
 
   DESTDIR="$pkgdir" cmake --install build
   install -Dm644 LICENSE "$pkgdir"/usr/share/licenses/bijectif/COPYING
