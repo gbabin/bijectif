@@ -48,6 +48,9 @@ public:
     /// Resizable columns (true (manually resizable) or false (content size))
     const bool resizableColumns;
 
+    /// Show command history (true or false)
+    const bool showCommandHistory;
+
 private:
     Settings(const QSettings &settings);
 };

@@ -16,6 +16,7 @@ Settings::Settings()
     , thumbnailDatabaseLimit(10000)
     , logVerbosity(2)
     , resizableColumns(false)
+    , showCommandHistory(true)
 {
 }
 

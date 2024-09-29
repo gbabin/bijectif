@@ -25,5 +25,6 @@ Settings::Settings(const QSettings &settings)
     , thumbnailDatabaseLimit(settings.value("thumbnail database limit", 10000).toInt())
     , logVerbosity(settings.value("log verbosity", 2).toInt())
     , resizableColumns(settings.value("resizable columns", false).toBool())
+    , showCommandHistory(settings.value("show command history", true).toBool())
 {
 }

@@ -160,10 +160,12 @@ Window::Window(const Settings &settings, QWidget *parent)
 
     // dock
 
-    QDockWidget *undoDockWidget = new QDockWidget;
-    undoDockWidget->setWindowTitle(tr("Commands"));
-    undoDockWidget->setWidget(new QUndoView(undoStack));
-    addDockWidget(Qt::RightDockWidgetArea, undoDockWidget);
+    if (settings.showCommandHistory) {
+        QDockWidget *undoDockWidget = new QDockWidget;
+        undoDockWidget->setWindowTitle(tr("Command history"));
+        undoDockWidget->setWidget(new QUndoView(undoStack));
+        addDockWidget(Qt::RightDockWidgetArea, undoDockWidget);
+    }
 }
 
 Window::~Window()

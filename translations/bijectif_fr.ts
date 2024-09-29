@@ -202,8 +202,8 @@ Fichier de réglages :
     </message>
     <message>
         <location filename="../src/window.cpp" line="159"/>
-        <source>Commands</source>
-        <translation>Commandes</translation>
+        <source>Command history</source>
+        <translation>Historique des commandes</translation>
     </message>
     <message>
         <location filename="../src/window.cpp" line="216"/>

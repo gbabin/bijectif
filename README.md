@@ -52,6 +52,7 @@ thumbnail cache size = 100
 thumbnail database limit = 10000
 log verbosity = 2
 resizable columns = false
+show command history = true
 ```
 
 See [`settings.h`](src/settings.h).
