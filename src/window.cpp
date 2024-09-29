@@ -25,7 +25,7 @@
 
 using namespace Qt::Literals::StringLiterals;
 
-const QString Window::versionString = u"v1.5.1"_s;
+const QString Window::versionString = u"v1.6"_s;
 const QString Window::websiteString = u"https://github.com/gbabin/bijectif"_s;
 const QString Window::aboutString =
     Window::tr("Bijectif %1\n"
