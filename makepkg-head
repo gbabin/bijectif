@@ -1,0 +1,18 @@
+#!/bin/bash
+set -eo pipefail
+IFS=$'\n\t'
+
+version=$(git describe --tags HEAD | sed 's/^v//;s/-/+/g;s/_/./')
+
+rm -rf build/makepkg-head
+mkdir -p build/makepkg-head
+
+cp PKGBUILD build/makepkg-head/
+git archive --format=tar.gz -o "build/makepkg-head/bijectif-$version.tar.gz" --prefix="bijectif-$version/" HEAD
+
+cd build/makepkg-head/
+
+sed -i "s/^pkgver=.*/pkgver=$version/" PKGBUILD
+sed -i "s/^pkgrel=.*/pkgrel=1/" PKGBUILD
+
+makepkg "$@"
