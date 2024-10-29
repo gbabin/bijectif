@@ -4,6 +4,7 @@
 #ifndef WINDOW_H
 #define WINDOW_H
 
+#include "completermodel.h"
 #include "model.h"
 #include "settings.h"
 
@@ -52,6 +53,7 @@ private:
     QProgressDialog* progressDialog = nullptr;
     QTableView view;
     Model model;
+    CompleterModel completerModel;
     QFuture<void> future;
     QUndoStack* undoStack = nullptr;
     QAction* copyAct = nullptr;

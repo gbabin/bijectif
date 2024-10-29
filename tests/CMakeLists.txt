@@ -15,6 +15,7 @@ qt_add_executable(tester
     ../src/command_id.h ../src/command_id.cpp
     ../src/command_insert.h ../src/command_insert.cpp
     ../src/command_paste.h ../src/command_paste.cpp
+    ../src/completermodel.h ../src/completermodel.cpp
     ../src/delegate.h ../src/delegate.cpp
     ../src/model.h ../src/model.cpp
     ../src/modelitem.h ../src/modelitem.cpp

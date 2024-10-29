@@ -4,6 +4,7 @@
 #ifndef MODEL_H
 #define MODEL_H
 
+#include "completermodel.h"
 #include "modelitem.h"
 #include "settings.h"
 
@@ -23,7 +24,7 @@ class Model : public QAbstractTableModel
     Q_DISABLE_COPY_MOVE(Model)
 
 public:
-    Model(const Settings &settings, QObject *parent = nullptr);
+    Model(const Settings &settings, CompleterModel* completerModel, QObject *parent = nullptr);
     ~Model() override;
     void load(const QFileInfoList &files, const QString &dbPath);
     Qt::ItemFlags flags(const QModelIndex &index) const override;
@@ -41,6 +42,7 @@ private:
     const Settings &settings;
     QCache<QString, QString> thumbnailCache;
     QList<ModelItem*> images;
+    CompleterModel* completerModel = nullptr;
 };
 
 #endif // MODEL_H

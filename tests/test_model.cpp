@@ -51,7 +51,7 @@ void ModelTest::test_1()
 
     QSortFilterProxyModel proxyModel;
     {
-        Model* model = new Model(settings);
+        Model* model = new Model(settings, new CompleterModel(this));
         model->load(files, dbPath);
         proxyModel.setSourceModel(model);
     }

@@ -74,7 +74,7 @@ void RowTest::initTestCase()
     const QFileInfoList files = Window::listFiles(filesDir);
     const QString dbPath = dbDir.filePath("thumbnails.sqlite");
 
-    Model* tableModel = new Model(settings);
+    Model* tableModel = new Model(settings, new CompleterModel(this));
     tableModel->load(files, dbPath);
 
     QVERIFY(QFile::exists(dbPath));

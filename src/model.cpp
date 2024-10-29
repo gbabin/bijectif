@@ -11,9 +11,10 @@
 
 using namespace Qt::Literals::StringLiterals;
 
-Model::Model(const Settings &settings, QObject *parent)
+Model::Model(const Settings &settings, CompleterModel* completerModel, QObject *parent)
     : QAbstractTableModel(parent)
     , settings(settings)
+    , completerModel(completerModel)
     , thumbnailCache(settings.thumbnailCacheSize)
 {
 }
@@ -181,6 +182,8 @@ void Model::load(const QFileInfoList &files, const QString &dbPath)
     qint64 dbFileSize = QFile(dbPath).size();
     qInfo() << "Thumbnails database file size:" << dbFileSize << "bytes";
 
+    completerModel->insert(images);
+
     emit loadingFinished(dbFileSize);
 }
 
@@ -275,7 +278,10 @@ QVariant Model::data(const QModelIndex &index, int role) const
 
 bool Model::setData(const QModelIndex &index, const QVariant &value, int role)
 {
-    if (index.isValid() && index.column() == 1) {
+    if (! index.isValid())
+        return false;
+
+    if (index.column() == 1) {
         if (role == ChangeIdRole) {
             QString valueStr = value.toString();
             valueStr = valueStr.trimmed();
@@ -289,25 +295,39 @@ bool Model::setData(const QModelIndex &index, const QVariant &value, int role)
             }
         }
     }
-    else if (index.isValid() && index.column() >= 2) {
+    else if (index.column() >= 2) {
         int nameIdx = index.column() - 2;
 
         if (role == Qt::EditRole) {
-            QString valueStr = value.toString();
+            QString beforeStr;
+            if (nameIdx < images.at(index.row())->getNamesSize())
+                beforeStr = images.at(index.row())->getName(nameIdx);
+            const QString valueStr = value.toString();
             if (images.at(index.row())->setName(nameIdx, valueStr)) {
+                const QString afterStr = images.at(index.row())->getName(nameIdx);
+                completerModel->insert(afterStr);
+                if (! beforeStr.isEmpty())
+                    completerModel->remove(beforeStr);
                 emit dataChanged(index, index);
                 return true;
             }
         }
         else if (role == InsertRole) {
-            QString valueStr = value.toString();
+            const QString valueStr = value.toString();
             if (images.at(index.row())->insertName(nameIdx, valueStr)) {
+                const QString afterStr = images.at(index.row())->getName(nameIdx);
+                completerModel->insert(afterStr);
                 emit dataChanged(index, index.siblingAtColumn(settings.maxNames + 1));
                 return true;
             }
         }
         else if (role == DeleteRole) {
+            QString beforeStr;
+            if (nameIdx < images.at(index.row())->getNamesSize())
+                beforeStr = images.at(index.row())->getName(nameIdx);
             if (images.at(index.row())->deleteName(nameIdx)) {
+                if (! beforeStr.isEmpty())
+                    completerModel->remove(beforeStr);
                 emit dataChanged(index, index.siblingAtColumn(settings.maxNames + 1));
                 return true;
             }

@@ -4,17 +4,17 @@
 <context>
     <name>Model</name>
     <message>
-        <location filename="../src/model.cpp" line="220"/>
+        <location filename="../src/model.cpp" line="223"/>
         <source>Thumbnail</source>
         <translation>Miniature</translation>
     </message>
     <message>
-        <location filename="../src/model.cpp" line="221"/>
+        <location filename="../src/model.cpp" line="224"/>
         <source>Identifier</source>
         <translation>Identifiant</translation>
     </message>
     <message>
-        <location filename="../src/model.cpp" line="222"/>
+        <location filename="../src/model.cpp" line="225"/>
         <source>Name %1</source>
         <translation>Nom %1</translation>
     </message>

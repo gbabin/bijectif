@@ -43,7 +43,7 @@ Window::Window(const Settings &settings, QWidget *parent)
     , settings(settings)
     , dir(QFileDialog::getExistingDirectory(nullptr,
                                             tr("Choose image folder")))
-    , model(settings)
+    , model(settings, &completerModel)
     , undoStack(new QUndoStack(this))
 {
     if (! dir.exists()) QApplication::exit(1);
@@ -68,7 +68,7 @@ Window::Window(const Settings &settings, QWidget *parent)
 
     // central widget
 
-    view.setItemDelegate(new Delegate(undoStack, this));
+    view.setItemDelegate(new Delegate(&completerModel, undoStack, this));
     view.setFont(font);
     if (! settings.resizableColumns) {
         view.horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
