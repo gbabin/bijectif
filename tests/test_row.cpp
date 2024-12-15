@@ -36,16 +36,16 @@ void RowTest::compare_row(const QAbstractItemModel &model,
     QStringList names = QStringList{name1, name2, name3, name4, name5, name6, name7, name8};
     int indexFirstEmpty = names.indexOf("");
 
-    QCOMPARE(model.data(model.index(0, 1), Qt::DisplayRole), QVariant(id));
+    QCOMPARE(model.data(model.index(0, IdentifierCol), Qt::DisplayRole), QVariant(id));
 
     for (int i = 0; i < 8; i++) {
         if (indexFirstEmpty != -1 && i > indexFirstEmpty)
             QCOMPARE(names.at(i), "");
 
         if (names.at(i).isEmpty())
-            QCOMPARE(model.data(model.index(0, i+2), Qt::DisplayRole), QVariant());
+            QCOMPARE(model.data(model.index(0, i + FirstNameCol), Qt::DisplayRole), QVariant());
         else
-            QCOMPARE(model.data(model.index(0, i+2), Qt::DisplayRole), QVariant(names.at(i)));
+            QCOMPARE(model.data(model.index(0, i + FirstNameCol), Qt::DisplayRole), QVariant(names.at(i)));
     }
 
     names.removeAll("");
@@ -87,7 +87,7 @@ void RowTest::initTestCase()
     proxyModel->sort(1, Qt::AscendingOrder);
     model = proxyModel;
 
-    QCOMPARE(model->columnCount(), 2 + settings.maxNames);
+    QCOMPARE(model->columnCount(), FirstNameCol + settings.maxNames);
     QCOMPARE(model->rowCount(), 1);
 
     compare_row(*model, "image", "", "", "", "", "", "", "", "");
@@ -99,20 +99,20 @@ void RowTest::test_0()
 
     QSignalSpy spy(&undoStack, &QUndoStack::indexChanged);
 
-    undoStack.push(new DeleteCommand(model, model->index(0, 2)));
+    undoStack.push(new DeleteCommand(model, model->index(0, FirstNameCol)));
     compare_row(*model, "image", "", "", "", "", "", "", "", "");
     QCOMPARE(spy.count(), 0);
 
-    undoStack.push(new EditCommand("ABC", model, model->index(0, 2)));
+    undoStack.push(new EditCommand("ABC", model, model->index(0, FirstNameCol)));
     compare_row(*model, "image", "ABC", "", "", "", "", "", "", "");
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 1);
 
-    undoStack.push(new EditCommand("", model, model->index(0, 2)));
+    undoStack.push(new EditCommand("", model, model->index(0, FirstNameCol)));
     compare_row(*model, "image", "ABC", "", "", "", "", "", "", "");
     QCOMPARE(spy.count(), 0);
 
-    undoStack.push(new EditCommand("ABC", model, model->index(0, 2)));
+    undoStack.push(new EditCommand("ABC", model, model->index(0, FirstNameCol)));
     compare_row(*model, "image", "ABC", "", "", "", "", "", "", "");
     QCOMPARE(spy.count(), 0);
 
@@ -121,7 +121,7 @@ void RowTest::test_0()
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 0);
 
-    undoStack.push(new InsertCommand("thing", model, model->index(0, 2)));
+    undoStack.push(new InsertCommand("thing", model, model->index(0, FirstNameCol)));
     compare_row(*model, "image", "thing", "", "", "", "", "", "", "");
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 1);
@@ -131,24 +131,24 @@ void RowTest::test_0()
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 0);
 
-    undoStack.push(new InsertCommand("nothing", model, model->index(0, 3)));
+    undoStack.push(new InsertCommand("nothing", model, model->index(0, 1 + FirstNameCol)));
     compare_row(*model, "image", "", "", "", "", "", "", "", "");
     QCOMPARE(spy.count(), 0);
 
-    undoStack.push(new PasteCommand("text1", model, model->index(0, 3)));
+    undoStack.push(new PasteCommand("text1", model, model->index(0, 1 + FirstNameCol)));
     compare_row(*model, "image", "", "", "", "", "", "", "", "");
     QCOMPARE(spy.count(), 0);
 
-    undoStack.push(new PasteCommand("", model, model->index(0, 2)));
+    undoStack.push(new PasteCommand("", model, model->index(0, FirstNameCol)));
     compare_row(*model, "image", "", "", "", "", "", "", "", "");
     QCOMPARE(spy.count(), 0);
 
-    undoStack.push(new PasteCommand("text1", model, model->index(0, 2)));
+    undoStack.push(new PasteCommand("text1", model, model->index(0, FirstNameCol)));
     compare_row(*model, "image", "text1", "", "", "", "", "", "", "");
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 1);
 
-    undoStack.push(new PasteCommand("text1", model, model->index(0, 2)));
+    undoStack.push(new PasteCommand("text1", model, model->index(0, FirstNameCol)));
     compare_row(*model, "image", "text1", "", "", "", "", "", "", "");
     QCOMPARE(spy.count(), 0);
 
@@ -170,11 +170,11 @@ void RowTest::test_1()
 
     compare_row(*model, "image", "text1", "", "", "", "", "", "", "");
 
-    undoStack.push(new DeleteCommand(model, model->index(0, 3)));
+    undoStack.push(new DeleteCommand(model, model->index(0, 1 + FirstNameCol)));
     compare_row(*model, "image", "text1", "", "", "", "", "", "", "");
     QCOMPARE(spy.count(), 0);
 
-    undoStack.push(new DeleteCommand(model, model->index(0, 2)));
+    undoStack.push(new DeleteCommand(model, model->index(0, FirstNameCol)));
     compare_row(*model, "image", "", "", "", "", "", "", "", "");
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 2);
@@ -184,16 +184,16 @@ void RowTest::test_1()
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 1);
 
-    undoStack.push(new EditCommand("DEF", model, model->index(0, 3)));
+    undoStack.push(new EditCommand("DEF", model, model->index(0, 1 + FirstNameCol)));
     compare_row(*model, "image", "text1", "DEF", "", "", "", "", "", "");
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 2);
 
-    undoStack.push(new EditCommand("", model, model->index(0, 3)));
+    undoStack.push(new EditCommand("", model, model->index(0, 1 + FirstNameCol)));
     compare_row(*model, "image", "text1", "DEF", "", "", "", "", "", "");
     QCOMPARE(spy.count(), 0);
 
-    undoStack.push(new EditCommand("DEF", model, model->index(0, 3)));
+    undoStack.push(new EditCommand("DEF", model, model->index(0, 1 + FirstNameCol)));
     compare_row(*model, "image", "text1", "DEF", "", "", "", "", "", "");
     QCOMPARE(spy.count(), 0);
 
@@ -202,7 +202,7 @@ void RowTest::test_1()
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 1);
 
-    undoStack.push(new InsertCommand("thing", model, model->index(0, 2)));
+    undoStack.push(new InsertCommand("thing", model, model->index(0, FirstNameCol)));
     compare_row(*model, "image", "thing", "text1", "", "", "", "", "", "");
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 2);
@@ -212,7 +212,7 @@ void RowTest::test_1()
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 1);
 
-    undoStack.push(new InsertCommand("thing", model, model->index(0, 3)));
+    undoStack.push(new InsertCommand("thing", model, model->index(0, 1 + FirstNameCol)));
     compare_row(*model, "image", "text1", "thing", "", "", "", "", "", "");
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 2);
@@ -222,7 +222,7 @@ void RowTest::test_1()
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 1);
 
-    undoStack.push(new PasteCommand("text2", model, model->index(0, 2)));
+    undoStack.push(new PasteCommand("text2", model, model->index(0, FirstNameCol)));
     compare_row(*model, "image", "text2", "", "", "", "", "", "", "");
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 2);
@@ -232,7 +232,7 @@ void RowTest::test_1()
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 1);
 
-    undoStack.push(new PasteCommand("text2", model, model->index(0, 3)));
+    undoStack.push(new PasteCommand("text2", model, model->index(0, 1 + FirstNameCol)));
     compare_row(*model, "image", "text1", "text2", "", "", "", "", "", "");
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 2);
@@ -254,7 +254,7 @@ void RowTest::test_2()
 
     compare_row(*model, "image", "text1", "text2", "", "", "", "", "", "");
 
-    undoStack.push(new PasteCommand("text3", model, model->index(0, 4)));
+    undoStack.push(new PasteCommand("text3", model, model->index(0, 2 + FirstNameCol)));
     compare_row(*model, "image", "text1", "text2", "text3", "", "", "", "", "");
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 3);
@@ -266,7 +266,7 @@ void RowTest::test_3()
 
     compare_row(*model, "image", "text1", "text2", "text3", "", "", "", "", "");
 
-    undoStack.push(new PasteCommand("text4", model, model->index(0, 5)));
+    undoStack.push(new PasteCommand("text4", model, model->index(0, 3 + FirstNameCol)));
     compare_row(*model, "image", "text1", "text2", "text3", "text4", "", "", "", "");
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 4);
@@ -278,7 +278,7 @@ void RowTest::test_4()
 
     compare_row(*model, "image", "text1", "text2", "text3", "text4", "", "", "", "");
 
-    undoStack.push(new PasteCommand("text5", model, model->index(0, 6)));
+    undoStack.push(new PasteCommand("text5", model, model->index(0, 4 + FirstNameCol)));
     compare_row(*model, "image", "text1", "text2", "text3", "text4", "text5", "", "", "");
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 5);
@@ -290,7 +290,7 @@ void RowTest::test_5()
 
     compare_row(*model, "image", "text1", "text2", "text3", "text4", "text5", "", "", "");
 
-    undoStack.push(new PasteCommand("text6", model, model->index(0, 7)));
+    undoStack.push(new PasteCommand("text6", model, model->index(0, 5 + FirstNameCol)));
     compare_row(*model, "image", "text1", "text2", "text3", "text4", "text5", "text6", "", "");
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 6);
@@ -302,7 +302,7 @@ void RowTest::test_6()
 
     compare_row(*model, "image", "text1", "text2", "text3", "text4", "text5", "text6", "", "");
 
-    undoStack.push(new PasteCommand("text7", model, model->index(0, 8)));
+    undoStack.push(new PasteCommand("text7", model, model->index(0, 6 + FirstNameCol)));
     compare_row(*model, "image", "text1", "text2", "text3", "text4", "text5", "text6", "text7", "");
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 7);
@@ -314,11 +314,11 @@ void RowTest::test_7()
 
     compare_row(*model, "image", "text1", "text2", "text3", "text4", "text5", "text6", "text7", "");
 
-    undoStack.push(new DeleteCommand(model, model->index(0, 9)));
+    undoStack.push(new DeleteCommand(model, model->index(0, 7 + FirstNameCol)));
     compare_row(*model, "image", "text1", "text2", "text3", "text4", "text5", "text6", "text7", "");
     QCOMPARE(spy.count(), 0);
 
-    undoStack.push(new DeleteCommand(model, model->index(0, 8)));
+    undoStack.push(new DeleteCommand(model, model->index(0, 6 + FirstNameCol)));
     compare_row(*model, "image", "text1", "text2", "text3", "text4", "text5", "text6", "", "");
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 8);
@@ -328,16 +328,16 @@ void RowTest::test_7()
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 7);
 
-    undoStack.push(new EditCommand("UVW", model, model->index(0, 9)));
+    undoStack.push(new EditCommand("UVW", model, model->index(0, 7 + FirstNameCol)));
     compare_row(*model, "image", "text1", "text2", "text3", "text4", "text5", "text6", "text7", "UVW");
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 8);
 
-    undoStack.push(new EditCommand("", model, model->index(0, 9)));
+    undoStack.push(new EditCommand("", model, model->index(0, 7 + FirstNameCol)));
     compare_row(*model, "image", "text1", "text2", "text3", "text4", "text5", "text6", "text7", "UVW");
     QCOMPARE(spy.count(), 0);
 
-    undoStack.push(new EditCommand("UVW", model, model->index(0, 9)));
+    undoStack.push(new EditCommand("UVW", model, model->index(0, 7 + FirstNameCol)));
     compare_row(*model, "image", "text1", "text2", "text3", "text4", "text5", "text6", "text7", "UVW");
     QCOMPARE(spy.count(), 0);
 
@@ -346,7 +346,7 @@ void RowTest::test_7()
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 7);
 
-    undoStack.push(new InsertCommand("thing", model, model->index(0, 7)));
+    undoStack.push(new InsertCommand("thing", model, model->index(0, 5 + FirstNameCol)));
     compare_row(*model, "image", "text1", "text2", "text3", "text4", "text5", "thing", "text6", "text7");
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 8);
@@ -356,7 +356,7 @@ void RowTest::test_7()
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 7);
 
-    undoStack.push(new InsertCommand("thing", model, model->index(0, 8)));
+    undoStack.push(new InsertCommand("thing", model, model->index(0, 6 + FirstNameCol)));
     compare_row(*model, "image", "text1", "text2", "text3", "text4", "text5", "text6", "thing", "text7");
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 8);
@@ -366,7 +366,7 @@ void RowTest::test_7()
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 7);
 
-    undoStack.push(new InsertCommand("thing", model, model->index(0, 9)));
+    undoStack.push(new InsertCommand("thing", model, model->index(0, 7 + FirstNameCol)));
     compare_row(*model, "image", "text1", "text2", "text3", "text4", "text5", "text6", "text7", "thing");
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 8);
@@ -376,7 +376,7 @@ void RowTest::test_7()
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 7);
 
-    undoStack.push(new PasteCommand("textX", model, model->index(0, 8)));
+    undoStack.push(new PasteCommand("textX", model, model->index(0, 6 + FirstNameCol)));
     compare_row(*model, "image", "text1", "text2", "text3", "text4", "text5", "text6", "textX", "");
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 8);
@@ -386,7 +386,7 @@ void RowTest::test_7()
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 7);
 
-    undoStack.push(new PasteCommand("text8", model, model->index(0, 9)));
+    undoStack.push(new PasteCommand("text8", model, model->index(0, 7 + FirstNameCol)));
     compare_row(*model, "image", "text1", "text2", "text3", "text4", "text5", "text6", "text7", "text8");
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 8);
@@ -408,11 +408,11 @@ void RowTest::test_8()
 
     compare_row(*model, "image", "text1", "text2", "text3", "text4", "text5", "text6", "text7", "text8");
 
-    undoStack.push(new DeleteCommand(model, model->index(0, 10)));
+    undoStack.push(new DeleteCommand(model, model->index(0, 8 + FirstNameCol)));
     compare_row(*model, "image", "text1", "text2", "text3", "text4", "text5", "text6", "text7", "text8");
     QCOMPARE(spy.count(), 0);
 
-    undoStack.push(new DeleteCommand(model, model->index(0, 9)));
+    undoStack.push(new DeleteCommand(model, model->index(0, 7 + FirstNameCol)));
     compare_row(*model, "image", "text1", "text2", "text3", "text4", "text5", "text6", "text7", "");
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 9);
@@ -422,15 +422,15 @@ void RowTest::test_8()
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 8);
 
-    undoStack.push(new EditCommand("UVW", model, model->index(0, 10)));
+    undoStack.push(new EditCommand("UVW", model, model->index(0, 8 + FirstNameCol)));
     compare_row(*model, "image", "text1", "text2", "text3", "text4", "text5", "text6", "text7", "text8");
     QCOMPARE(spy.count(), 0);
 
-    undoStack.push(new EditCommand("", model, model->index(0, 9)));
+    undoStack.push(new EditCommand("", model, model->index(0, 7 + FirstNameCol)));
     compare_row(*model, "image", "text1", "text2", "text3", "text4", "text5", "text6", "text7", "text8");
     QCOMPARE(spy.count(), 0);
 
-    undoStack.push(new EditCommand("UVW", model, model->index(0, 9)));
+    undoStack.push(new EditCommand("UVW", model, model->index(0, 7 + FirstNameCol)));
     compare_row(*model, "image", "text1", "text2", "text3", "text4", "text5", "text6", "text7", "UVW");
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 9);
@@ -440,19 +440,19 @@ void RowTest::test_8()
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 8);
 
-    undoStack.push(new InsertCommand("nothing", model, model->index(0, 7)));
+    undoStack.push(new InsertCommand("nothing", model, model->index(0, 5 + FirstNameCol)));
     compare_row(*model, "image", "text1", "text2", "text3", "text4", "text5", "text6", "text7", "text8");
     QCOMPARE(spy.count(), 0);
 
-    undoStack.push(new InsertCommand("nothing", model, model->index(0, 9)));
+    undoStack.push(new InsertCommand("nothing", model, model->index(0, 7 + FirstNameCol)));
     compare_row(*model, "image", "text1", "text2", "text3", "text4", "text5", "text6", "text7", "text8");
     QCOMPARE(spy.count(), 0);
 
-    undoStack.push(new InsertCommand("nothing", model, model->index(0, 10)));
+    undoStack.push(new InsertCommand("nothing", model, model->index(0, 8 + FirstNameCol)));
     compare_row(*model, "image", "text1", "text2", "text3", "text4", "text5", "text6", "text7", "text8");
     QCOMPARE(spy.count(), 0);
 
-    undoStack.push(new PasteCommand("textY", model, model->index(0, 9)));
+    undoStack.push(new PasteCommand("textY", model, model->index(0, 7 + FirstNameCol)));
     compare_row(*model, "image", "text1", "text2", "text3", "text4", "text5", "text6", "text7", "textY");
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 9);
@@ -462,7 +462,7 @@ void RowTest::test_8()
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 8);
 
-    undoStack.push(new PasteCommand("text8", model, model->index(0, 10)));
+    undoStack.push(new PasteCommand("text8", model, model->index(0, 8 + FirstNameCol)));
     compare_row(*model, "image", "text1", "text2", "text3", "text4", "text5", "text6", "text7", "text8");
     QCOMPARE(spy.count(), 0);
 }

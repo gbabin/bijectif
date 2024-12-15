@@ -307,11 +307,12 @@ void Window::modelLoadingDone(qint64 dbFileSize)
     QSortFilterProxyModel* proxyModel = new QSortFilterProxyModel(&view);
     model.setParent(proxyModel);
     proxyModel->setSourceModel(&model);
-    proxyModel->sort(1, Qt::AscendingOrder);
+    proxyModel->sort(IdentifierCol, Qt::AscendingOrder);
     view.setModel(proxyModel);
     if (settings.resizableColumns) {
-        view.horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
-        view.horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
+        for (int i = 0 ; i < FirstNameCol ; i++) {
+            view.horizontalHeader()->setSectionResizeMode(i, QHeaderView::ResizeToContents);
+        }
     }
 
     if (dbFileSize < 0) {
@@ -351,7 +352,7 @@ void Window::selectionChanged(const QItemSelection &selected, const QItemSelecti
         insertAct->setDisabled(true);
     } else {
         bool anyId = std::any_of(selectedIndexes.cbegin(), selectedIndexes.cend(),
-                                 [](const QModelIndex &index){ return index.column() == 1; });
+                                 [](const QModelIndex &index){ return index.column() == IdentifierCol; });
 
         bool anyEmpty = std::any_of(selectedIndexes.cbegin(), selectedIndexes.cend(),
                                     [this](const QModelIndex &index){ return view.model()->data(index).isNull(); });
@@ -393,7 +394,7 @@ void Window::dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRi
 
 void Window::doubleClickedHandler(const QModelIndex &index)
 {
-    if (index.column() == 0) {
+    if (index.column() == ThumbnailCol) {
         const QVariant data = index.data(ImagePathRole);
         if (data.userType() == QMetaType::QString) {
             const QString path = data.toString();

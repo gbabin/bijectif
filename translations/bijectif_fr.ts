@@ -228,34 +228,34 @@ The maximum number allowed is %2.</source>
 Le nombre maximum autorisé est %2.</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="318"/>
+        <location filename="../src/window.cpp" line="319"/>
         <source>Load completed</source>
         <translation>Chargement terminé</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="321"/>
+        <location filename="../src/window.cpp" line="322"/>
         <source>Load completed (Thumbnails database: %1)</source>
         <translation>Chargement terminé (Base de données des miniatures : %1)</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="467"/>
-        <location filename="../src/window.cpp" line="481"/>
+        <location filename="../src/window.cpp" line="468"/>
+        <location filename="../src/window.cpp" line="482"/>
         <source>Pasting multiple cells</source>
         <translation>Coller plusieurs cellules</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="468"/>
-        <location filename="../src/window.cpp" line="482"/>
+        <location filename="../src/window.cpp" line="469"/>
+        <location filename="../src/window.cpp" line="483"/>
         <source>The pasted content has %1 parts. Therefore, each modifed row must have %1 selected cells.</source>
         <translation>Le contenu collé comporte %1 parties. Par conséquent, chaque ligne modifiée doit avoir %1 cellules sélectionnées.</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="515"/>
+        <location filename="../src/window.cpp" line="516"/>
         <source>Insertion</source>
         <translation>Insertion</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="515"/>
+        <location filename="../src/window.cpp" line="516"/>
         <source>Name:</source>
         <translation>Nom :</translation>
     </message>

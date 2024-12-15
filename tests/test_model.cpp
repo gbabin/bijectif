@@ -55,26 +55,26 @@ void ModelTest::test_1()
         model->load(files, dbPath);
         proxyModel.setSourceModel(model);
     }
-    proxyModel.sort(1, Qt::AscendingOrder);
+    proxyModel.sort(IdentifierCol, Qt::AscendingOrder);
 
     QVERIFY(QFile::exists(dbPath));
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
     db.setDatabaseName(dbPath);
     QVERIFY(db.open());
 
-    QCOMPARE(proxyModel.columnCount(), 2 + settings.maxNames);
+    QCOMPARE(proxyModel.columnCount(), FirstNameCol + settings.maxNames);
     QCOMPARE(proxyModel.rowCount(), 100);
 
     for (int row = 0; row < 100; row++) {
-        QCOMPARE(proxyModel.data(proxyModel.index(row, 1), Qt::DisplayRole),
+        QCOMPARE(proxyModel.data(proxyModel.index(row, IdentifierCol), Qt::DisplayRole),
                  QVariant(QString::asprintf("IMG_%04d", row)));
 
         for (int name = 1; name <= settings.maxNames; name++) {
             if (name <= row%(1+settings.maxNames)) {
-                QCOMPARE(proxyModel.data(proxyModel.index(row, name+1), Qt::DisplayRole),
+                QCOMPARE(proxyModel.data(proxyModel.index(row, name + FirstNameCol - 1), Qt::DisplayRole),
                          QVariant(QString::number(name)));
             } else {
-                QCOMPARE(proxyModel.data(proxyModel.index(row, name+1), Qt::DisplayRole),
+                QCOMPARE(proxyModel.data(proxyModel.index(row, name + FirstNameCol - 1), Qt::DisplayRole),
                          QVariant());
             }
         }
@@ -83,19 +83,19 @@ void ModelTest::test_1()
     QUndoStack undoStack;
 
     for (int row = 0; row <= settings.maxNames; row++) {
-        undoStack.push(new DeleteCommand(&proxyModel, proxyModel.index(row, 2)));
+        undoStack.push(new DeleteCommand(&proxyModel, proxyModel.index(row, FirstNameCol)));
     }
 
     for (int row = 0; row <= settings.maxNames; row++) {
-        QCOMPARE(proxyModel.data(proxyModel.index(row, 1), Qt::DisplayRole),
+        QCOMPARE(proxyModel.data(proxyModel.index(row, IdentifierCol), Qt::DisplayRole),
                  QVariant(QString::asprintf("IMG_%04d", row)));
 
         for (int name = 1; name <= settings.maxNames; name++) {
             if (name < row%(1+settings.maxNames)) {
-                QCOMPARE(proxyModel.data(proxyModel.index(row, name+1), Qt::DisplayRole),
+                QCOMPARE(proxyModel.data(proxyModel.index(row, name + FirstNameCol - 1), Qt::DisplayRole),
                          QVariant(QString::number(name+1)));
             } else {
-                QCOMPARE(proxyModel.data(proxyModel.index(row, name+1), Qt::DisplayRole),
+                QCOMPARE(proxyModel.data(proxyModel.index(row, name + FirstNameCol - 1), Qt::DisplayRole),
                          QVariant());
             }
         }
@@ -109,15 +109,15 @@ void ModelTest::test_1()
     QVERIFY(! undoStack.canUndo());
 
     for (int row = 0; row < 100; row++) {
-        QCOMPARE(proxyModel.data(proxyModel.index(row, 1), Qt::DisplayRole),
+        QCOMPARE(proxyModel.data(proxyModel.index(row, IdentifierCol), Qt::DisplayRole),
                  QVariant(QString::asprintf("IMG_%04d", row)));
 
         for (int name = 1; name <= settings.maxNames; name++) {
             if (name <= row%(1+settings.maxNames)) {
-                QCOMPARE(proxyModel.data(proxyModel.index(row, name+1), Qt::DisplayRole),
+                QCOMPARE(proxyModel.data(proxyModel.index(row, name + FirstNameCol - 1), Qt::DisplayRole),
                          QVariant(QString::number(name)));
             } else {
-                QCOMPARE(proxyModel.data(proxyModel.index(row, name+1), Qt::DisplayRole),
+                QCOMPARE(proxyModel.data(proxyModel.index(row, name + FirstNameCol - 1), Qt::DisplayRole),
                          QVariant());
             }
         }
@@ -125,59 +125,59 @@ void ModelTest::test_1()
 
     QSignalSpy spy(&undoStack, &QUndoStack::indexChanged);
 
-    QCOMPARE(proxyModel.data(proxyModel.index(5, 1), Qt::DisplayRole),
+    QCOMPARE(proxyModel.data(proxyModel.index(5, IdentifierCol), Qt::DisplayRole),
              QVariant("IMG_0005"));
-    undoStack.push(new ChangeIdCommand("IMG_0010", &proxyModel, proxyModel.index(5, 1)));
+    undoStack.push(new ChangeIdCommand("IMG_0010", &proxyModel, proxyModel.index(5, IdentifierCol)));
     QCOMPARE(spy.count(), 0);
     QVERIFY(! undoStack.canUndo());
-    QCOMPARE(proxyModel.data(proxyModel.index(5, 1), Qt::DisplayRole),
+    QCOMPARE(proxyModel.data(proxyModel.index(5, IdentifierCol), Qt::DisplayRole),
              QVariant("IMG_0005"));
 
-    QCOMPARE(proxyModel.data(proxyModel.index(50, 6), Qt::DisplayRole),
+    QCOMPARE(proxyModel.data(proxyModel.index(50, FirstNameCol + 4), Qt::DisplayRole),
              QVariant(QString::number(5)));
-    QCOMPARE(proxyModel.data(proxyModel.index(50, 7), Qt::DisplayRole),
+    QCOMPARE(proxyModel.data(proxyModel.index(50, FirstNameCol + 5), Qt::DisplayRole),
              QVariant());
 
-    undoStack.push(new ChangeIdCommand("IMG_0100", &proxyModel, proxyModel.index(10, 1)));
+    undoStack.push(new ChangeIdCommand("IMG_0100", &proxyModel, proxyModel.index(10, IdentifierCol)));
     QVERIFY(undoStack.canUndo());
-    QCOMPARE(proxyModel.data(proxyModel.index(10, 1), Qt::DisplayRole),
+    QCOMPARE(proxyModel.data(proxyModel.index(10, IdentifierCol), Qt::DisplayRole),
              QVariant("IMG_0011"));
-    QCOMPARE(proxyModel.data(proxyModel.index(11, 1), Qt::DisplayRole),
+    QCOMPARE(proxyModel.data(proxyModel.index(11, IdentifierCol), Qt::DisplayRole),
              QVariant("IMG_0012"));
-    QCOMPARE(proxyModel.data(proxyModel.index(99, 1), Qt::DisplayRole),
+    QCOMPARE(proxyModel.data(proxyModel.index(99, IdentifierCol), Qt::DisplayRole),
              QVariant("IMG_0100"));
 
-    QCOMPARE(proxyModel.data(proxyModel.index(49, 6), Qt::DisplayRole),
+    QCOMPARE(proxyModel.data(proxyModel.index(49, FirstNameCol + 4), Qt::DisplayRole),
              QVariant(QString::number(5)));
-    QCOMPARE(proxyModel.data(proxyModel.index(49, 7), Qt::DisplayRole),
+    QCOMPARE(proxyModel.data(proxyModel.index(49, FirstNameCol + 5), Qt::DisplayRole),
              QVariant());
 
-    undoStack.push(new EditCommand("XYZ", &proxyModel, proxyModel.index(49, 6)));
+    undoStack.push(new EditCommand("XYZ", &proxyModel, proxyModel.index(49, FirstNameCol + 4)));
 
-    QCOMPARE(proxyModel.data(proxyModel.index(49, 6), Qt::DisplayRole),
+    QCOMPARE(proxyModel.data(proxyModel.index(49, FirstNameCol + 4), Qt::DisplayRole),
              QVariant("XYZ"));
-    QCOMPARE(proxyModel.data(proxyModel.index(49, 7), Qt::DisplayRole),
+    QCOMPARE(proxyModel.data(proxyModel.index(49, FirstNameCol + 5), Qt::DisplayRole),
              QVariant());
 
     undoStack.undo();
 
-    QCOMPARE(proxyModel.data(proxyModel.index(49, 6), Qt::DisplayRole),
+    QCOMPARE(proxyModel.data(proxyModel.index(49, FirstNameCol + 4), Qt::DisplayRole),
              QVariant(QString::number(5)));
-    QCOMPARE(proxyModel.data(proxyModel.index(49, 7), Qt::DisplayRole),
+    QCOMPARE(proxyModel.data(proxyModel.index(49, FirstNameCol + 5), Qt::DisplayRole),
              QVariant());
 
     QVERIFY(undoStack.canUndo());
     undoStack.undo();
     for (int row = 0; row < 100; row++) {
-        QCOMPARE(proxyModel.data(proxyModel.index(row, 1), Qt::DisplayRole),
+        QCOMPARE(proxyModel.data(proxyModel.index(row, IdentifierCol), Qt::DisplayRole),
                  QVariant(QString::asprintf("IMG_%04d", row)));
 
         for (int name = 1; name <= settings.maxNames; name++) {
             if (name <= row%(1+settings.maxNames)) {
-                QCOMPARE(proxyModel.data(proxyModel.index(row, name+1), Qt::DisplayRole),
+                QCOMPARE(proxyModel.data(proxyModel.index(row, name + FirstNameCol - 1), Qt::DisplayRole),
                          QVariant(QString::number(name)));
             } else {
-                QCOMPARE(proxyModel.data(proxyModel.index(row, name+1), Qt::DisplayRole),
+                QCOMPARE(proxyModel.data(proxyModel.index(row, name + FirstNameCol - 1), Qt::DisplayRole),
                          QVariant());
             }
         }

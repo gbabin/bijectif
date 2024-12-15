@@ -18,6 +18,12 @@ enum UserRole {
     ImagePathRole
 };
 
+enum Columns {
+    ThumbnailCol = 0,
+    IdentifierCol = 1,
+    FirstNameCol = 2
+};
+
 class Model : public QAbstractTableModel
 {
     Q_OBJECT

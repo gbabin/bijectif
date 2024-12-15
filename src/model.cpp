@@ -189,11 +189,11 @@ void Model::load(const QFileInfoList &files, const QString &dbPath)
 
 Qt::ItemFlags Model::flags(const QModelIndex &index) const
 {
-    if (index.column() == 1) {
+    if (index.column() == IdentifierCol) {
         return Qt::ItemIsEnabled | Qt::ItemNeverHasChildren | Qt::ItemIsSelectable | Qt::ItemIsEditable;
     }
-    else if (index.column() > 1) {
-        if (images.at(index.row())->getNamesSize() > (index.column() - 3))
+    else if (index.column() >= FirstNameCol) {
+        if (images.at(index.row())->getNamesSize() > (index.column() - 1 - FirstNameCol))
             return Qt::ItemIsEnabled | Qt::ItemNeverHasChildren | Qt::ItemIsSelectable | Qt::ItemIsEditable;
         else
             return Qt::ItemIsEnabled | Qt::ItemNeverHasChildren | Qt::ItemIsSelectable;
@@ -213,16 +213,16 @@ int Model::columnCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent)
 
-    return settings.maxNames + 2;
+    return settings.maxNames + FirstNameCol;
 }
 
 QVariant Model::headerData(int section, Qt::Orientation orientation, int role) const
 {
     if (role == Qt::DisplayRole && orientation == Qt::Horizontal) {
         switch (section) {
-        case 0: return tr("Thumbnail");
-        case 1: return tr("Identifier");
-        default: return tr("Name %1").arg(section-1);
+        case ThumbnailCol: return tr("Thumbnail");
+        case IdentifierCol: return tr("Identifier");
+        default: return tr("Name %1").arg(section + 1 - FirstNameCol);
         }
     }
 
@@ -237,17 +237,17 @@ QVariant Model::data(const QModelIndex &index, int role) const
     if (index.row() >= images.count())
         return QVariant();
 
-    if (index.column() > settings.maxNames + 1)
+    if (index.column() >= settings.maxNames + FirstNameCol)
         return QVariant();
 
     if (role == Qt::DisplayRole || role == Qt::EditRole) {
         int col = index.column();
-        if (col == 0) {
+        if (col == ThumbnailCol) {
             return images.at(index.row())->getThumbnail();
-        } else if (col == 1) {
+        } else if (col == IdentifierCol) {
             return images.at(index.row())->getId();
         } else{
-            col-=2;
+            col-=FirstNameCol;
             if (col >= images.at(index.row())->getNamesSize()) {
                 return QVariant();
             } else {
@@ -255,19 +255,19 @@ QVariant Model::data(const QModelIndex &index, int role) const
             }
         }
     } else if (role == Qt::DecorationRole) {
-        if (index.column() == 0) {
+        if (index.column() == ThumbnailCol) {
             return images.at(index.row())->getThumbnail();
         } else {
             return QVariant();
         }
     } else if (role == Qt::ToolTipRole) {
-        if (index.column() == 0) {
+        if (index.column() == ThumbnailCol) {
             return images.at(index.row())->getTooltip();
         } else {
             return QVariant();
         }
     } else if (role == ImagePathRole) {
-        if (index.column() == 0) {
+        if (index.column() == ThumbnailCol) {
             return images.at(index.row())->getPath();
         } else {
             return QVariant();
@@ -281,7 +281,7 @@ bool Model::setData(const QModelIndex &index, const QVariant &value, int role)
     if (! index.isValid())
         return false;
 
-    if (index.column() == 1) {
+    if (index.column() == IdentifierCol) {
         if (role == ChangeIdRole) {
             QString valueStr = value.toString();
             valueStr = valueStr.trimmed();
@@ -295,8 +295,8 @@ bool Model::setData(const QModelIndex &index, const QVariant &value, int role)
             }
         }
     }
-    else if (index.column() >= 2) {
-        int nameIdx = index.column() - 2;
+    else if (index.column() >= FirstNameCol) {
+        int nameIdx = index.column() - FirstNameCol;
 
         if (role == Qt::EditRole) {
             QString beforeStr;
