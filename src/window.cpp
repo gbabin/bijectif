@@ -27,16 +27,21 @@ using namespace Qt::Literals::StringLiterals;
 
 const QString Window::versionString = u"v1.6"_s;
 const QString Window::websiteString = u"https://github.com/gbabin/bijectif"_s;
-const QString Window::aboutString =
-    Window::tr("Bijectif %1\n"
-               "Edit titles in filenames\n"
-               "%2\n"
-               "Licensed under the terms of the GNU General Public License v3.0\n"
-               "\n"
-               "Thumbnails database:\n"
-               "%3\n"
-               "Settings file:\n"
-               "%4");
+const char* Window::aboutString =
+    QT_TRANSLATE_NOOP("Window",
+                      "<b>Bijectif %1</b><br>"
+                      "Edit titles in filenames<br>"
+                      "<a href=\"%2\">%2</a><br>"
+                      "Licensed under the terms of the GNU General Public License v3.0<br>"
+                      "<br>"
+                      "Thumbnails database:<br>"
+                      "%3<br>"
+                      "Settings file:<br>"
+                      "%4<br>"
+                      "<br>"
+                      "<a href=\"https://www.flaticon.com/free-icon/map_1865269\">Map icon</a> "
+                      "by <a href=\"https://www.flaticon.com/authors/freepik\">Freepik</a> "
+                      "from <a href=\"https://www.flaticon.com/\">Flaticon.com</a>");
 
 Window::Window(const Settings &settings, QWidget *parent)
     : QMainWindow(parent)
@@ -139,12 +144,12 @@ Window::Window(const Settings &settings, QWidget *parent)
 
     QAction* aboutAct = new QAction(tr("&About"), this);
     connect(aboutAct, &QAction::triggered,
-            this, [this]{ QMessageBox::about(this, u"About"_s,
-                                             aboutString
+            this, [this]{ QMessageBox::about(this, tr("About"),
+                                             tr(aboutString)
                                              .arg(versionString,
                                                   websiteString,
-                                                  QDir::toNativeSeparators(getThumbnailsDatabasePath()),
-                                                  QDir::toNativeSeparators(this->settings.fileName))); });
+                                                  QDir::toNativeSeparators(getThumbnailsDatabasePath()).toHtmlEscaped(),
+                                                  QDir::toNativeSeparators(this->settings.fileName).toHtmlEscaped())); });
     helpMenu->addAction(aboutAct);
 
     QAction* aboutQtAct = new QAction(tr("About &Qt"), this);
@@ -399,6 +404,12 @@ void Window::doubleClickedHandler(const QModelIndex &index)
         if (data.userType() == QMetaType::QString) {
             const QString path = data.toString();
             QDesktopServices::openUrl(QUrl::fromLocalFile(path));
+        }
+    } else if (index.column() == MapCol) {
+        const QVariant data = index.data(MapUrlRole);
+        if (data.userType() == QMetaType::QUrl) {
+            const QUrl url = data.toUrl();
+            QDesktopServices::openUrl(url);
         }
     }
 }

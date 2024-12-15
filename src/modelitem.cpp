@@ -2,36 +2,17 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include "modelitem.h"
+#include "loader.h"
+
+#include <libexif/exif-data.h>
 
 #include <QBuffer>
 #include <QCache>
 #include <QImageReader>
-#include <QMediaPlayer>
 #include <QMessageBox>
 #include <QSqlQuery>
-#include <QThreadPool>
-#include <QTimer>
-#include <QVideoFrame>
-#include <QVideoSink>
 
 using namespace Qt::Literals::StringLiterals;
-
-const QStringList ModelItem::imageExtensions = {u"bmp"_s,
-                                                u"gif"_s,
-                                                u"jpg"_s,
-                                                u"jpeg"_s,
-                                                u"png"_s,
-                                                u"tif"_s,
-                                                u"tiff"_s};
-
-const QStringList ModelItem::videoExtensions = {u"avi"_s,
-                                                u"mkv"_s,
-                                                u"mov"_s,
-                                                u"mp4"_s,
-                                                u"mpg"_s,
-                                                u"mts"_s,
-                                                u"vob"_s,
-                                                u"wmv"_s};
 
 TooManyPartsError::TooManyPartsError(QString path)
     : path(std::move(path))
@@ -48,114 +29,19 @@ TooManyPartsError* TooManyPartsError::clone() const
     return new TooManyPartsError(*this);
 }
 
-QVariant ModelItem::createThumbnail(const Settings &settings, const QFileInfo &path, const QPixmap &pixmap)
-{
-    if (pixmap.isNull()) {
-        qInfo() << "Pixmap argument is null:" << path.filePath();
-        if (imageExtensions.contains(path.suffix().toLower())) {
-            if (path.size() <= settings.maxFileSize) {
-                QImageReader reader(path.filePath());
-                reader.setAutoTransform(true);
-                QImage image = reader.read();
-                if (image.isNull()) {
-                    qWarning() << "Image loading failed:" << path.filePath();
-                    return tr("Failure");
-                } else {
-                    qInfo() << "Image loading succeeded:" << path.filePath();
-                    return QPixmap::fromImage(
-                        image.scaled(settings.thumbnailSize,
-                                     settings.thumbnailSize,
-                                     Qt::KeepAspectRatio,
-                                     Qt::SmoothTransformation));
-                }
-            } else {
-                qInfo() << "Pixmap creation ignored because of size:" << path.filePath();
-                return tr("File too large");
-            }
-        } else if (videoExtensions.contains(path.suffix().toLower())) {
-            QImage image;
-            QVideoSink videoSink;
-            QMediaPlayer mediaPlayer;
-            mediaPlayer.setVideoSink(&videoSink);
-
-            {
-                QEventLoop eventLoop;
-                QTimer::singleShot(3000, &eventLoop,
-                                   [&eventLoop](){ eventLoop.exit(1); });
-                connect(&mediaPlayer, &QMediaPlayer::mediaStatusChanged,
-                        &eventLoop,
-                        [&eventLoop](QMediaPlayer::MediaStatus status){
-                            switch (status) {
-                            case QMediaPlayer::LoadingMedia:
-                                break;
-                            case QMediaPlayer::LoadedMedia:
-                                eventLoop.exit();
-                                break;
-                            default:
-                                eventLoop.exit(1);
-                                break;
-                            }
-                        });
-                mediaPlayer.setSource(QUrl::fromLocalFile(path.filePath()));
-                QThreadPool::globalInstance()->releaseThread();
-                int returnCode = eventLoop.exec();
-                QThreadPool::globalInstance()->reserveThread();
-                mediaPlayer.disconnect();
-                if (returnCode != 0) {
-                    qWarning() << "Video loading failed (setSource):" << path.filePath() << mediaPlayer.mediaStatus() << mediaPlayer.error() << mediaPlayer.errorString();
-                    return tr("Failure");
-                }
-            }
-
-            {
-                QEventLoop eventLoop;
-                QTimer::singleShot(3000, &eventLoop,
-                                   [&eventLoop](){ eventLoop.exit(1); });
-                connect(&videoSink, &QVideoSink::videoFrameChanged,
-                        &eventLoop,
-                        [&eventLoop, &image](const QVideoFrame &frame){
-                            if (image.isNull()) image = frame.toImage();
-                            eventLoop.exit();
-                        });
-                mediaPlayer.play();
-                QThreadPool::globalInstance()->releaseThread();
-                int returnCode = eventLoop.exec();
-                QThreadPool::globalInstance()->reserveThread();
-                videoSink.disconnect();
-                mediaPlayer.stop();
-                if (returnCode != 0) {
-                    qWarning() << "Video loading failed (play):" << path.filePath() << mediaPlayer.mediaStatus() << mediaPlayer.error() << mediaPlayer.errorString();
-                    return tr("Failure");
-                }
-            }
-
-            if (image.isNull()) {
-                qWarning() << "Video loading failed (null):" << path.filePath();
-                return tr("Failure");
-            } else {
-                return QPixmap::fromImage(
-                    image.scaled(settings.thumbnailSize,
-                                 settings.thumbnailSize,
-                                 Qt::KeepAspectRatio,
-                                 Qt::SmoothTransformation));
-            }
-        } else {
-            qInfo() << "Pixmap creation ignored because of extension:" << path.filePath();
-            return path.suffix().toUpper();
-        }
-    } else {
-        qInfo() << "Pixmap argument is not null:" << path.filePath();
-        return pixmap;
-    }
-}
-
-ModelItem::ModelItem(const Settings &settings, QCache<QString, QString> &thumbnailCache, const QFileInfo &path, const QPixmap &pixmap, QObject *parent)
+ModelItem::ModelItem(const Settings &settings,
+                     QCache<QString, QString> &thumbnailCache,
+                     const QFileInfo &path,
+                     const std::optional<Location> &possibleLocation,
+                     const std::optional<QPixmap> &possibleThumbnail,
+                     QObject *parent)
     : QObject(parent)
     , settings(settings)
     , thumbnailCache(thumbnailCache)
     , folder(path.dir())
     , extension(path.suffix())
-    , thumbnail(createThumbnail(settings, path, pixmap))
+    , possibleLocation(possibleLocation)
+    , possibleThumbnail(possibleThumbnail)
 {
     QString basename = path.completeBaseName();
     qsizetype index_sep = basename.indexOf(u" - "_s);
@@ -171,6 +57,16 @@ ModelItem::ModelItem(const Settings &settings, QCache<QString, QString> &thumbna
     }
 }
 
+void ModelItem::setLocation(const Location &location)
+{
+    possibleLocation.emplace(location);
+}
+
+void ModelItem::setThumbnail(const QPixmap &thumbnail)
+{
+    possibleThumbnail.emplace(thumbnail);
+}
+
 QString ModelItem::getPath() const
 {
     return computePath(*this, this->id, this->names);
@@ -178,9 +74,9 @@ QString ModelItem::getPath() const
 
 QString ModelItem::getTooltip() const
 {
-    if (thumbnail.isNull() || thumbnail.userType() != QMetaType::QPixmap) {
+    if (! possibleThumbnail.has_value()) {
         return tr("Thumbnail unavailable");
-    } else if (videoExtensions.contains(QFileInfo(getPath()).suffix().toLower())) {
+    } else if (Loader::videoExtensions.contains(QFileInfo(getPath()).suffix().toLower())) {
         return tr("Video");
     } else {
         QString path = getPath();
@@ -235,14 +131,24 @@ int ModelItem::getNamesSize() const
     return names.size();
 }
 
-QString ModelItem::getName(int index) const
+const QString& ModelItem::getName(int index) const
 {
     return names.at(index);
 }
 
-QVariant ModelItem::getThumbnail() const
+const QString& ModelItem::getExtension() const
 {
-    return thumbnail;
+    return extension;
+}
+
+const std::optional<Location>& ModelItem::getLocation() const
+{
+    return possibleLocation;
+}
+
+const std::optional<QPixmap>& ModelItem::getThumbnail() const
+{
+    return possibleThumbnail;
 }
 
 bool ModelItem::setName(int index, const QString &name)
@@ -360,7 +266,7 @@ bool ModelItem::syncFilename(const QString &oldPath, const QString &newPath)
     if (QFile::rename(oldPath, newPath)) {
         QFile::rename(oldPath + u".dop"_s, newPath + u".dop"_s); // Rename DxO PhotoLab sidecar file if possible
         QSqlQuery query;
-        query.prepare(u"UPDATE thumbnails "
+        query.prepare(u"UPDATE thumbnails2 "
                        "SET path = :newPath "
                        "WHERE path = :oldPath"_s);
         query.bindValue(u":newPath"_s, newPath);

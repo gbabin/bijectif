@@ -24,7 +24,7 @@ class Window : public QMainWindow
 public:
     static QFileInfoList listFiles(const QDir &dir);
 
-    Window(const Settings &settings, QWidget *parent = nullptr);
+    explicit Window(const Settings &settings, QWidget *parent = nullptr);
     ~Window() override;
 
 public slots:
@@ -46,7 +46,7 @@ private:
     static QString getThumbnailsDatabasePath();
     static const QString versionString;
     static const QString websiteString;
-    static const QString aboutString;
+    static const char* aboutString;
 
     const Settings &settings;
     const QDir dir;

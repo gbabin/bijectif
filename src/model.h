@@ -15,13 +15,15 @@ enum UserRole {
     InsertRole = Qt::UserRole,
     DeleteRole,
     ChangeIdRole,
-    ImagePathRole
+    ImagePathRole,
+    MapUrlRole
 };
 
 enum Columns {
     ThumbnailCol = 0,
-    IdentifierCol = 1,
-    FirstNameCol = 2
+    MapCol = 1,
+    IdentifierCol = 2,
+    FirstNameCol = 3
 };
 
 class Model : public QAbstractTableModel
@@ -30,7 +32,7 @@ class Model : public QAbstractTableModel
     Q_DISABLE_COPY_MOVE(Model)
 
 public:
-    Model(const Settings &settings, CompleterModel* completerModel, QObject *parent = nullptr);
+    explicit Model(const Settings &settings, CompleterModel* completerModel, QObject *parent = nullptr);
     ~Model() override;
     void load(const QFileInfoList &files, const QString &dbPath);
     Qt::ItemFlags flags(const QModelIndex &index) const override;
@@ -49,6 +51,7 @@ private:
     QCache<QString, QString> thumbnailCache;
     QList<ModelItem*> images;
     CompleterModel* completerModel = nullptr;
+    QImage mapIcon;
 };
 
 #endif // MODEL_H

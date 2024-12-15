@@ -6,6 +6,9 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(EXIF REQUIRED libexif)
+
 find_package(Qt6 REQUIRED COMPONENTS Concurrent Core Gui LinguistTools Multimedia Sql Widgets)
 
 if (Qt6_VERSION VERSION_LESS 6.4)
@@ -31,12 +34,21 @@ else()
     qt_add_executable(bijectif ${SRC_FILES})
 endif()
 
+qt_add_resources(bijectif "resources"
+    PREFIX "/"
+    FILES resources/map.png
+)
+
+target_include_directories(bijectif SYSTEM PUBLIC ${EXIF_INCLUDE_DIRS})
+target_compile_options(bijectif PUBLIC ${EXIF_CFLAGS_OTHER})
+
 set_target_properties(bijectif PROPERTIES
     WIN32_EXECUTABLE TRUE
     MACOSX_BUNDLE TRUE
 )
 
 target_link_libraries(bijectif PRIVATE
+    ${EXIF_LIBRARIES}
     Qt6::Concurrent
     Qt6::Core
     Qt6::Gui

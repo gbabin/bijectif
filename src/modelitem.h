@@ -5,6 +5,7 @@
 #define MODELITEM_H
 
 #include "settings.h"
+#include "location.h"
 
 #include <QDir>
 #include <QException>
@@ -25,16 +26,23 @@ class ModelItem : public QObject
     Q_OBJECT
 
 public:
-    static QVariant createThumbnail(const Settings &settings, const QFileInfo &path, const QPixmap &pixmap = QPixmap());
-
-    explicit ModelItem(const Settings &settings, QCache<QString, QString> &thumbnailCache, const QFileInfo &path, const QPixmap &pixmap = QPixmap(), QObject *parent = nullptr);
+    explicit ModelItem(const Settings &settings,
+                       QCache<QString, QString> &thumbnailCache,
+                       const QFileInfo &path,
+                       const std::optional<Location> &possibleLocation,
+                       const std::optional<QPixmap> &possibleThumbnail,
+                       QObject *parent = nullptr);
+    void setLocation(const Location &location);
+    void setThumbnail(const QPixmap &thumbnail);
     [[nodiscard]] QString getPath() const;
     [[nodiscard]] QString getTooltip() const;
     [[nodiscard]] QString getId() const;
     bool setId(const QString &id);
     [[nodiscard]] int getNamesSize() const;
-    [[nodiscard]] QString getName(int index) const;
-    [[nodiscard]] QVariant getThumbnail() const;
+    [[nodiscard]] const QString& getName(int index) const;
+    [[nodiscard]] const QString& getExtension() const;
+    [[nodiscard]] const std::optional<Location>& getLocation() const;
+    [[nodiscard]] const std::optional<QPixmap>& getThumbnail() const;
     bool setName(int index, const QString &name);
     bool deleteName(int index);
     bool insertName(int index, const QString &name);
@@ -43,8 +51,6 @@ private:
     [[nodiscard]] static bool isValidPathChars(const QString &str);
     [[nodiscard]] static QString computePath(const ModelItem &item, const QString &id, const QStringList &names);
     static bool syncFilename(const QString &oldPath, const QString &newPath);
-    static const QStringList imageExtensions;
-    static const QStringList videoExtensions;
 
     const Settings &settings;
     QCache<QString, QString> &thumbnailCache;
@@ -52,7 +58,8 @@ private:
     QString id;
     QStringList names;
     const QString extension;
-    const QVariant thumbnail;
+    std::optional<Location> possibleLocation;
+    std::optional<QPixmap> possibleThumbnail;
 };
 
 #endif // MODELITEM_H

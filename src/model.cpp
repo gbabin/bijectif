@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include "model.h"
+#include "location.h"
+#include "loader.h"
 
 #include <QMutex>
 #include <QSqlDatabase>
@@ -17,6 +19,11 @@ Model::Model(const Settings &settings, CompleterModel* completerModel, QObject *
     , completerModel(completerModel)
     , thumbnailCache(settings.thumbnailCacheSize)
 {
+    mapIcon = QImage(u":/resources/map.png"_s)
+        .scaled(settings.thumbnailSize / 4,
+                settings.thumbnailSize / 4,
+                Qt::KeepAspectRatio,
+                Qt::SmoothTransformation);
 }
 
 Model::~Model()
@@ -45,23 +52,30 @@ void Model::load(const QFileInfoList &files, const QString &dbPath)
             qWarning() << "Thumbnails database opening failure:" << db.lastError();
         }
         QSqlQuery query(db);
-        if (query.exec(u"CREATE TABLE IF NOT EXISTS thumbnails "
-                        "(path TEXT PRIMARY KEY, "
-                        " timestamp INTEGER, "
-                        " thumbnail BLOB)"_s)) {
-            qInfo() << "Thumbnails database table created";
+        if (query.exec(u"DROP TABLE IF EXISTS thumbnails"_s)) {
+            qInfo() << "Thumbnails database table (v1) dropped";
         } else {
-            qWarning() << "Thumbnails database table creation failure:" << query.lastError();
+            qWarning() << "Thumbnails database table (v1) drop failure:" << query.lastError();
+        }
+        if (query.exec(u"CREATE TABLE IF NOT EXISTS thumbnails2 "
+                        "(path TEXT PRIMARY KEY, "
+                        " timestamp INTEGER NOT NULL, "
+                        " latitude REAL, "
+                        " longitude REAL, "
+                        " thumbnail BLOB)"_s)) {
+            qInfo() << "Thumbnails database table (v2) created";
+        } else {
+            qWarning() << "Thumbnails database table (v2) creation failure:" << query.lastError();
         }
 
         QFileInfoList newFiles;
         newFiles.reserve(files.size());
 
-        // retrieve thumbnails
+        // retrieve thumbnails & locations
         for (const QFileInfo &file : files) {
             qint64 timestamp = file.lastModified().toSecsSinceEpoch();
-            query.prepare(u"SELECT timestamp, thumbnail "
-                           "FROM thumbnails "
+            query.prepare(u"SELECT timestamp, latitude, longitude, thumbnail "
+                           "FROM thumbnails2 "
                            "WHERE path = :path AND timestamp >= :timestamp"_s);
             query.bindValue(u":path"_s, file.filePath());
             query.bindValue(u":timestamp"_s, timestamp);
@@ -72,18 +86,26 @@ void Model::load(const QFileInfoList &files, const QString &dbPath)
             }
             if (query.next()) {
                 qInfo() << "Thumbnail retrieval query has a result:" << file.filePath();
-                QByteArray bytes = query.value(u"thumbnail"_s).toByteArray();
-                QPixmap pixmap = QPixmap();
-                pixmap.loadFromData(bytes);
-                if (pixmap.isNull()) {
-                    qInfo() << "Thumbnail retrieval result is null:" << file.filePath();
-                    newFiles.append(file);
-                } else {
-                    qInfo() << "Thumbnail retrieval result is not null:" << file.filePath();
-                    ModelItem *item = new ModelItem(settings, thumbnailCache, file, pixmap);
-                    images.append(item);
-                    emit loadingProgressed(11);
+                std::optional<Location> possibleLocation;
+                if (! query.value(u"latitude"_s).isNull()
+                    && ! query.value(u"longitude"_s).isNull())
+                {
+                    possibleLocation.emplace(Location(query.value(u"latitude"_s).toDouble(),
+                                                      query.value(u"longitude"_s).toDouble()));
                 }
+                std::optional<QPixmap> possibleThumbnail;
+                if (! query.value(u"thumbnail"_s).isNull())
+                {
+                    QByteArray bytes = query.value(u"thumbnail"_s).toByteArray();
+                    QPixmap pixmap = QPixmap();
+                    pixmap.loadFromData(bytes);
+                    possibleThumbnail.emplace(pixmap);
+                }
+
+                qInfo() << "Thumbnail retrieval result is not null:" << file.filePath();
+                ModelItem *item = new ModelItem(settings, thumbnailCache, file, possibleLocation, possibleThumbnail);
+                images.append(item);
+                emit loadingProgressed(11);
             } else {
                 qInfo() << "Thumbnail retrieval query has no result:" << file.filePath();
                 newFiles.append(file);
@@ -105,13 +127,14 @@ void Model::load(const QFileInfoList &files, const QString &dbPath)
         try {
             QtConcurrent::blockingMap(std::as_const(newFiles),
                                       [this, &newThumbnailsMutex, &newThumbnails](const QFileInfo & entry){
-                                          ModelItem *item = new ModelItem(settings, thumbnailCache, entry);
-                                          QByteArray *bytes = new QByteArray();
-                                          if (item->getThumbnail().userType() == QMetaType::QPixmap) {
-                                              const QPixmap thumbnail = item->getThumbnail().value<QPixmap>();
+                                          auto [possibleLocation, possibleThumbnail] = Loader::load(settings, entry);
+                                          ModelItem *item = new ModelItem(settings, thumbnailCache, entry, possibleLocation, possibleThumbnail);
+                                          QByteArray *bytes = nullptr;
+                                          if (item->getThumbnail().has_value()) {
+                                              bytes = new QByteArray();
                                               QBuffer buffer(bytes);
                                               buffer.open(QIODevice::WriteOnly);
-                                              thumbnail.save(&buffer, "PNG");
+                                              item->getThumbnail()->save(&buffer, "PNG");
                                               buffer.close();
                                           }
                                           newThumbnailsMutex.lock();
@@ -133,20 +156,27 @@ void Model::load(const QFileInfoList &files, const QString &dbPath)
         }
         for (const NewItem &item : std::as_const(newThumbnails)) {
             images.append(item.modelItem);
-            if (item.thumbnail->isNull()) {
-                qInfo() << "Thumbnail storing ignored (null):" << item.filePath;
-            } else {
-                query.prepare(u"INSERT OR REPLACE INTO thumbnails (path, timestamp, thumbnail) "
-                               "VALUES (:path, :timestamp, :thumbnail)"_s);
-                query.bindValue(u":path"_s, item.filePath);
-                query.bindValue(u":timestamp"_s, timestamp);
-                query.bindValue(u":thumbnail"_s, *item.thumbnail);
-                if (query.exec()) {
-                    qInfo() << "Thumbnail storing query succeeded:" << item.filePath;
-                } else {
-                    qWarning() << "Thumbnail storing query failed:" << item.filePath << ":" << query.lastError();
-                }
+
+            QVariant latitude, longitude, thumbnail;
+            if (item.modelItem->getLocation().has_value()) {
+                latitude = item.modelItem->getLocation()->getLatitude();
+                longitude = item.modelItem->getLocation()->getLongitude();
             }
+            if (item.thumbnail != nullptr)
+                thumbnail = *item.thumbnail;
+            query.prepare(u"INSERT OR REPLACE INTO thumbnails2 (path, timestamp, latitude, longitude, thumbnail) "
+                           "VALUES (:path, :timestamp, :latitude, :longitude, :thumbnail)"_s);
+            query.bindValue(u":path"_s, item.filePath);
+            query.bindValue(u":timestamp"_s, timestamp);
+            query.bindValue(u":latitude"_s, latitude);
+            query.bindValue(u":longitude"_s, longitude);
+            query.bindValue(u":thumbnail"_s, thumbnail);
+            if (query.exec()) {
+                qInfo() << "Thumbnail storing query succeeded:" << item.filePath;
+            } else {
+                qWarning() << "Thumbnail storing query failed:" << item.filePath << ":" << query.lastError();
+            }
+
             emit loadingProgressed();
             delete item.thumbnail;
         }
@@ -157,8 +187,8 @@ void Model::load(const QFileInfoList &files, const QString &dbPath)
         }
 
         // limit database size
-        if (query.exec(u"DELETE FROM thumbnails "
-                        "WHERE path NOT IN (SELECT path FROM thumbnails ORDER BY timestamp DESC LIMIT %1)"_s.arg(settings.thumbnailDatabaseLimit))) {
+        if (query.exec(u"DELETE FROM thumbnails2 "
+                        "WHERE path NOT IN (SELECT path FROM thumbnails2 ORDER BY timestamp DESC LIMIT %1)"_s.arg(settings.thumbnailDatabaseLimit))) {
             qInfo() << "Thumbnails database size limiting query succeeded";
         } else {
             qWarning() << "Thumbnails database size limiting query failed:" << query.lastError();
@@ -191,8 +221,11 @@ Qt::ItemFlags Model::flags(const QModelIndex &index) const
 {
     if (index.column() == IdentifierCol) {
         return Qt::ItemIsEnabled | Qt::ItemNeverHasChildren | Qt::ItemIsSelectable | Qt::ItemIsEditable;
-    }
-    else if (index.column() >= FirstNameCol) {
+    } else if (index.column() == MapCol) {
+        if (images.at(index.row())->getLocation().has_value())
+            return Qt::ItemIsEnabled | Qt::ItemNeverHasChildren;
+        return Qt::ItemNeverHasChildren;
+    } else if (index.column() >= FirstNameCol) {
         if (images.at(index.row())->getNamesSize() > (index.column() - 1 - FirstNameCol))
             return Qt::ItemIsEnabled | Qt::ItemNeverHasChildren | Qt::ItemIsSelectable | Qt::ItemIsEditable;
         else
@@ -222,6 +255,7 @@ QVariant Model::headerData(int section, Qt::Orientation orientation, int role) c
         switch (section) {
         case ThumbnailCol: return tr("Thumbnail");
         case IdentifierCol: return tr("Identifier");
+        case MapCol: return tr("Map");
         default: return tr("Name %1").arg(section + 1 - FirstNameCol);
         }
     }
@@ -243,20 +277,29 @@ QVariant Model::data(const QModelIndex &index, int role) const
     if (role == Qt::DisplayRole || role == Qt::EditRole) {
         int col = index.column();
         if (col == ThumbnailCol) {
-            return images.at(index.row())->getThumbnail();
+            if (images.at(index.row())->getThumbnail().has_value())
+                return QVariant();
+            else
+                return tr("%1 file").arg(images.at(index.row())->getExtension().toUpper());
         } else if (col == IdentifierCol) {
             return images.at(index.row())->getId();
-        } else{
+        } else if (col >= FirstNameCol){
             col-=FirstNameCol;
             if (col >= images.at(index.row())->getNamesSize()) {
                 return QVariant();
             } else {
                 return images.at(index.row())->getName(col);
             }
+        } else {
+            return QVariant();
         }
     } else if (role == Qt::DecorationRole) {
         if (index.column() == ThumbnailCol) {
-            return images.at(index.row())->getThumbnail();
+            return images.at(index.row())->getThumbnail().value_or(QPixmap());
+        } else if (index.column() == MapCol) {
+            if (images.at(index.row())->getLocation().has_value())
+                return mapIcon;
+            return QVariant();
         } else {
             return QVariant();
         }
@@ -269,6 +312,15 @@ QVariant Model::data(const QModelIndex &index, int role) const
     } else if (role == ImagePathRole) {
         if (index.column() == ThumbnailCol) {
             return images.at(index.row())->getPath();
+        } else {
+            return QVariant();
+        }
+    } else if (role == MapUrlRole) {
+        if (index.column() == MapCol) {
+            const std::optional<Location>& location = images.at(index.row())->getLocation();
+            if (location.has_value())
+                return location->getUrl();
+            return QVariant();
         } else {
             return QVariant();
         }
