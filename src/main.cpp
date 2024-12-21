@@ -5,8 +5,12 @@
 #include "window.h"
 
 #include <QApplication>
+#include <QCommandLineParser>
+#include <QFileDialog>
 #include <QLibraryInfo>
 #include <QLoggingCategory>
+#include <QStandardPaths>
+#include <QTextStream>
 #include <QTimer>
 #include <QTranslator>
 
@@ -42,7 +46,9 @@ void setLogVerbosity(const Settings &settings)
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
+    QApplication::setApplicationName(u"bijectif"_s);
     QApplication::setApplicationDisplayName(u"Bijectif"_s);
+    QApplication::setApplicationVersion(Window::versionString);
 
     const Settings settings;
 
@@ -80,8 +86,37 @@ int main(int argc, char *argv[])
         }
         qWarning() << "No app translation found for" << locale;
     }
-    
-    Window window(settings);
+
+    QCommandLineParser parser;
+    parser.addHelpOption();
+    parser.addVersionOption();
+    parser.addPositionalArgument(u"directory"_s, QApplication::translate("main", "Directory to open."));
+    parser.process(app);
+    std::optional<QString> possibleDirPath;
+    const QStringList args = parser.positionalArguments();
+    if (args.size() > 1) {
+        QTextStream(stdout) << QApplication::translate("main", "Error: too many arguments") << Qt::endl;
+        parser.showHelp(1);
+    } else if (args.size() == 1) {
+        if (QDir(args[0]).exists()) {
+            possibleDirPath.emplace(args[0]);
+        } else {
+            QTextStream(stdout) << QApplication::translate("main", "Error: directory not found") << Qt::endl;
+            parser.showHelp(1);
+        }
+    }
+
+    if (! possibleDirPath.has_value()) {
+        possibleDirPath.emplace(QFileDialog::getExistingDirectory(nullptr,
+                                                                  QApplication::translate("main", "Choose image folder"),
+                                                                  QStandardPaths::standardLocations(QStandardPaths::HomeLocation).constFirst(),
+                                                                  QFileDialog::ShowDirsOnly));
+    }
+
+    QDir directory(possibleDirPath.value());
+    directory.makeAbsolute();
+
+    Window window(settings, directory);
     window.show();
     
     QTimer::singleShot(0, &window, &Window::modelLoadingStart);

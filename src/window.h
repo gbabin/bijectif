@@ -23,8 +23,9 @@ class Window : public QMainWindow
 
 public:
     static QFileInfoList listFiles(const QDir &dir);
+    static const QString versionString;
 
-    explicit Window(const Settings &settings, QWidget *parent = nullptr);
+    explicit Window(const Settings &settings, const QDir &directory, QWidget *parent = nullptr);
     ~Window() override;
 
 public slots:
@@ -44,12 +45,11 @@ private slots:
 
 private:
     static QString getThumbnailsDatabasePath();
-    static const QString versionString;
     static const QString websiteString;
     static const char* aboutString;
 
     const Settings &settings;
-    const QDir dir;
+    const QDir &dir;
     QProgressDialog* progressDialog = nullptr;
     QTableView view;
     Model model;

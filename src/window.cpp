@@ -11,7 +11,6 @@
 #include <QClipboard>
 #include <QDesktopServices>
 #include <QDockWidget>
-#include <QFileDialog>
 #include <QHeaderView>
 #include <QInputDialog>
 #include <QLabel>
@@ -43,16 +42,13 @@ const char* Window::aboutString =
                       "by <a href=\"https://www.flaticon.com/authors/freepik\">Freepik</a> "
                       "from <a href=\"https://www.flaticon.com/\">Flaticon.com</a>");
 
-Window::Window(const Settings &settings, QWidget *parent)
+Window::Window(const Settings &settings, const QDir &directory, QWidget *parent)
     : QMainWindow(parent)
     , settings(settings)
-    , dir(QFileDialog::getExistingDirectory(nullptr,
-                                            tr("Choose image folder")))
+    , dir(directory)
     , model(settings, &completerModel)
     , undoStack(new QUndoStack(this))
 {
-    if (! dir.exists()) QApplication::exit(1);
-
     setMinimumSize(settings.minWidth, settings.minHeight);
 
     QFont font = this->font();
