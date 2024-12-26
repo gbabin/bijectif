@@ -91,6 +91,8 @@ int main(int argc, char *argv[])
     parser.addHelpOption();
     parser.addVersionOption();
     parser.addPositionalArgument(u"directory"_s, QApplication::translate("main", "Directory to open."));
+    QCommandLineOption benchmarkOption(u"benchmark"_s, QApplication::translate("main", "Benchmark model load."));
+    parser.addOption(benchmarkOption);
     parser.process(app);
     std::optional<QString> possibleDirPath;
     const QStringList args = parser.positionalArguments();
@@ -107,6 +109,10 @@ int main(int argc, char *argv[])
     }
 
     if (! possibleDirPath.has_value()) {
+        if (parser.isSet(benchmarkOption)) {
+            QTextStream(stdout) << QApplication::translate("main", "Error: directory argument is mandatory when using benchmark option") << Qt::endl;
+            parser.showHelp(1);
+        }
         possibleDirPath.emplace(QFileDialog::getExistingDirectory(nullptr,
                                                                   QApplication::translate("main", "Choose image folder"),
                                                                   QStandardPaths::standardLocations(QStandardPaths::HomeLocation).constFirst(),
@@ -116,7 +122,7 @@ int main(int argc, char *argv[])
     QDir directory(possibleDirPath.value());
     directory.makeAbsolute();
 
-    Window window(settings, directory);
+    Window window(settings, directory, parser.isSet(benchmarkOption));
     window.show();
     
     QTimer::singleShot(0, &window, &Window::modelLoadingStart);

@@ -122,121 +122,121 @@ Après : %2</translation>
         <translation>&lt;b&gt;Bijectif %1&lt;/b&gt;&lt;br&gt;Modifier les titres dans les noms de fichiers&lt;br&gt;&lt;a href=&quot;%2&quot;&gt;%2&lt;/a&gt;&lt;br&gt;Sous licence selon les termes de la GNU General Public License v3.0&lt;br&gt;&lt;br&gt;Base de données des miniatures :&lt;br&gt;%3&lt;br&gt;Fichier de réglages :&lt;br&gt;%4&lt;br&gt;&lt;br&gt;&lt;a href=&quot;https://www.flaticon.com/free-icon/map_1865269&quot;&gt;Icône carte&lt;/a&gt; par &lt;a href=&quot;https://www.flaticon.com/authors/freepik&quot;&gt;Freepik&lt;/a&gt; de &lt;a href=&quot;https://www.flaticon.com/&quot;&gt;Flaticon.com&lt;/a&gt;</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="61"/>
+        <location filename="../src/window.cpp" line="62"/>
         <source>Folder: %1</source>
         <translation>Dossier : %1</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="90"/>
+        <location filename="../src/window.cpp" line="91"/>
         <source>&amp;Undo</source>
         <translation>&amp;Annuler</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="94"/>
+        <location filename="../src/window.cpp" line="95"/>
         <source>&amp;Redo</source>
         <translation>&amp;Refaire</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="102"/>
+        <location filename="../src/window.cpp" line="103"/>
         <source>&amp;Copy</source>
         <translation>Co&amp;pier</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="109"/>
+        <location filename="../src/window.cpp" line="110"/>
         <source>&amp;Paste</source>
         <translation>C&amp;oller</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="116"/>
+        <location filename="../src/window.cpp" line="117"/>
         <source>&amp;Insert</source>
         <translation>&amp;Insérer</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="123"/>
+        <location filename="../src/window.cpp" line="124"/>
         <source>&amp;Delete</source>
         <translation>&amp;Supprimer</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="134"/>
+        <location filename="../src/window.cpp" line="135"/>
         <source>&amp;Help</source>
         <translation>Ai&amp;de</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="136"/>
+        <location filename="../src/window.cpp" line="137"/>
         <source>&amp;Website</source>
         <translation>&amp;Site web</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="141"/>
+        <location filename="../src/window.cpp" line="142"/>
         <source>&amp;About</source>
         <translation>À &amp;propos</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="143"/>
+        <location filename="../src/window.cpp" line="144"/>
         <source>About</source>
         <translation>À propos</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="151"/>
+        <location filename="../src/window.cpp" line="152"/>
         <source>About &amp;Qt</source>
         <translation>À propos de &amp;Qt</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="166"/>
+        <location filename="../src/window.cpp" line="167"/>
         <source>Command history</source>
         <translation>Historique des commandes</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="270"/>
+        <location filename="../src/window.cpp" line="271"/>
         <source>Cancel</source>
         <translation>Annuler</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="270"/>
+        <location filename="../src/window.cpp" line="271"/>
         <source>Loading thumbnails...</source>
         <translation>Chargement des miniatures...</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="301"/>
+        <location filename="../src/window.cpp" line="302"/>
         <source>Too many name parts</source>
         <translation>Trop d&apos;éléments de noms</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="302"/>
+        <location filename="../src/window.cpp" line="303"/>
         <source>The file &quot;%1&quot; has too many parts in its name.
 The maximum number allowed is %2.</source>
         <translation>Le fichier &quot;%1&quot; comporte trop d&apos;éléments dans son nom.
 Le nombre maximum autorisé est %2.</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="320"/>
+        <location filename="../src/window.cpp" line="324"/>
         <source>Load completed</source>
         <translation>Chargement terminé</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="323"/>
+        <location filename="../src/window.cpp" line="327"/>
         <source>Load completed (Thumbnails database: %1)</source>
         <translation>Chargement terminé (Base de données des miniatures : %1)</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="475"/>
-        <location filename="../src/window.cpp" line="489"/>
+        <location filename="../src/window.cpp" line="479"/>
+        <location filename="../src/window.cpp" line="493"/>
         <source>Pasting multiple cells</source>
         <translation>Coller plusieurs cellules</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="476"/>
-        <location filename="../src/window.cpp" line="490"/>
+        <location filename="../src/window.cpp" line="480"/>
+        <location filename="../src/window.cpp" line="494"/>
         <source>The pasted content has %1 parts. Therefore, each modifed row must have %1 selected cells.</source>
         <translation>Le contenu collé comporte %1 parties. Par conséquent, chaque ligne modifiée doit avoir %1 cellules sélectionnées.</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="523"/>
+        <location filename="../src/window.cpp" line="527"/>
         <source>Insertion</source>
         <translation>Insertion</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="523"/>
+        <location filename="../src/window.cpp" line="527"/>
         <source>Name:</source>
         <translation>Nom :</translation>
     </message>
@@ -249,17 +249,27 @@ Le nombre maximum autorisé est %2.</translation>
         <translation>Répertoire à ouvrir.</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="98"/>
+        <location filename="../src/main.cpp" line="94"/>
+        <source>Benchmark model load.</source>
+        <translation>Mesurer le chargement du modèle.</translation>
+    </message>
+    <message>
+        <location filename="../src/main.cpp" line="100"/>
         <source>Error: too many arguments</source>
         <translation>Erreur : trop d&apos;arguments</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="104"/>
+        <location filename="../src/main.cpp" line="106"/>
         <source>Error: directory not found</source>
         <translation>Erreur : répertoire non trouvé</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="111"/>
+        <location filename="../src/main.cpp" line="113"/>
+        <source>Error: directory argument is mandatory when using benchmark option</source>
+        <translation>Erreur : l&apos;argument directory est obligatoire lors de l&apos;utilisation de l&apos;option benchmark</translation>
+    </message>
+    <message>
+        <location filename="../src/main.cpp" line="117"/>
         <source>Choose image folder</source>
         <translation>Choisissez le dossier des images</translation>
     </message>

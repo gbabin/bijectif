@@ -25,7 +25,7 @@ public:
     static QFileInfoList listFiles(const QDir &dir);
     static const QString versionString;
 
-    explicit Window(const Settings &settings, const QDir &directory, QWidget *parent = nullptr);
+    explicit Window(const Settings &settings, const QDir &directory, bool benchmark, QWidget *parent = nullptr);
     ~Window() override;
 
 public slots:
@@ -50,6 +50,7 @@ private:
 
     const Settings &settings;
     const QDir &dir;
+    const bool benchmark;
     QProgressDialog* progressDialog = nullptr;
     QTableView view;
     Model model;

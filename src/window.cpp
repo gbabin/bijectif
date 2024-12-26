@@ -42,10 +42,11 @@ const char* Window::aboutString =
                       "by <a href=\"https://www.flaticon.com/authors/freepik\">Freepik</a> "
                       "from <a href=\"https://www.flaticon.com/\">Flaticon.com</a>");
 
-Window::Window(const Settings &settings, const QDir &directory, QWidget *parent)
+Window::Window(const Settings &settings, const QDir &directory, bool benchmark, QWidget *parent)
     : QMainWindow(parent)
     , settings(settings)
     , dir(directory)
+    , benchmark(benchmark)
     , model(settings, &completerModel)
     , undoStack(new QUndoStack(this))
 {
@@ -304,6 +305,9 @@ void Window::modelLoadingDone(qint64 dbFileSize)
                                   .arg(e.path, QString::number(settings.maxNames)));
         QApplication::exit(2);
     }
+
+    if (benchmark)
+        QApplication::exit();
 
     QSortFilterProxyModel* proxyModel = new QSortFilterProxyModel(&view);
     model.setParent(proxyModel);
