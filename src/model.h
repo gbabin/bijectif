@@ -1,4 +1,4 @@
-// Copyright (C) 2023, 2024 gbabin
+// Copyright (C) 2023, 2024, 2025 gbabin
 // SPDX-License-Identifier: GPL-3.0-only
 
 #ifndef MODEL_H
@@ -42,7 +42,7 @@ public:
     QVariant data(const QModelIndex &index, int role) const override;
     bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
 
-signals:
+Q_SIGNALS:
     void loadingProgressed(int step = 1);
     void loadingFinished(qint64 dbFileSize = -1);
 

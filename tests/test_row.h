@@ -1,4 +1,4 @@
-// Copyright (C) 2023, 2024 gbabin
+// Copyright (C) 2023, 2024, 2025 gbabin
 // SPDX-License-Identifier: GPL-3.0-only
 
 #ifndef ROWTEST_H
@@ -18,7 +18,7 @@ class RowTest : public QObject
 public:
     RowTest(const Settings &settings, QObject *parent = nullptr);
 
-private slots:
+private Q_SLOTS:
     void initTestCase();
     void test_0();
     void test_1();

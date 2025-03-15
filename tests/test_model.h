@@ -1,4 +1,4 @@
-// Copyright (C) 2023, 2024 gbabin
+// Copyright (C) 2023, 2024, 2025 gbabin
 // SPDX-License-Identifier: GPL-3.0-only
 
 #ifndef MODELTEST_H
@@ -15,7 +15,7 @@ class ModelTest : public QObject
 public:
     ModelTest(const Settings &settings, QObject *parent = nullptr);
 
-private slots:
+private Q_SLOTS:
     void initTestCase();
     void test_1();
     void cleanupTestCase();

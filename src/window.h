@@ -1,4 +1,4 @@
-// Copyright (C) 2023, 2024 gbabin
+// Copyright (C) 2023, 2024, 2025 gbabin
 // SPDX-License-Identifier: GPL-3.0-only
 
 #ifndef WINDOW_H
@@ -28,7 +28,7 @@ public:
     explicit Window(const Settings &settings, const QDir &directory, bool benchmark, QWidget *parent = nullptr);
     ~Window() override;
 
-public slots:
+public Q_SLOTS:
     void modelLoadingStart();
     void modelLoadingProgressed(int step);
     void modelLoadingDone(qint64 dbFileSize);
@@ -40,7 +40,7 @@ public slots:
     void deleteSelection();
     void insertAtSelection();
 
-private slots:
+private Q_SLOTS:
     static void doubleClickedHandler(const QModelIndex &index);
 
 private:

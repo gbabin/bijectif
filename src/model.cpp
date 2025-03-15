@@ -1,4 +1,4 @@
-// Copyright (C) 2023, 2024 gbabin
+// Copyright (C) 2023, 2024, 2025 gbabin
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include "model.h"
@@ -105,7 +105,7 @@ void Model::load(const QFileInfoList &files, const QString &dbPath)
                 qInfo() << "Thumbnail retrieval result is not null:" << file.filePath();
                 ModelItem *item = new ModelItem(settings, thumbnailCache, file, possibleLocation, possibleThumbnail);
                 images.append(item);
-                emit loadingProgressed(11);
+                Q_EMIT loadingProgressed(11);
             } else {
                 qInfo() << "Thumbnail retrieval query has no result:" << file.filePath();
                 newFiles.append(file);
@@ -140,11 +140,11 @@ void Model::load(const QFileInfoList &files, const QString &dbPath)
                                           newThumbnailsMutex.lock();
                                           newThumbnails.append(NewItem{entry.filePath(), item, bytes});
                                           newThumbnailsMutex.unlock();
-                                          emit loadingProgressed(10);
+                                          Q_EMIT loadingProgressed(10);
                                       });
         } catch (TooManyPartsError &e) {
             qCritical() << "Too many name parts:" << e.path;
-            emit loadingFinished();
+            Q_EMIT loadingFinished();
             throw;
         }
 
@@ -177,7 +177,7 @@ void Model::load(const QFileInfoList &files, const QString &dbPath)
                 qWarning() << "Thumbnail storing query failed:" << item.filePath << ":" << query.lastError();
             }
 
-            emit loadingProgressed();
+            Q_EMIT loadingProgressed();
             delete item.thumbnail;
         }
         if (query.exec(u"END TRANSACTION"_s)) {
@@ -214,7 +214,7 @@ void Model::load(const QFileInfoList &files, const QString &dbPath)
 
     completerModel->insert(images);
 
-    emit loadingFinished(dbFileSize);
+    Q_EMIT loadingFinished(dbFileSize);
 }
 
 Qt::ItemFlags Model::flags(const QModelIndex &index) const
@@ -342,7 +342,7 @@ bool Model::setData(const QModelIndex &index, const QVariant &value, int role)
                                 return QString::compare(valueStr, item->getId()) == 0; }))
                 return false;
             if (images.at(index.row())->setId(valueStr)) {
-                emit dataChanged(index, index);
+                Q_EMIT dataChanged(index, index);
                 return true;
             }
         }
@@ -360,7 +360,7 @@ bool Model::setData(const QModelIndex &index, const QVariant &value, int role)
                 completerModel->insert(afterStr);
                 if (! beforeStr.isEmpty())
                     completerModel->remove(beforeStr);
-                emit dataChanged(index, index);
+                Q_EMIT dataChanged(index, index);
                 return true;
             }
         }
@@ -369,7 +369,7 @@ bool Model::setData(const QModelIndex &index, const QVariant &value, int role)
             if (images.at(index.row())->insertName(nameIdx, valueStr)) {
                 const QString afterStr = images.at(index.row())->getName(nameIdx);
                 completerModel->insert(afterStr);
-                emit dataChanged(index, index.siblingAtColumn(settings.maxNames + 1));
+                Q_EMIT dataChanged(index, index.siblingAtColumn(settings.maxNames + 1));
                 return true;
             }
         }
@@ -380,7 +380,7 @@ bool Model::setData(const QModelIndex &index, const QVariant &value, int role)
             if (images.at(index.row())->deleteName(nameIdx)) {
                 if (! beforeStr.isEmpty())
                     completerModel->remove(beforeStr);
-                emit dataChanged(index, index.siblingAtColumn(settings.maxNames + 1));
+                Q_EMIT dataChanged(index, index.siblingAtColumn(settings.maxNames + 1));
                 return true;
             }
         }
