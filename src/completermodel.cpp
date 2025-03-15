@@ -1,4 +1,4 @@
-// Copyright (C) 2024 gbabin
+// Copyright (C) 2024, 2025 gbabin
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include "completermodel.h"
@@ -10,6 +10,8 @@ CompleterModel::CompleterModel(QObject *parent)
 
 int CompleterModel::rowCount(const QModelIndex &parent) const
 {
+    Q_UNUSED(parent)
+
     return items.size();
 }
 

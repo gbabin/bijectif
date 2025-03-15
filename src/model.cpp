@@ -16,8 +16,8 @@ using namespace Qt::Literals::StringLiterals;
 Model::Model(const Settings &settings, CompleterModel* completerModel, QObject *parent)
     : QAbstractTableModel(parent)
     , settings(settings)
-    , completerModel(completerModel)
     , thumbnailCache(settings.thumbnailCacheSize)
+    , completerModel(completerModel)
 {
     mapIcon = QImage(u":/resources/map.png"_s)
         .scaled(settings.thumbnailSize / 4,
