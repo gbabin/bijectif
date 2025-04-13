@@ -1,4 +1,4 @@
-// Copyright (C) 2023, 2024 gbabin
+// Copyright (C) 2023, 2024, 2025 gbabin
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include "window.h"
@@ -72,9 +72,6 @@ Window::Window(const Settings &settings, const QDir &directory, bool benchmark, 
 
     view.setItemDelegate(new Delegate(&completerModel, undoStack, this));
     view.setFont(font);
-    if (! settings.resizableColumns) {
-        view.horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
-    }
     view.horizontalHeader()->setFont(font);
     view.verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
     view.verticalHeader()->setDefaultSectionSize(settings.thumbnailSize + 4);
@@ -318,6 +315,8 @@ void Window::modelLoadingDone(qint64 dbFileSize)
         for (int i = 0 ; i < FirstNameCol ; i++) {
             view.horizontalHeader()->setSectionResizeMode(i, QHeaderView::ResizeToContents);
         }
+    } else {
+        view.horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
     }
 
     if (dbFileSize < 0) {
