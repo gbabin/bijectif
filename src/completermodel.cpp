@@ -51,10 +51,10 @@ void CompleterModel::insert(const QString &item)
         ++counts[item];
     } else {
         counts.insert(item, 1);
-        QStringList::const_iterator it = std::lower_bound(items.cbegin(), items.cend(), item,
-                                                          [](const QString &a, const QString &b) {
-                                                              return QString::compare(a, b, Qt::CaseInsensitive) < 0;
-                                                          });
+        const QStringList::const_iterator it = std::lower_bound(items.cbegin(), items.cend(), item,
+                                                                [](const QString &a, const QString &b) {
+                                                                    return QString::compare(a, b, Qt::CaseInsensitive) < 0;
+                                                                });
         beginResetModel();
         items.insert(it, item);
         endResetModel();
@@ -66,10 +66,10 @@ void CompleterModel::remove(const QString &item)
     if (counts.contains(item)) {
         if (--counts[item] == 0) {
             counts.remove(item);
-            QStringList::const_iterator it = std::lower_bound(items.cbegin(), items.cend(), item,
-                                                              [](const QString &a, const QString &b) {
-                                                                  return QString::compare(a, b, Qt::CaseInsensitive) < 0;
-                                                              });
+            const QStringList::const_iterator it = std::lower_bound(items.cbegin(), items.cend(), item,
+                                                                    [](const QString &a, const QString &b) {
+                                                                        return QString::compare(a, b, Qt::CaseInsensitive) < 0;
+                                                                    });
             beginResetModel();
             items.erase(it);
             endResetModel();

@@ -43,8 +43,8 @@ ModelItem::ModelItem(const Settings &settings,
     , possibleLocation(possibleLocation)
     , possibleThumbnail(possibleThumbnail)
 {
-    QString basename = path.completeBaseName();
-    qsizetype index_sep = basename.indexOf(u" - "_s);
+    const QString basename = path.completeBaseName();
+    const qsizetype index_sep = basename.indexOf(u" - "_s);
 
     if (index_sep != -1) {
         id = basename.sliced(0, index_sep);
@@ -79,7 +79,7 @@ QString ModelItem::getTooltip() const
     } else if (Loader::videoExtensions.contains(QFileInfo(getPath()).suffix().toLower())) {
         return tr("Video");
     } else {
-        QString path = getPath();
+        const QString path = getPath();
         QString* imgBase64 = thumbnailCache.object(path);
         if (imgBase64 == nullptr) {
             QImageReader reader(path);
@@ -155,7 +155,7 @@ bool ModelItem::setName(int index, const QString &name)
 {
     if (! isValidPathChars(name)) return false;
 
-    QString nameT = name.trimmed();
+    const QString nameT = name.trimmed();
 
     if (nameT.isEmpty()) return false;
     if (index < names.size() && names.at(index) == nameT) return false;
@@ -201,7 +201,7 @@ bool ModelItem::insertName(int index, const QString &name)
 {
     if (! isValidPathChars(name)) return false;
 
-    QString nameT = name.trimmed();
+    const QString nameT = name.trimmed();
 
     if (nameT.isEmpty()) return false;
     if (index > names.size()) return false;

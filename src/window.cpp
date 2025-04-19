@@ -249,7 +249,7 @@ QFileInfoList Window::listFiles(const QDir &dir)
 }
 
 QString Window::getThumbnailsDatabasePath() {
-    QDir dbDir(QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation));
+    const QDir dbDir(QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation));
     if (! dbDir.exists()) {
         if (! QDir().mkpath(dbDir.path())) {
             qWarning() << "Thumbnails database folder creation failed: " << dbDir;
@@ -261,7 +261,7 @@ QString Window::getThumbnailsDatabasePath() {
 
 void Window::modelLoadingStart()
 {
-    QFileInfoList files = listFiles(dir);
+    const QFileInfoList files = listFiles(dir);
 
     if (files.isEmpty()) return;
 
@@ -355,11 +355,11 @@ void Window::selectionChanged(const QItemSelection &selected, const QItemSelecti
         deleteAct->setDisabled(true);
         insertAct->setDisabled(true);
     } else {
-        bool anyId = std::any_of(selectedIndexes.cbegin(), selectedIndexes.cend(),
-                                 [](const QModelIndex &index){ return index.column() == IdentifierCol; });
+        const bool anyId = std::any_of(selectedIndexes.cbegin(), selectedIndexes.cend(),
+                                       [](const QModelIndex &index){ return index.column() == IdentifierCol; });
 
-        bool anyEmpty = std::any_of(selectedIndexes.cbegin(), selectedIndexes.cend(),
-                                    [this](const QModelIndex &index){ return view.model()->data(index).isNull(); });
+        const bool anyEmpty = std::any_of(selectedIndexes.cbegin(), selectedIndexes.cend(),
+                                          [this](const QModelIndex &index){ return view.model()->data(index).isNull(); });
 
         QString mode = u"plain"_s;
         pasteAct->setEnabled((! QApplication::clipboard()->text(mode).trimmed().isEmpty())

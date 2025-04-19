@@ -73,7 +73,7 @@ void Model::load(const QFileInfoList &files, const QString &dbPath)
 
         // retrieve thumbnails & locations
         for (const QFileInfo &file : files) {
-            qint64 timestamp = file.lastModified().toSecsSinceEpoch();
+            const qint64 timestamp = file.lastModified().toSecsSinceEpoch();
             query.prepare(u"SELECT timestamp, latitude, longitude, thumbnail "
                            "FROM thumbnails2 "
                            "WHERE path = :path AND timestamp >= :timestamp"_s);
@@ -96,7 +96,7 @@ void Model::load(const QFileInfoList &files, const QString &dbPath)
                 std::optional<QPixmap> possibleThumbnail;
                 if (! query.value(u"thumbnail"_s).isNull())
                 {
-                    QByteArray bytes = query.value(u"thumbnail"_s).toByteArray();
+                    const QByteArray bytes = query.value(u"thumbnail"_s).toByteArray();
                     QPixmap pixmap = QPixmap();
                     pixmap.loadFromData(bytes);
                     possibleThumbnail.emplace(pixmap);
@@ -158,9 +158,10 @@ void Model::load(const QFileInfoList &files, const QString &dbPath)
             images.append(item.modelItem);
 
             QVariant latitude, longitude, thumbnail;
-            if (item.modelItem->getLocation().has_value()) {
-                latitude = item.modelItem->getLocation()->getLatitude();
-                longitude = item.modelItem->getLocation()->getLongitude();
+            const std::optional<Location> &location = item.modelItem->getLocation();
+            if (location.has_value()) {
+                latitude = location->getLatitude();
+                longitude = location->getLongitude();
             }
             if (item.thumbnail != nullptr)
                 thumbnail = *item.thumbnail;
@@ -348,7 +349,7 @@ bool Model::setData(const QModelIndex &index, const QVariant &value, int role)
         }
     }
     else if (index.column() >= FirstNameCol) {
-        int nameIdx = index.column() - FirstNameCol;
+        const int nameIdx = index.column() - FirstNameCol;
 
         if (role == Qt::EditRole) {
             QString beforeStr;

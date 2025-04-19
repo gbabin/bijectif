@@ -91,7 +91,7 @@ int main(int argc, char *argv[])
     parser.addHelpOption();
     parser.addVersionOption();
     parser.addPositionalArgument(u"directory"_s, QApplication::translate("main", "Directory to open."));
-    QCommandLineOption benchmarkOption(u"benchmark"_s, QApplication::translate("main", "Benchmark model load."));
+    const QCommandLineOption benchmarkOption(u"benchmark"_s, QApplication::translate("main", "Benchmark model load."));
     parser.addOption(benchmarkOption);
     parser.process(app);
     std::optional<QString> possibleDirPath;

@@ -52,7 +52,7 @@ public:
     const bool showCommandHistory;
 
 private:
-    Settings(const QSettings &settings);
+    explicit Settings(const QSettings &settings);
 };
 
 #endif // SETTINGS_H

@@ -67,7 +67,7 @@ std::optional<QPixmap> Loader::computeImageThumbnail(const Settings &settings, c
     buffer.open(QIODevice::ReadOnly);
     QImageReader reader(&buffer);
     reader.setAutoTransform(true);
-    QImage image = reader.read();
+    const QImage image = reader.read();
     if (image.isNull()) {
         qWarning() << "Image loading failed:" << filePath;
     } else {
@@ -112,7 +112,7 @@ std::optional<QPixmap> Loader::computeVideoThumbnail(const Settings &settings, c
                          });
         mediaPlayer.setSource(QUrl::fromLocalFile(filePath));
         QThreadPool::globalInstance()->releaseThread();
-        int returnCode = eventLoop.exec();
+        const int returnCode = eventLoop.exec();
         QThreadPool::globalInstance()->reserveThread();
         mediaPlayer.disconnect();
         if (returnCode != 0) {
@@ -132,7 +132,7 @@ std::optional<QPixmap> Loader::computeVideoThumbnail(const Settings &settings, c
                          });
         mediaPlayer.play();
         QThreadPool::globalInstance()->releaseThread();
-        int returnCode = eventLoop.exec();
+        const int returnCode = eventLoop.exec();
         QThreadPool::globalInstance()->reserveThread();
         videoSink.disconnect();
         mediaPlayer.stop();
@@ -165,7 +165,7 @@ std::optional<Location> Loader::readLocation(const QString &filePath, const QByt
     if (ed == nullptr) {
         qInfo() << "Image EXIF reading data failed:" << filePath;
     } else {
-        ExifByteOrder bo = exif_data_get_byte_order(ed);
+        const ExifByteOrder bo = exif_data_get_byte_order(ed);
         ExifEntry *entry = nullptr;
 
         entry = exif_content_get_entry(ed->ifd[EXIF_IFD_GPS], static_cast<ExifTag>(EXIF_TAG_GPS_LATITUDE));
@@ -178,7 +178,7 @@ std::optional<Location> Loader::readLocation(const QString &filePath, const QByt
                 if (entry->components != 3) {
                     qWarning() << "Image EXIF wrong GPS latitude components count:" << filePath;
                 } else {
-                    unsigned char rational_size = exif_format_get_size(EXIF_FORMAT_RATIONAL);
+                    const unsigned char rational_size = exif_format_get_size(EXIF_FORMAT_RATIONAL);
                     ExifRational r;
                     double degrees = 0.0, minutes = 0.0, seconds = 0.0;
                     r = exif_get_rational(entry->data, bo);
@@ -222,7 +222,7 @@ std::optional<Location> Loader::readLocation(const QString &filePath, const QByt
                 if (entry->components != 3) {
                     qWarning() << "Image EXIF wrong GPS longitude components count:" << filePath;
                 } else {
-                    unsigned char rational_size = exif_format_get_size(EXIF_FORMAT_RATIONAL);
+                    const unsigned char rational_size = exif_format_get_size(EXIF_FORMAT_RATIONAL);
                     ExifRational r;
                     double degrees = 0.0, minutes = 0.0, seconds = 0.0;
                     r = exif_get_rational(entry->data, bo);
