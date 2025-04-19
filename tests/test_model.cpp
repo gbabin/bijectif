@@ -1,4 +1,4 @@
-// Copyright (C) 2023, 2024 gbabin
+// Copyright (C) 2023 gbabin
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include "test_model.h"
