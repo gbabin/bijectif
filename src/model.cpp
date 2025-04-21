@@ -123,6 +123,7 @@ void Model::load(const QFileInfoList &files, const QString &dbPath)
         // compute new thumbnails
         const qint64 timestamp = QDateTime::currentSecsSinceEpoch();
         QList<NewItem> newThumbnails;
+        newThumbnails.reserve(newFiles.size());
         QMutex newThumbnailsMutex;
         try {
             QtConcurrent::blockingMap(std::as_const(newFiles),
