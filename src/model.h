@@ -44,7 +44,8 @@ public:
 
 Q_SIGNALS:
     void loadingProgressed(int step = 1);
-    void loadingFinished(qint64 dbFileSize = -1);
+    void loadingFinished(qint64 dbFileSize);
+    void tooManyParts(const QString &path);
 
 private:
     const Settings &settings;

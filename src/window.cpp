@@ -278,6 +278,9 @@ void Window::modelLoadingStart()
     connect(&model, &Model::loadingFinished,
             this, &Window::modelLoadingDone);
 
+    connect(&model, &Model::tooManyParts,
+            this, &Window::modelTooManyParts);
+
     future = QtConcurrent::run([this, files] {
         model.load(files, getThumbnailsDatabasePath());
     });
@@ -292,16 +295,7 @@ void Window::modelLoadingDone(qint64 dbFileSize)
 {
     progressDialog->cancel();
 
-    try {
-        future.waitForFinished();
-    } catch (TooManyPartsError &e) {
-        QMessageBox::critical(nullptr,
-                              tr("Too many name parts"),
-                              tr("The file \"%1\" has too many parts in its name.\n"
-                                 "The maximum number allowed is %2.")
-                                  .arg(e.path, QString::number(settings.maxNames)));
-        QApplication::exit(2);
-    }
+    future.waitForFinished();
 
     if (benchmark)
         QApplication::exit();
@@ -319,14 +313,9 @@ void Window::modelLoadingDone(qint64 dbFileSize)
         view.horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
     }
 
-    if (dbFileSize < 0) {
-        statusBar()->showMessage(tr("Load completed"),
-                                 3000);
-    } else {
-        statusBar()->showMessage(tr("Load completed (Thumbnails database: %1)")
-                                     .arg(locale().formattedDataSize(dbFileSize)),
-                                 3000);
-    }
+    statusBar()->showMessage(tr("Load completed (Thumbnails database: %1)")
+                                 .arg(locale().formattedDataSize(dbFileSize)),
+                             3000);
 
     connect(view.selectionModel(), &QItemSelectionModel::selectionChanged,
             this, &Window::selectionChanged);
@@ -337,6 +326,17 @@ void Window::modelLoadingDone(qint64 dbFileSize)
     db = QSqlDatabase::addDatabase(u"QSQLITE"_s);
     db.setDatabaseName(getThumbnailsDatabasePath());
     db.open();
+}
+
+void Window::modelTooManyParts(const QString &path)
+{
+    QMessageBox::critical(this,
+                          tr("Too many name parts"),
+                          tr("The file \"%1\" has too many parts in its name.\n"
+                             "The maximum number allowed is %2.\n"
+                             "It will been ignored.")
+                              .arg(QDir::toNativeSeparators(path),
+                                   QString::number(settings.maxNames)));
 }
 
 void Window::selectionChanged(const QItemSelection &selected, const QItemSelection &deselected)

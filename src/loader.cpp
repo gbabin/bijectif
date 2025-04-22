@@ -8,7 +8,7 @@
 #include <QBuffer>
 #include <QImageReader>
 #include <QMediaPlayer>
-#include <QThreadPool>
+#include <QQueue>
 #include <QTimer>
 #include <QVideoFrame>
 #include <QVideoSink>
@@ -31,6 +31,57 @@ const QStringList Loader::videoExtensions = {u"avi"_s,
                                              u"mts"_s,
                                              u"vob"_s,
                                              u"wmv"_s};
+
+Loader::Loader(QQueue<QFileInfo> &entries, QMutex &entriesMutex,
+               QList<NewItem> &newThumbnails, QMutex &newThumbnailsMutex,
+               const Settings &settings, QCache<QString, QString> &thumbnailCache,
+               QObject *parent)
+    : QObject(parent)
+    , entries(entries)
+    , entriesMutex(entriesMutex)
+    , newThumbnails(newThumbnails)
+    , newThumbnailsMutex(newThumbnailsMutex)
+    , settings(settings)
+    , thumbnailCache(thumbnailCache)
+{
+}
+
+void Loader::loadAll()
+{
+    Q_FOREVER {
+        entriesMutex.lock();
+        if (entries.isEmpty()) {
+            entriesMutex.unlock();
+            break;
+        }
+        const QFileInfo entry = entries.dequeue();
+        entriesMutex.unlock();
+
+        auto [possibleLocation, possibleThumbnail] = load(settings, entry);
+        ModelItem *item = nullptr;
+        try {
+            item = new ModelItem(settings, thumbnailCache, entry, possibleLocation, possibleThumbnail);
+        } catch (TooManyPartsError &e) {
+            qCritical() << "Too many name parts:" << e.path;
+            Q_EMIT tooManyParts(e.path);
+            continue;
+        }
+        QByteArray *bytes = nullptr;
+        if (possibleThumbnail.has_value()) {
+            bytes = new QByteArray();
+            QBuffer buffer(bytes);
+            buffer.open(QIODevice::WriteOnly);
+            possibleThumbnail->save(&buffer, "PNG");
+            buffer.close();
+        }
+        newThumbnailsMutex.lock();
+        newThumbnails.append(NewItem{entry.filePath(), item, bytes});
+        newThumbnailsMutex.unlock();
+        Q_EMIT loadingProgressed(10);
+    }
+
+    Q_EMIT finished();
+}
 
 std::pair<std::optional<Location>, std::optional<QPixmap>> Loader::load(const Settings &settings, const QFileInfo &path)
 {
@@ -111,9 +162,7 @@ std::optional<QPixmap> Loader::computeVideoThumbnail(const Settings &settings, c
                              }
                          });
         mediaPlayer.setSource(QUrl::fromLocalFile(filePath));
-        QThreadPool::globalInstance()->releaseThread();
         const int returnCode = eventLoop.exec();
-        QThreadPool::globalInstance()->reserveThread();
         mediaPlayer.disconnect();
         if (returnCode != 0) {
             qWarning() << "Video loading failed (setSource):" << filePath << mediaPlayer.mediaStatus() << mediaPlayer.error() << mediaPlayer.errorString();
@@ -131,9 +180,7 @@ std::optional<QPixmap> Loader::computeVideoThumbnail(const Settings &settings, c
                              eventLoop.exit();
                          });
         mediaPlayer.play();
-        QThreadPool::globalInstance()->releaseThread();
         const int returnCode = eventLoop.exec();
-        QThreadPool::globalInstance()->reserveThread();
         videoSink.disconnect();
         mediaPlayer.stop();
         if (returnCode != 0) {

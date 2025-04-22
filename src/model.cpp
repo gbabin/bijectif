@@ -5,11 +5,13 @@
 #include "location.h"
 #include "loader.h"
 
+#include <QEventLoop>
 #include <QMutex>
+#include <QQueue>
 #include <QSqlDatabase>
 #include <QSqlError>
 #include <QSqlQuery>
-#include <QtConcurrent>
+#include <QThread>
 
 using namespace Qt::Literals::StringLiterals;
 
@@ -68,7 +70,7 @@ void Model::load(const QFileInfoList &files, const QString &dbPath)
             qWarning() << "Thumbnails database table (v2) creation failure:" << query.lastError();
         }
 
-        QFileInfoList newFiles;
+        QQueue<QFileInfo> newFiles;
         newFiles.reserve(files.size());
 
         // retrieve thumbnails & locations
@@ -114,39 +116,52 @@ void Model::load(const QFileInfoList &files, const QString &dbPath)
 
         newFiles.squeeze();
 
-        struct NewItem {
-            QString filePath;
-            ModelItem* modelItem;
-            QByteArray* thumbnail;
-        } ;
-
         // compute new thumbnails
         const qint64 timestamp = QDateTime::currentSecsSinceEpoch();
         QList<NewItem> newThumbnails;
-        newThumbnails.reserve(newFiles.size());
-        QMutex newThumbnailsMutex;
-        try {
-            QtConcurrent::blockingMap(std::as_const(newFiles),
-                                      [this, &newThumbnailsMutex, &newThumbnails](const QFileInfo & entry){
-                                          auto [possibleLocation, possibleThumbnail] = Loader::load(settings, entry);
-                                          ModelItem *item = new ModelItem(settings, thumbnailCache, entry, possibleLocation, possibleThumbnail);
-                                          QByteArray *bytes = nullptr;
-                                          if (item->getThumbnail().has_value()) {
-                                              bytes = new QByteArray();
-                                              QBuffer buffer(bytes);
-                                              buffer.open(QIODevice::WriteOnly);
-                                              item->getThumbnail()->save(&buffer, "PNG");
-                                              buffer.close();
-                                          }
-                                          newThumbnailsMutex.lock();
-                                          newThumbnails.append(NewItem{entry.filePath(), item, bytes});
-                                          newThumbnailsMutex.unlock();
-                                          Q_EMIT loadingProgressed(10);
-                                      });
-        } catch (TooManyPartsError &e) {
-            qCritical() << "Too many name parts:" << e.path;
-            Q_EMIT loadingFinished();
-            throw;
+        {
+            newThumbnails.reserve(newFiles.size());
+
+            QMutex newFilesMutex;
+            QMutex newThumbnailsMutex;
+            QVector<QThread*> threads;
+            QVector<Loader*> loaders;
+            QEventLoop eventLoop;
+            QAtomicInt finishedCount = 0;
+            const int threadCount = QThread::idealThreadCount();
+
+            threads.reserve(threadCount);
+            loaders.reserve(threadCount);
+
+            for (int i = 0 ; i < threadCount ; i++) {
+                QThread* thread = new QThread;
+                Loader* loader = new Loader(newFiles, newFilesMutex,
+                                            newThumbnails, newThumbnailsMutex,
+                                            settings, thumbnailCache);
+                loader->moveToThread(thread);
+
+                connect(thread, &QThread::started, loader, &Loader::loadAll);
+                connect(thread, &QThread::finished, thread, &QThread::deleteLater);
+
+                connect(loader, &Loader::loadingProgressed, this, &Model::loadingProgressed);
+                connect(loader, &Loader::tooManyParts, this, &Model::tooManyParts);
+                connect(loader, &Loader::finished, thread, &QThread::quit);
+                connect(loader, &Loader::finished, loader, &Loader::deleteLater);
+                connect(loader, &Loader::finished,
+                        this,
+                        [&eventLoop, &finishedCount, threadCount]() {
+                            if (++finishedCount == threadCount) {
+                                eventLoop.quit();
+                            }
+                        });
+
+                threads.append(thread);
+                loaders.append(loader);
+
+                thread->start();
+            }
+
+            eventLoop.exec();
         }
 
         // store new thumbnails
