@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include "modelitem.h"
+
 #include "loader.h"
 
 #include <libexif/exif-data.h>
@@ -48,7 +49,7 @@ ModelItem::ModelItem(const Settings &settings,
 
     if (index_sep != -1) {
         id = basename.sliced(0, index_sep);
-        names = basename.sliced(index_sep+3).split(u", "_s, Qt::SkipEmptyParts);
+        names = basename.sliced(index_sep + 3).split(u", "_s, Qt::SkipEmptyParts);
         if (names.size() > settings.maxNames) {
             throw TooManyPartsError(path.filePath());
         }

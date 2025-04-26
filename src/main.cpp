@@ -124,7 +124,7 @@ int main(int argc, char *argv[])
 
     Window window(settings, directory, parser.isSet(benchmarkOption));
     window.show();
-    
+
     QTimer::singleShot(0, &window, &Window::modelLoadingStart);
 
     return QApplication::exec();

@@ -2,8 +2,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include "model.h"
-#include "location.h"
+
 #include "loader.h"
+#include "location.h"
 
 #include <QEventLoop>
 #include <QMutex>
@@ -299,8 +300,8 @@ QVariant Model::data(const QModelIndex &index, int role) const
                 return tr("%1 file").arg(images.at(index.row())->getExtension().toUpper());
         } else if (col == IdentifierCol) {
             return images.at(index.row())->getId();
-        } else if (col >= FirstNameCol){
-            col-=FirstNameCol;
+        } else if (col >= FirstNameCol) {
+            col -= FirstNameCol;
             if (col >= images.at(index.row())->getNamesSize()) {
                 return QVariant();
             } else {

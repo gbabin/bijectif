@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include "command_edit.h"
+
 #include "model.h"
 
 EditCommand::EditCommand(QString text, QAbstractItemModel *model, const QModelIndex &index, QUndoCommand *parent)

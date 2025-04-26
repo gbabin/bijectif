@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include "command_insert.h"
+
 #include "model.h"
 
 InsertCommand::InsertCommand(QString text, QAbstractItemModel *model, const QModelIndex &index, QUndoCommand *parent)

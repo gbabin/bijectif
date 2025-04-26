@@ -2,11 +2,12 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include "test_model.h"
+
 #include "../src/command_delete.h"
 #include "../src/command_edit.h"
 #include "../src/command_id.h"
-#include "../src/window.h"
 #include "../src/model.h"
+#include "../src/window.h"
 
 #include <QFileInfoList>
 #include <QSignalSpy>

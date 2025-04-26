@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include "window.h"
+
 #include "command_delete.h"
 #include "command_insert.h"
 #include "command_paste.h"
@@ -248,7 +249,8 @@ QFileInfoList Window::listFiles(const QDir &dir)
                              QDir::Name | QDir::LocaleAware);
 }
 
-QString Window::getThumbnailsDatabasePath() {
+QString Window::getThumbnailsDatabasePath()
+{
     const QDir dbDir(QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation));
     if (! dbDir.exists()) {
         if (! QDir().mkpath(dbDir.path())) {

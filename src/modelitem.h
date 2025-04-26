@@ -4,8 +4,8 @@
 #ifndef MODELITEM_H
 #define MODELITEM_H
 
-#include "settings.h"
 #include "location.h"
+#include "settings.h"
 
 #include <QDir>
 #include <QException>

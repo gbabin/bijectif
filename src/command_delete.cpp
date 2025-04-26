@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include "command_delete.h"
+
 #include "model.h"
 
 DeleteCommand::DeleteCommand(QAbstractItemModel *model, const QModelIndex &index, QUndoCommand *parent)

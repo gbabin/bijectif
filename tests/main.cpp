@@ -1,12 +1,12 @@
 // Copyright (C) 2023 gbabin
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include <QApplication>
-#include <QtTest>
-
 #include "test_model.h"
 #include "test_row.h"
 #include "../src/settings.h"
+
+#include <QApplication>
+#include <QtTest>
 
 int main(int argc, char *argv[]) {
     QApplication app(argc, argv);

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include "command_paste.h"
+
 #include "model.h"
 
 PasteCommand::PasteCommand(QString text, QAbstractItemModel *model, const QModelIndex &index, QUndoCommand *parent)

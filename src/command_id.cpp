@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include "command_id.h"
+
 #include "model.h"
 
 ChangeIdCommand::ChangeIdCommand(QString text, QAbstractItemModel *model, const QModelIndex &index, QUndoCommand *parent)

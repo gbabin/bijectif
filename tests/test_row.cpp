@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include "test_row.h"
+
 #include "../src/command_delete.h"
 #include "../src/command_edit.h"
 #include "../src/command_insert.h"
@@ -10,8 +11,8 @@
 #include "../src/window.h"
 
 #include <QFileInfoList>
-#include <QSortFilterProxyModel>
 #include <QSignalSpy>
+#include <QSortFilterProxyModel>
 #include <QStandardPaths>
 
 RowTest::RowTest(const Settings &settings, QObject *parent)
