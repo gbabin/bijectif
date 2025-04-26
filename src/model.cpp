@@ -174,8 +174,7 @@ void Model::load(const QFileInfoList &files, const QString &dbPath)
             images.append(item.modelItem);
 
             QVariant latitude, longitude, thumbnail;
-            const std::optional<Location> &location = item.modelItem->getLocation();
-            if (location.has_value()) {
+            if (const std::optional<Location> &location = item.modelItem->getLocation()) {
                 latitude = location->getLatitude();
                 longitude = location->getLongitude();
             }
@@ -334,8 +333,7 @@ QVariant Model::data(const QModelIndex &index, int role) const
         }
     } else if (role == MapUrlRole) {
         if (index.column() == MapCol) {
-            const std::optional<Location>& location = images.at(index.row())->getLocation();
-            if (location.has_value())
+            if (const std::optional<Location> &location = images.at(index.row())->getLocation())
                 return location->getUrl();
             return QVariant();
         } else {
