@@ -79,7 +79,7 @@ void RowTest::initTestCase()
     tableModel->load(files, dbPath);
 
     QVERIFY(QFile::exists(dbPath));
-    db = QSqlDatabase::addDatabase("QSQLITE");
+    db = QSqlDatabase::addDatabase("QSQLITE", "update");
     db.setDatabaseName(dbPath);
     QVERIFY(db.open());
 
@@ -473,8 +473,7 @@ void RowTest::cleanupTestCase()
     db.close();
     db = QSqlDatabase();
 
-    for (const QString &name : QSqlDatabase::connectionNames())
-        QSqlDatabase::removeDatabase(name);
+    QSqlDatabase::removeDatabase("update");
 
     if (rootDir.path().startsWith("/tmp/"))
         rootDir.removeRecursively();

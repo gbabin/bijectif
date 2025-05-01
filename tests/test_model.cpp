@@ -59,7 +59,7 @@ void ModelTest::test_1()
     proxyModel.sort(IdentifierCol, Qt::AscendingOrder);
 
     QVERIFY(QFile::exists(dbPath));
-    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
+    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", "update");
     db.setDatabaseName(dbPath);
     QVERIFY(db.open());
 
@@ -191,8 +191,8 @@ void ModelTest::test_1()
 
 void ModelTest::cleanupTestCase()
 {
-    for (const QString &name : QSqlDatabase::connectionNames())
-        QSqlDatabase::removeDatabase(name);
+    QSqlDatabase::removeDatabase("update");
+
     if (rootDir.path().startsWith("/tmp/"))
         rootDir.removeRecursively();
 }

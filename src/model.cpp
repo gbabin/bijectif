@@ -47,7 +47,7 @@ void Model::load(const QFileInfoList &files, const QString &dbPath)
     }
 
     {
-        QSqlDatabase db = QSqlDatabase::addDatabase(u"QSQLITE"_s);
+        QSqlDatabase db = QSqlDatabase::addDatabase(u"QSQLITE"_s, u"load"_s);
         db.setDatabaseName(dbPath);
         if (db.open()) {
             qInfo() << "Thumbnails database opened";
@@ -221,8 +221,7 @@ void Model::load(const QFileInfoList &files, const QString &dbPath)
         db.close();
     }
 
-    for (const QString &name : QSqlDatabase::connectionNames())
-        QSqlDatabase::removeDatabase(name);
+    QSqlDatabase::removeDatabase(u"load"_s);
 
     images.squeeze();
 

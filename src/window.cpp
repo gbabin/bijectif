@@ -325,7 +325,7 @@ void Window::modelLoadingDone(qint64 dbFileSize)
     connect(view.model(), &QAbstractItemModel::dataChanged,
             this, &Window::dataChanged);
 
-    db = QSqlDatabase::addDatabase(u"QSQLITE"_s);
+    db = QSqlDatabase::addDatabase(u"QSQLITE"_s, u"update"_s);
     db.setDatabaseName(getThumbnailsDatabasePath());
     db.open();
 }

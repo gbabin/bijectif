@@ -266,7 +266,8 @@ bool ModelItem::syncFilename(const QString &oldPath, const QString &newPath)
 {
     if (QFile::rename(oldPath, newPath)) {
         QFile::rename(oldPath + u".dop"_s, newPath + u".dop"_s); // Rename DxO PhotoLab sidecar file if possible
-        QSqlQuery query;
+        const QSqlDatabase db = QSqlDatabase::database(u"update"_s, false);
+        QSqlQuery query(db);
         query.prepare(u"UPDATE thumbnails2 "
                        "SET path = :newPath "
                        "WHERE path = :oldPath"_s);
