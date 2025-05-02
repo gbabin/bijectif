@@ -273,7 +273,9 @@ bool ModelItem::syncFilename(const QString &oldPath, const QString &newPath)
                        "WHERE path = :oldPath"_s);
         query.bindValue(u":newPath"_s, newPath);
         query.bindValue(u":oldPath"_s, oldPath);
-        query.exec();
+        if (! query.exec()) {
+            qWarning() << "Failed to update database:" << newPath;
+        }
         return true;
     } else {
         QMessageBox::critical(nullptr,
