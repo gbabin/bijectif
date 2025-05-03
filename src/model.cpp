@@ -37,7 +37,7 @@ Model::~Model()
 
 void Model::load(const QFileInfoList &files, const QString &dbPath)
 {
-    images.reserve(files.count());
+    images.reserve(files.size());
 
     // prepare database
     if (QFile(dbPath).exists()) {
@@ -225,7 +225,7 @@ void Model::load(const QFileInfoList &files, const QString &dbPath)
 
     images.squeeze();
 
-    qint64 dbFileSize = QFile(dbPath).size();
+    const qint64 dbFileSize = QFile(dbPath).size();
     qInfo() << "Thumbnails database file size:" << dbFileSize << "bytes";
 
     completerModel->insert(images);
@@ -255,7 +255,7 @@ int Model::rowCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent)
 
-    return images.count();
+    return images.size();
 }
 
 int Model::columnCount(const QModelIndex &parent) const
@@ -284,7 +284,7 @@ QVariant Model::data(const QModelIndex &index, int role) const
     if (!index.isValid())
         return QVariant();
 
-    if (index.row() >= images.count())
+    if (index.row() >= images.size())
         return QVariant();
 
     if (index.column() >= settings.maxNames + FirstNameCol)

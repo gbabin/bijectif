@@ -225,7 +225,7 @@ std::optional<Location> Loader::readLocation(const QString &filePath, const QByt
                 if (entry->components != 3) {
                     qWarning() << "Image EXIF wrong GPS latitude components count:" << filePath;
                 } else {
-                    const unsigned char rational_size = exif_format_get_size(EXIF_FORMAT_RATIONAL);
+                    const ptrdiff_t rational_size = exif_format_get_size(EXIF_FORMAT_RATIONAL);
                     ExifRational r;
                     double degrees = 0.0, minutes = 0.0, seconds = 0.0;
                     r = exif_get_rational(entry->data, bo);
@@ -269,7 +269,7 @@ std::optional<Location> Loader::readLocation(const QString &filePath, const QByt
                 if (entry->components != 3) {
                     qWarning() << "Image EXIF wrong GPS longitude components count:" << filePath;
                 } else {
-                    const unsigned char rational_size = exif_format_get_size(EXIF_FORMAT_RATIONAL);
+                    const ptrdiff_t rational_size = exif_format_get_size(EXIF_FORMAT_RATIONAL);
                     ExifRational r;
                     double degrees = 0.0, minutes = 0.0, seconds = 0.0;
                     r = exif_get_rational(entry->data, bo);
