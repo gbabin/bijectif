@@ -380,7 +380,7 @@ void Window::selectionChanged(const QItemSelection &selected, const QItemSelecti
                                || anyId
                                || std::any_of(selectedIndexes.cbegin(), selectedIndexes.cend(),
                                               [this](const QModelIndex &index){
-                                                  return ! view.model()->data(index.siblingAtColumn(settings.maxNames + 1)).isNull(); }));
+                                                  return ! view.model()->data(index.siblingAtColumn(FirstNameCol + settings.maxNames - 1)).isNull(); }));
     }
 }
 
@@ -424,7 +424,7 @@ void Window::copySelection()
 
     if (selection->selectedIndexes().size() == 1) {
         const QModelIndex index = selection->selectedIndexes().first();
-        if (index.column() > 0) {
+        if (index.column() == IdentifierCol || index.column() >= FirstNameCol) {
             const QVariant data = index.data(Qt::DisplayRole);
             if (data.userType() == QMetaType::QString) {
                 QApplication::clipboard()->setText(data.toString());
@@ -439,7 +439,7 @@ void Window::copySelection()
                              || (a.column() == b.column() && a.row() < b.row()); });
         QStringList names;
         for (const QModelIndex index : std::as_const(indexes)) {
-            if (index.column() > 1) {
+            if (index.column() >= FirstNameCol) {
                 const QVariant data = index.data(Qt::DisplayRole);
                 if (data.userType() == QMetaType::QString) {
                     names.append(data.toString());

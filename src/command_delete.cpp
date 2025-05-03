@@ -12,8 +12,8 @@ DeleteCommand::DeleteCommand(QAbstractItemModel *model, const QModelIndex &index
     , oldValue(index.data().toString())
 {
     setText(QObject::tr("Delete (%1) [%2] \"%3\"\n")
-                .arg(model->data(index.siblingAtColumn(1)).toString(),
-                     QString::number(index.column() - 1),
+                .arg(model->data(index.siblingAtColumn(IdentifierCol)).toString(),
+                     QString::number(index.column() - FirstNameCol + 1),
                      oldValue));
 }
 

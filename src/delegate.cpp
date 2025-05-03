@@ -5,6 +5,7 @@
 
 #include "command_edit.h"
 #include "command_id.h"
+#include "model.h"
 
 #include <QCompleter>
 #include <QItemEditorFactory>
@@ -22,7 +23,7 @@ QWidget* Delegate::createEditor(QWidget *parent, const QStyleOptionViewItem &opt
 {
     QWidget* editor = QStyledItemDelegate::createEditor(parent, option, index);
 
-    if (index.column() > 1) {
+    if (index.column() >= FirstNameCol) {
         if (QLineEdit* lineEdit = qobject_cast<QLineEdit*>(editor)) {
             QCompleter *completer = new QCompleter(completerModel, lineEdit);
             completer->setCaseSensitivity(Qt::CaseInsensitive);
@@ -44,7 +45,7 @@ void Delegate::setModelData(QWidget *editor, QAbstractItemModel *model, const QM
     if (!name.isEmpty()) {
         const QVariant v = editor->property(name.constData());
         if (v.userType() == QMetaType::QString) {
-            if (index.column() == 1)
+            if (index.column() == IdentifierCol)
                 undoStack->push(new ChangeIdCommand(v.toString(), model, index));
             else
                 undoStack->push(new EditCommand(v.toString(), model, index));

@@ -384,7 +384,7 @@ bool Model::setData(const QModelIndex &index, const QVariant &value, int role)
             if (images.at(index.row())->insertName(nameIdx, valueStr)) {
                 const QString afterStr = images.at(index.row())->getName(nameIdx);
                 completerModel->insert(afterStr);
-                Q_EMIT dataChanged(index, index.siblingAtColumn(settings.maxNames + 1));
+                Q_EMIT dataChanged(index, index.siblingAtColumn(FirstNameCol + settings.maxNames - 1));
                 return true;
             }
         }
@@ -395,7 +395,7 @@ bool Model::setData(const QModelIndex &index, const QVariant &value, int role)
             if (images.at(index.row())->deleteName(nameIdx)) {
                 if (! beforeStr.isEmpty())
                     completerModel->remove(beforeStr);
-                Q_EMIT dataChanged(index, index.siblingAtColumn(settings.maxNames + 1));
+                Q_EMIT dataChanged(index, index.siblingAtColumn(FirstNameCol + settings.maxNames - 1));
                 return true;
             }
         }

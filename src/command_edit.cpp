@@ -13,8 +13,8 @@ EditCommand::EditCommand(QString text, QAbstractItemModel *model, const QModelIn
     , newValue(std::move(text))
 {
     setText(QObject::tr("Edit (%1) [%2] \"%3\" > \"%4\"\n")
-                .arg(model->data(index.siblingAtColumn(1)).toString(),
-                     QString::number(index.column() - 1),
+                .arg(model->data(index.siblingAtColumn(IdentifierCol)).toString(),
+                     QString::number(index.column() - FirstNameCol + 1),
                      oldValue,
                      newValue));
 }
