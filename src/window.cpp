@@ -17,11 +17,13 @@
 #include <QLabel>
 #include <QMenuBar>
 #include <QMessageBox>
+#include <QSortFilterProxyModel>
 #include <QSpacerItem>
+#include <QStandardPaths>
 #include <QStatusBar>
 #include <QUndoView>
 #include <QVBoxLayout>
-#include <QtConcurrent>
+#include <QtConcurrentRun>
 
 using namespace Qt::Literals::StringLiterals;
 
