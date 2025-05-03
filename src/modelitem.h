@@ -8,15 +8,16 @@
 #include "settings.h"
 
 #include <QDir>
-#include <QException>
 #include <QPixmap>
 
-class TooManyPartsError : public QException
+class TooManyPartsError : public std::exception
 {
+    Q_DISABLE_COPY_MOVE(TooManyPartsError)
+
 public:
     explicit TooManyPartsError(QString path);
-    void raise() const override;
-    [[nodiscard]] TooManyPartsError* clone() const override;
+    ~TooManyPartsError() override = default;
+    [[nodiscard]] const char* what() const noexcept override;
 
     const QString path;
 };

@@ -20,14 +20,9 @@ TooManyPartsError::TooManyPartsError(QString path)
 {
 }
 
-void TooManyPartsError::raise() const
+const char* TooManyPartsError::what() const noexcept
 {
-    throw *this;
-}
-
-TooManyPartsError* TooManyPartsError::clone() const
-{
-    return new TooManyPartsError(*this);
+    return "The file has too many parts in its name.";
 }
 
 ModelItem::ModelItem(const Settings &settings,
