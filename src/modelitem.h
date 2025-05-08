@@ -4,23 +4,12 @@
 #ifndef MODELITEM_H
 #define MODELITEM_H
 
+#include "filegroup.h"
 #include "location.h"
 #include "settings.h"
 
 #include <QDir>
 #include <QPixmap>
-
-class TooManyPartsError : public std::exception
-{
-    Q_DISABLE_COPY_MOVE(TooManyPartsError)
-
-public:
-    explicit TooManyPartsError(QString path);
-    ~TooManyPartsError() override = default;
-    [[nodiscard]] const char* what() const noexcept override;
-
-    const QString path;
-};
 
 class ModelItem : public QObject
 {
@@ -28,8 +17,9 @@ class ModelItem : public QObject
 
 public:
     explicit ModelItem(const Settings &settings,
+                       const QDir &directory,
                        QCache<QString, QString> &thumbnailCache,
-                       const QFileInfo &path,
+                       const FileGroup *fileGroup,
                        const std::optional<Location> &possibleLocation,
                        const std::optional<QPixmap> &possibleThumbnail,
                        QObject *parent = nullptr);
@@ -50,15 +40,19 @@ public:
 
 private:
     [[nodiscard]] static bool isValidPathChars(const QString &str);
-    [[nodiscard]] static QString computePath(const ModelItem &item, const QString &id, const QStringList &names);
-    static bool syncFilename(const QString &oldPath, const QString &newPath);
+    [[nodiscard]] static QString computeBasePath(const QDir &folder, const QString &id, const QStringList &names);
+    [[nodiscard]] static QList<QPair<QString, QString>> computeNewPaths(const QDir &folder,
+                                                                        const QString &oldId, const QStringList &oldNames,
+                                                                        const QString &newId, const QStringList &newNames,
+                                                                        const QStringList &extensions);
+    static bool syncFilename(const QList<QPair<QString, QString>> &pathsList);
 
     const Settings &settings;
     QCache<QString, QString> &thumbnailCache;
-    const QDir folder;
+    const QDir &folder;
     QString id;
     QStringList names;
-    const QString extension;
+    const QStringList extensions;
     std::optional<Location> possibleLocation;
     std::optional<QPixmap> possibleThumbnail;
 };

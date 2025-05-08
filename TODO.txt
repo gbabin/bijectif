@@ -1,5 +1,4 @@
 - video file preview in tooltip
 - rename once for multiple cell changes
 - EXIF info (date, time)
-- rename sidecar files (e.g. XMP)
 - action progress bar

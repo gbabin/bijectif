@@ -22,7 +22,6 @@ class Window : public QMainWindow
     Q_DISABLE_COPY_MOVE(Window)
 
 public:
-    static QFileInfoList listFiles(const QDir &dir);
     static const QString versionString;
 
     explicit Window(const Settings &settings, const QDir &directory, bool benchmark, QWidget *parent = nullptr);
@@ -32,7 +31,6 @@ public Q_SLOTS:
     void modelLoadingStart();
     void modelLoadingProgressed(int step);
     void modelLoadingDone(qint64 dbFileSize);
-    void modelTooManyParts(const QString &path);
     void selectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
     void clipboardChanged();
     void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QList<int> &roles = QList<int>());
@@ -50,7 +48,7 @@ private:
     static const char* aboutString;
 
     const Settings &settings;
-    const QDir &dir;
+    const QDir &directory;
     const bool benchmark;
     QProgressDialog* progressDialog = nullptr;
     QTableView view;

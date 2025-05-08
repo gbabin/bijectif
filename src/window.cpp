@@ -7,6 +7,7 @@
 #include "command_insert.h"
 #include "command_paste.h"
 #include "delegate.h"
+#include "filegroup.h"
 
 #include <QApplication>
 #include <QClipboard>
@@ -48,7 +49,7 @@ const char* Window::aboutString =
 Window::Window(const Settings &settings, const QDir &directory, bool benchmark, QWidget *parent)
     : QMainWindow(parent)
     , settings(settings)
-    , dir(directory)
+    , directory(directory)
     , benchmark(benchmark)
     , model(settings, &completerModel)
     , undoStack(new QUndoStack(this))
@@ -62,7 +63,7 @@ Window::Window(const Settings &settings, const QDir &directory, bool benchmark, 
 
     statusBar()->setFont(font);
 
-    QLabel* dirLabel = new QLabel(tr("Folder: %1").arg(QDir::toNativeSeparators(dir.path())));
+    QLabel* dirLabel = new QLabel(tr("Folder: %1").arg(QDir::toNativeSeparators(directory.path())));
     dirLabel->setFont(font);
 
     QLabel* versionLabel = new QLabel(versionString);
@@ -175,82 +176,6 @@ Window::~Window()
     db.close();
 }
 
-QFileInfoList Window::listFiles(const QDir &dir)
-{
-    return dir.entryInfoList({// images
-                              u"*.avif"_s,
-                              u"*.bmp"_s,
-                              u"*.exr"_s,
-                              u"*.gif"_s,
-                              u"*.heic"_s,
-                              u"*.heif"_s,
-                              u"*.jpg"_s,
-                              u"*.jpeg"_s,
-                              u"*.jxl"_s,
-                              u"*.png"_s,
-                              u"*.tif"_s,
-                              u"*.tiff"_s,
-                              u"*.webp"_s,
-                              // raw
-                              u"*.3fr"_s,
-                              u"*.ari"_s,
-                              u"*.arw"_s,
-                              u"*.bay"_s,
-                              u"*.braw"_s,
-                              u"*.cap"_s,
-                              u"*.cr2"_s,
-                              u"*.cr3"_s,
-                              u"*.cri"_s,
-                              u"*.crw"_s,
-                              u"*.dcr"_s,
-                              u"*.dcs"_s,
-                              u"*.dng"_s,
-                              u"*.drf"_s,
-                              u"*.eip"_s,
-                              u"*.erf"_s,
-                              u"*.fff"_s,
-                              u"*.gpr"_s,
-                              u"*.iiq"_s,
-                              u"*.k25"_s,
-                              u"*.kdc"_s,
-                              u"*.mdc"_s,
-                              u"*.mef"_s,
-                              u"*.mos"_s,
-                              u"*.mrw"_s,
-                              u"*.nef"_s,
-                              u"*.nrw"_s,
-                              u"*.orf"_s,
-                              u"*.pef"_s,
-                              u"*.ptx"_s,
-                              u"*.pxn"_s,
-                              u"*.r3d"_s,
-                              u"*.raf"_s,
-                              u"*.raw"_s,
-                              u"*.rw2"_s,
-                              u"*.rwl"_s,
-                              u"*.rwz"_s,
-                              u"*.sr2"_s,
-                              u"*.srf"_s,
-                              u"*.srw"_s,
-                              u"*.tco"_s,
-                              u"*.x3f"_s,
-                              // others
-                              u"*.psd"_s,
-                              u"*.svg"_s,
-                              u"*.xcf"_s,
-                              // videos
-                              u"*.avi"_s,
-                              u"*.mkv"_s,
-                              u"*.mov"_s,
-                              u"*.mp4"_s,
-                              u"*.mpg"_s,
-                              u"*.mts"_s,
-                              u"*.vob"_s,
-                              u"*.wmv"_s},
-                             QDir::Files | QDir::Readable,
-                             QDir::Name | QDir::LocaleAware);
-}
-
 QString Window::getThumbnailsDatabasePath()
 {
     const QDir dbDir(QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation));
@@ -265,11 +190,32 @@ QString Window::getThumbnailsDatabasePath()
 
 void Window::modelLoadingStart()
 {
-    const QFileInfoList files = listFiles(dir);
+    QList<const FileGroup *> fileGroupList;
 
-    if (files.isEmpty()) return;
+    try {
+        fileGroupList = FileGroup::fileGroupList(settings, directory);
+    } catch (TooManyPartsError &e) {
+        qCritical() << "Too many name parts:" << e.path;
+        QMessageBox::critical(this,
+                              tr("Too many name parts"),
+                              tr("The file \"%1\" has too many parts in its name.\n"
+                                 "The maximum number allowed is %2.\n"
+                                 "This can be changed with the setting \"max names\".")
+                                  .arg(QDir::toNativeSeparators(e.path),
+                                       QString::number(settings.maxNames)));
+        return;
+    }
 
-    progressDialog = new QProgressDialog(tr("Loading thumbnails..."), tr("Cancel"), 0, 11 * files.size(), this);
+    if (fileGroupList.isEmpty()) {
+        qInfo() << "No file found";
+        QMessageBox::information(this,
+                                 tr("No file found"),
+                                 tr("No appropriate file has been found in %1.")
+                                     .arg(QDir::toNativeSeparators(directory.path())));
+        return;
+    }
+
+    progressDialog = new QProgressDialog(tr("Loading thumbnails..."), tr("Cancel"), 0, 11 * fileGroupList.size(), this);
     progressDialog->setMinimumDuration(2000);
     progressDialog->setWindowModality(Qt::WindowModal);
     progressDialog->setAttribute(Qt::WA_DeleteOnClose);
@@ -282,11 +228,9 @@ void Window::modelLoadingStart()
     connect(&model, &Model::loadingFinished,
             this, &Window::modelLoadingDone);
 
-    connect(&model, &Model::tooManyParts,
-            this, &Window::modelTooManyParts);
-
-    future = QtConcurrent::run([this, files] {
-        model.load(files, getThumbnailsDatabasePath());
+    future = QtConcurrent::run([this, fileGroupList] {
+        model.load(fileGroupList, directory, getThumbnailsDatabasePath());
+        qDeleteAll(fileGroupList);
     });
 }
 
@@ -330,17 +274,6 @@ void Window::modelLoadingDone(qint64 dbFileSize)
     db = QSqlDatabase::addDatabase(u"QSQLITE"_s, u"update"_s);
     db.setDatabaseName(getThumbnailsDatabasePath());
     db.open();
-}
-
-void Window::modelTooManyParts(const QString &path)
-{
-    QMessageBox::critical(this,
-                          tr("Too many name parts"),
-                          tr("The file \"%1\" has too many parts in its name.\n"
-                             "The maximum number allowed is %2.\n"
-                             "It will been ignored.")
-                              .arg(QDir::toNativeSeparators(path),
-                                   QString::number(settings.maxNames)));
 }
 
 void Window::selectionChanged(const QItemSelection &selected, const QItemSelection &deselected)

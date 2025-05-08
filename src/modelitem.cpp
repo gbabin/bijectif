@@ -12,45 +12,27 @@
 #include <QImageReader>
 #include <QMessageBox>
 #include <QSqlQuery>
+#include <QStack>
 
 using namespace Qt::Literals::StringLiterals;
 
-TooManyPartsError::TooManyPartsError(QString path)
-    : path(std::move(path))
-{
-}
-
-const char* TooManyPartsError::what() const noexcept
-{
-    return "The file has too many parts in its name.";
-}
-
 ModelItem::ModelItem(const Settings &settings,
+                     const QDir &directory,
                      QCache<QString, QString> &thumbnailCache,
-                     const QFileInfo &path,
+                     const FileGroup *fileGroup,
                      const std::optional<Location> &possibleLocation,
                      const std::optional<QPixmap> &possibleThumbnail,
                      QObject *parent)
     : QObject(parent)
     , settings(settings)
     , thumbnailCache(thumbnailCache)
-    , folder(path.dir())
-    , extension(path.suffix())
+    , folder(directory)
+    , id(fileGroup->id)
+    , names(fileGroup->names)
+    , extensions(fileGroup->getExtensions())
     , possibleLocation(possibleLocation)
     , possibleThumbnail(possibleThumbnail)
 {
-    const QString basename = path.completeBaseName();
-    const qsizetype index_sep = basename.indexOf(u" - "_s);
-
-    if (index_sep != -1) {
-        id = basename.sliced(0, index_sep);
-        names = basename.sliced(index_sep + 3).split(u", "_s, Qt::SkipEmptyParts);
-        if (names.size() > settings.maxNames) {
-            throw TooManyPartsError(path.filePath());
-        }
-    } else {
-        id = basename;
-    }
 }
 
 void ModelItem::setLocation(const Location &location)
@@ -65,7 +47,7 @@ void ModelItem::setThumbnail(const QPixmap &thumbnail)
 
 QString ModelItem::getPath() const
 {
-    return computePath(*this, this->id, this->names);
+    return computeBasePath(folder, id, names) + u"."_s + getExtension();
 }
 
 QString ModelItem::getTooltip() const
@@ -112,9 +94,12 @@ bool ModelItem::setId(const QString &id)
 
     if (id.isEmpty()) return false;
 
-    const QString newPath = computePath(*this, id, this->names);
+    const QList<QPair<QString, QString>> newPaths = computeNewPaths(folder,
+                                                                    this->id, this->names,
+                                                                    id, this->names,
+                                                                    extensions);
 
-    if (syncFilename(getPath(), newPath)) {
+    if (syncFilename(newPaths)) {
         this->id = id;
         return true;
     } else {
@@ -134,7 +119,7 @@ const QString& ModelItem::getName(int index) const
 
 const QString& ModelItem::getExtension() const
 {
-    return extension;
+    return extensions.constFirst();
 }
 
 const std::optional<Location>& ModelItem::getLocation() const
@@ -165,9 +150,12 @@ bool ModelItem::setName(int index, const QString &name)
         newNames.replace(index, nameT);
     }
 
-    const QString newPath = computePath(*this, this->id, newNames);
+    const QList<QPair<QString, QString>> newPaths = computeNewPaths(folder,
+                                                                    this->id, this->names,
+                                                                    this->id, newNames,
+                                                                    extensions);
 
-    if (syncFilename(getPath(), newPath)) {
+    if (syncFilename(newPaths)) {
         names = newNames;
         return true;
     } else {
@@ -183,9 +171,12 @@ bool ModelItem::deleteName(int index)
 
     newNames.remove(index);
 
-    const QString newPath = computePath(*this, this->id, newNames);
+    const QList<QPair<QString, QString>> newPaths = computeNewPaths(folder,
+                                                                    this->id, this->names,
+                                                                    this->id, newNames,
+                                                                    extensions);
 
-    if (syncFilename(getPath(), newPath)) {
+    if (syncFilename(newPaths)) {
         names = newNames;
         return true;
     } else {
@@ -207,9 +198,11 @@ bool ModelItem::insertName(int index, const QString &name)
 
     newNames.insert(index, nameT);
 
-    const QString newPath = computePath(*this, this->id, newNames);
-
-    if (syncFilename(getPath(), newPath)) {
+    const QList<QPair<QString, QString>> newPaths = computeNewPaths(folder,
+                                                                    this->id, this->names,
+                                                                    this->id, newNames,
+                                                                    extensions);
+    if (syncFilename(newPaths)) {
         names = newNames;
         return true;
     } else {
@@ -247,35 +240,73 @@ bool ModelItem::isValidPathChars(const QString &str)
     return true;
 }
 
-QString ModelItem::computePath(const ModelItem &item, const QString &id, const QStringList &names)
+QString ModelItem::computeBasePath(const QDir &folder, const QString &id, const QStringList &names)
 {
     if (names.isEmpty())
-        return item.folder.filePath(id + u"."_s + item.extension);
+        return folder.filePath(id);
     else
-        return item.folder.filePath(id + u" - "_s
-                                    + names.join(u", "_s)
-                                    + u"."_s + item.extension);
+        return folder.filePath(id + u" - "_s
+                               + names.join(u", "_s));
 }
 
-bool ModelItem::syncFilename(const QString &oldPath, const QString &newPath)
+QList<QPair<QString, QString>> ModelItem::computeNewPaths(const QDir &folder,
+                                                          const QString &oldId, const QStringList &oldNames,
+                                                          const QString &newId, const QStringList &newNames,
+                                                          const QStringList &extensions)
 {
-    if (QFile::rename(oldPath, newPath)) {
-        QFile::rename(oldPath + u".dop"_s, newPath + u".dop"_s); // Rename DxO PhotoLab sidecar file if possible
-        const QSqlDatabase db = QSqlDatabase::database(u"update"_s, false);
-        QSqlQuery query(db);
-        query.prepare(u"UPDATE thumbnails2 "
-                       "SET path = :newPath "
-                       "WHERE path = :oldPath"_s);
-        query.bindValue(u":newPath"_s, newPath);
-        query.bindValue(u":oldPath"_s, oldPath);
-        if (! query.exec()) {
-            qWarning() << "Failed to update database:" << newPath;
-        }
-        return true;
-    } else {
-        QMessageBox::critical(nullptr,
-                              tr("Unable to rename file"),
-                              tr("Before : %1\nAfter : %2").arg(oldPath, newPath));
-        return false;
+    QList<QPair<QString, QString>> list;
+    list.reserve(extensions.size());
+
+    const QString oldBasepath = computeBasePath(folder, oldId, oldNames);
+    const QString newBasepath = computeBasePath(folder, newId, newNames);
+
+    for (const QString& extension : extensions) {
+        list.append(qMakePair(oldBasepath + u"."_s + extension,
+                              newBasepath + u"."_s + extension));
     }
+
+    return list;
+}
+
+bool ModelItem::syncFilename(const QList<QPair<QString, QString>> &pathsList)
+{
+    Q_ASSERT(! pathsList.isEmpty());
+
+    QStack<QPair<QString, QString>> renamed;
+
+    for (const QPair<QString, QString>& paths : pathsList) {
+        if (QFile::rename(paths.first, paths.second)) {
+            qDebug() << "Renamed" << paths.first << "to" << paths.second;
+            renamed.push(paths);
+        } else {
+            qCritical() << "Failed to rename" << paths.first << "to" << paths.second;
+
+            while (! renamed.isEmpty()) {
+                const QPair<QString, QString> renamedFile = renamed.pop();
+
+                if (QFile::rename(renamedFile.second, renamedFile.first))
+                    qDebug() << "Reverted" << renamedFile.second << "to" << renamedFile.first;
+                else
+                    qDebug() << "Failed to revert" << renamedFile.second << "to" << renamedFile.first;
+            }
+
+            QMessageBox::critical(nullptr,
+                                  tr("Unable to rename file"),
+                                  tr("Before : %1\nAfter : %2").arg(paths.first, paths.second));
+            return false;
+        }
+    }
+
+    const QSqlDatabase db = QSqlDatabase::database(u"update"_s, false);
+    QSqlQuery query(db);
+    query.prepare(u"UPDATE thumbnails2 "
+                   "SET path = :newPath "
+                   "WHERE path = :oldPath"_s);
+    query.bindValue(u":oldPath"_s, pathsList.constFirst().first);
+    query.bindValue(u":newPath"_s, pathsList.constFirst().second);
+    if (! query.exec()) {
+        qWarning() << "Failed to update database:" << pathsList.constFirst().second;
+    }
+
+    return true;
 }

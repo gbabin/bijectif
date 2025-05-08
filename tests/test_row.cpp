@@ -8,7 +8,6 @@
 #include "../src/command_insert.h"
 #include "../src/command_paste.h"
 #include "../src/model.h"
-#include "../src/window.h"
 
 #include <QFileInfoList>
 #include <QSignalSpy>
@@ -56,7 +55,7 @@ void RowTest::compare_row(const QAbstractItemModel &model,
     all.append(id);
     if (! allNames.isEmpty()) all.append(allNames);
     const QString filename = all.join(" - ") + ".jpg";
-    const QFileInfoList files = Window::listFiles(filesDir);
+    const QFileInfoList files = filesDir.entryInfoList({"*.jpg"}, QDir::Files, QDir::Name);
     QCOMPARE(files.size(), 1);
     QCOMPARE(files.first().fileName(), filename);
 }
@@ -72,11 +71,11 @@ void RowTest::initTestCase()
     QDir().mkpath(filesDir.path());
     QImage(8, 8, QImage::Format_RGB888).save(filesDir.filePath("image.jpg"));
 
-    const QFileInfoList files = Window::listFiles(filesDir);
+    const QList<const FileGroup *> fileGroupList = FileGroup::fileGroupList(settings, filesDir);
     const QString dbPath = dbDir.filePath("thumbnails.sqlite");
 
     Model* tableModel = new Model(settings, new CompleterModel(this));
-    tableModel->load(files, dbPath);
+    tableModel->load(fileGroupList, filesDir, dbPath);
 
     QVERIFY(QFile::exists(dbPath));
     db = QSqlDatabase::addDatabase("QSQLITE", "update");

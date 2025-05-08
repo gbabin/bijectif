@@ -5,6 +5,7 @@
 #define MODEL_H
 
 #include "completermodel.h"
+#include "filegroup.h"
 #include "modelitem.h"
 #include "settings.h"
 
@@ -34,7 +35,7 @@ class Model : public QAbstractTableModel
 public:
     explicit Model(const Settings &settings, CompleterModel* completerModel, QObject *parent = nullptr);
     ~Model() override;
-    void load(const QFileInfoList &files, const QString &dbPath);
+    void load(const QList<const FileGroup *> &fileGroupList, const QDir &directory, const QString &dbPath);
     Qt::ItemFlags flags(const QModelIndex &index) const override;
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     int columnCount(const QModelIndex &parent) const override;
@@ -45,7 +46,6 @@ public:
 Q_SIGNALS:
     void loadingProgressed(int step = 1);
     void loadingFinished(qint64 dbFileSize);
-    void tooManyParts(const QString &path);
 
 private:
     const Settings &settings;

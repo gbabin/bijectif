@@ -15,33 +15,38 @@
 
 using namespace Qt::Literals::StringLiterals;
 
+// https://doc.qt.io/qt-6/qimagereader.html#supportedImageFormats
+// https://doc.qt.io/qt-6/qtimageformats-index.html#the-image-i-o-plugins
 const QStringList Loader::imageExtensions = {u"bmp"_s,
                                              u"gif"_s,
+                                             u"heic"_s,
+                                             u"jp2"_s,
                                              u"jpg"_s,
                                              u"jpeg"_s,
                                              u"png"_s,
                                              u"tif"_s,
-                                             u"tiff"_s};
+                                             u"tiff"_s,
+                                             u"webp"_s};
 
+// https://doc.qt.io/qt-6/qmediaformat.html#FileFormat-enum
 const QStringList Loader::videoExtensions = {u"avi"_s,
                                              u"mkv"_s,
                                              u"mov"_s,
                                              u"mp4"_s,
-                                             u"mpg"_s,
-                                             u"mts"_s,
-                                             u"vob"_s,
+                                             u"webm"_s,
                                              u"wmv"_s};
 
-Loader::Loader(QQueue<QFileInfo> &entries, QMutex &entriesMutex,
+Loader::Loader(QQueue<const FileGroup *> &fileGroups, QMutex &fileGroupsMutex,
                QList<NewItem> &newThumbnails, QMutex &newThumbnailsMutex,
-               const Settings &settings, QCache<QString, QString> &thumbnailCache,
+               const Settings &settings, const QDir &directory, QCache<QString, QString> &thumbnailCache,
                QObject *parent)
     : QObject(parent)
-    , entries(entries)
-    , entriesMutex(entriesMutex)
+    , fileGroups(fileGroups)
+    , fileGroupsMutex(fileGroupsMutex)
     , newThumbnails(newThumbnails)
     , newThumbnailsMutex(newThumbnailsMutex)
     , settings(settings)
+    , directory(directory)
     , thumbnailCache(thumbnailCache)
 {
 }
@@ -49,23 +54,16 @@ Loader::Loader(QQueue<QFileInfo> &entries, QMutex &entriesMutex,
 void Loader::loadAll()
 {
     Q_FOREVER {
-        entriesMutex.lock();
-        if (entries.isEmpty()) {
-            entriesMutex.unlock();
+        fileGroupsMutex.lock();
+        if (fileGroups.isEmpty()) {
+            fileGroupsMutex.unlock();
             break;
         }
-        const QFileInfo entry = entries.dequeue();
-        entriesMutex.unlock();
+        FileGroup const * const fileGroup = fileGroups.dequeue();
+        fileGroupsMutex.unlock();
 
-        auto [possibleLocation, possibleThumbnail] = load(settings, entry);
-        ModelItem *item = nullptr;
-        try {
-            item = new ModelItem(settings, thumbnailCache, entry, possibleLocation, possibleThumbnail);
-        } catch (TooManyPartsError &e) {
-            qCritical() << "Too many name parts:" << e.path;
-            Q_EMIT tooManyParts(e.path);
-            continue;
-        }
+        auto [possibleLocation, possibleThumbnail] = load(settings, fileGroup);
+        ModelItem * const item = new ModelItem(settings, directory, thumbnailCache, fileGroup, possibleLocation, possibleThumbnail);
         QByteArray *bytes = nullptr;
         if (possibleThumbnail.has_value()) {
             bytes = new QByteArray();
@@ -75,7 +73,7 @@ void Loader::loadAll()
             buffer.close();
         }
         newThumbnailsMutex.lock();
-        newThumbnails.append(NewItem{entry.filePath(), item, bytes});
+        newThumbnails.append(NewItem{fileGroup->filePath, item, bytes});
         newThumbnailsMutex.unlock();
         Q_EMIT loadingProgressed(10);
     }
@@ -83,31 +81,30 @@ void Loader::loadAll()
     Q_EMIT finished();
 }
 
-std::pair<std::optional<Location>, std::optional<QPixmap>> Loader::load(const Settings &settings, const QFileInfo &path)
+std::pair<std::optional<Location>, std::optional<QPixmap>> Loader::load(const Settings &settings, const FileGroup *fileGroup)
 {
     std::optional<Location> possibleLocation;
     std::optional<QPixmap> possibleThumbnail;
 
-    if (imageExtensions.contains(path.suffix().toLower())) {
-        if (path.size() <= settings.maxFileSize) {
-            QFile file(path.filePath());
+    if (imageExtensions.contains(fileGroup->getMainExtension().toLower())) {
+        if (fileGroup->size <= settings.maxFileSize) {
+            QFile file(fileGroup->filePath);
             file.open(QIODevice::ReadOnly);
             const QByteArray bytes = file.readAll();
             file.close();
-            possibleThumbnail = computeImageThumbnail(settings, path.filePath(), bytes);
-            possibleLocation = readLocation(path.filePath(), bytes);
+            possibleThumbnail = computeImageThumbnail(settings, fileGroup->filePath, bytes);
+            possibleLocation = readLocation(fileGroup->filePath, bytes);
         } else {
-            qInfo() << "Image ignored because of size:" << path.filePath();
+            qInfo() << "Image ignored because of size:" << fileGroup->filePath;
         }
-    } else if (videoExtensions.contains(path.suffix().toLower())) {
-        possibleThumbnail = computeVideoThumbnail(settings, path.filePath());
+    } else if (videoExtensions.contains(fileGroup->getMainExtension().toLower())) {
+        possibleThumbnail = computeVideoThumbnail(settings, fileGroup->filePath);
     } else {
-        qInfo() << "File ignored because of extension:" << path.filePath();
+        qInfo() << "File ignored because of extension:" << fileGroup->filePath;
     }
 
     return std::make_pair(possibleLocation, possibleThumbnail);
 }
-
 
 std::optional<QPixmap> Loader::computeImageThumbnail(const Settings &settings, const QString &filePath, const QByteArray &bytes)
 {

@@ -35,9 +35,9 @@ Model::~Model()
     images.clear();
 }
 
-void Model::load(const QFileInfoList &files, const QString &dbPath)
+void Model::load(const QList<const FileGroup *> &fileGroupList, const QDir &directory, const QString &dbPath)
 {
-    images.reserve(files.size());
+    images.reserve(fileGroupList.size());
 
     // prepare database
     if (QFile(dbPath).exists()) {
@@ -71,24 +71,23 @@ void Model::load(const QFileInfoList &files, const QString &dbPath)
             qWarning() << "Thumbnails database table (v2) creation failure:" << query.lastError();
         }
 
-        QQueue<QFileInfo> newFiles;
-        newFiles.reserve(files.size());
+        QQueue<const FileGroup *> newFiles;
+        newFiles.reserve(fileGroupList.size());
 
         // retrieve thumbnails & locations
-        for (const QFileInfo &file : files) {
-            const qint64 timestamp = file.lastModified().toSecsSinceEpoch();
+        for (const FileGroup * const fileGroup : fileGroupList) {
             query.prepare(u"SELECT timestamp, latitude, longitude, thumbnail "
                            "FROM thumbnails2 "
                            "WHERE path = :path AND timestamp >= :timestamp"_s);
-            query.bindValue(u":path"_s, file.filePath());
-            query.bindValue(u":timestamp"_s, timestamp);
+            query.bindValue(u":path"_s, fileGroup->filePath);
+            query.bindValue(u":timestamp"_s, fileGroup->lastModified);
             if (query.exec()) {
-                qInfo() << "Thumbnail retrieval query succeeded:" << file.filePath();
+                qInfo() << "Thumbnail retrieval query succeeded:" << fileGroup->filePath;
             } else {
-                qWarning() << "Thumbnail retrieval query failed:" << file.filePath() << ":" << query.lastError();
+                qWarning() << "Thumbnail retrieval query failed:" << fileGroup->filePath << ":" << query.lastError();
             }
             if (query.next()) {
-                qInfo() << "Thumbnail retrieval query has a result:" << file.filePath();
+                qInfo() << "Thumbnail retrieval query has a result:" << fileGroup->filePath;
                 std::optional<Location> possibleLocation;
                 if (! query.value(u"latitude"_s).isNull()
                     && ! query.value(u"longitude"_s).isNull())
@@ -105,13 +104,13 @@ void Model::load(const QFileInfoList &files, const QString &dbPath)
                     possibleThumbnail.emplace(pixmap);
                 }
 
-                qInfo() << "Thumbnail retrieval result is not null:" << file.filePath();
-                ModelItem *item = new ModelItem(settings, thumbnailCache, file, possibleLocation, possibleThumbnail);
+                qInfo() << "Thumbnail retrieval result is not null:" << fileGroup->filePath;
+                ModelItem *item = new ModelItem(settings, directory, thumbnailCache, fileGroup, possibleLocation, possibleThumbnail);
                 images.append(item);
                 Q_EMIT loadingProgressed(11);
             } else {
-                qInfo() << "Thumbnail retrieval query has no result:" << file.filePath();
-                newFiles.append(file);
+                qInfo() << "Thumbnail retrieval query has no result:" << fileGroup->filePath;
+                newFiles.append(fileGroup);
             }
         }
 
@@ -138,14 +137,13 @@ void Model::load(const QFileInfoList &files, const QString &dbPath)
                 QThread* thread = new QThread;
                 Loader* loader = new Loader(newFiles, newFilesMutex,
                                             newThumbnails, newThumbnailsMutex,
-                                            settings, thumbnailCache);
+                                            settings, directory, thumbnailCache);
                 loader->moveToThread(thread);
 
                 connect(thread, &QThread::started, loader, &Loader::loadAll);
                 connect(thread, &QThread::finished, thread, &QThread::deleteLater);
 
                 connect(loader, &Loader::loadingProgressed, this, &Model::loadingProgressed);
-                connect(loader, &Loader::tooManyParts, this, &Model::tooManyParts);
                 connect(loader, &Loader::finished, thread, &QThread::quit);
                 connect(loader, &Loader::finished, loader, &Loader::deleteLater);
                 connect(loader, &Loader::finished,

@@ -7,11 +7,11 @@
 #include "../src/command_edit.h"
 #include "../src/command_id.h"
 #include "../src/model.h"
-#include "../src/window.h"
 
 #include <QFileInfoList>
 #include <QSignalSpy>
 #include <QSortFilterProxyModel>
+#include <QSqlDatabase>
 #include <QStandardPaths>
 
 ModelTest::ModelTest(const Settings &settings, QObject *parent)
@@ -47,13 +47,13 @@ void ModelTest::initTestCase()
 
 void ModelTest::test_1()
 {
-    const QFileInfoList files = Window::listFiles(filesDir);
+    const QList<const FileGroup *> fileGroupList = FileGroup::fileGroupList(settings, filesDir);
     const QString dbPath = dbDir.filePath("thumbnails.sqlite");
 
     QSortFilterProxyModel proxyModel;
     {
         Model* model = new Model(settings, new CompleterModel(this));
-        model->load(files, dbPath);
+        model->load(fileGroupList, filesDir, dbPath);
         proxyModel.setSourceModel(model);
     }
     proxyModel.sort(IdentifierCol, Qt::AscendingOrder);
