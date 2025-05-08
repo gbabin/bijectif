@@ -47,6 +47,13 @@ qt_add_resources(bijectif "resources"
 target_include_directories(bijectif SYSTEM PUBLIC ${EXIF_INCLUDE_DIRS})
 target_compile_options(bijectif PUBLIC ${EXIF_CFLAGS_OTHER})
 
+target_compile_options(bijectif PRIVATE
+    $<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:
+        -Wall -Wextra -Wpedantic>
+    $<$<CXX_COMPILER_ID:MSVC>:
+        /W4>
+)
+
 set_target_properties(bijectif PROPERTIES
     WIN32_EXECUTABLE TRUE
     MACOSX_BUNDLE TRUE
