@@ -102,6 +102,10 @@ qt_add_executable(tester
 target_include_directories(tester SYSTEM PUBLIC ${EXIF_INCLUDE_DIRS})
 target_compile_options(tester PUBLIC ${EXIF_CFLAGS_OTHER})
 
+target_compile_definitions(tester PUBLIC
+    NO_POPUP
+)
+
 set_target_properties(tester PROPERTIES
     WIN32_EXECUTABLE TRUE
     MACOSX_BUNDLE TRUE

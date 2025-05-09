@@ -22,7 +22,15 @@ ModelTest::ModelTest(const Settings &settings, QObject *parent)
 {
 }
 
-void ModelTest::initTestCase()
+bool ModelTest::createEmptyFile(const QString &path)
+{
+    QFile file(path);
+    const bool ret = file.open(QIODevice::WriteOnly);
+    file.close();
+    return ret;
+}
+
+void ModelTest::init()
 {
     const QDir tmpDir(QStandardPaths::writableLocation(QStandardPaths::TempLocation));
     rootDir = tmpDir.filePath(u"bijectif-tests"_s);
@@ -31,6 +39,10 @@ void ModelTest::initTestCase()
     QDir().mkpath(dbDir.path());
     filesDir = rootDir.filePath(u"files"_s);
     QDir().mkpath(filesDir.path());
+}
+
+void ModelTest::test_1()
+{
     for (int i = 99; i >= 0; i--) {
         QList<int> numbers(i%(1+settings.maxNames));
         std::iota(numbers.begin(), numbers.end(), 1);
@@ -44,10 +56,7 @@ void ModelTest::initTestCase()
         filename += u".jpg"_s;
         QImage(8, 8, QImage::Format_RGB888).save(filesDir.filePath(filename));
     }
-}
 
-void ModelTest::test_1()
-{
     const QList<const FileGroup *> fileGroupList = FileGroup::fileGroupList(settings, filesDir);
     const QString dbPath = dbDir.filePath(u"thumbnails.sqlite"_s);
 
@@ -190,7 +199,142 @@ void ModelTest::test_1()
     db.close();
 }
 
-void ModelTest::cleanupTestCase()
+void ModelTest::test_2()
+{
+    QVERIFY(QImage(8, 8, QImage::Format_RGB888).save(filesDir.filePath(u"IMG_0001.jpg"_s)));  // main image file
+    QVERIFY(createEmptyFile(filesDir.filePath(u"IMG_0001.jpg.xmp"_s))); // sidecar (additional suffix)
+    QVERIFY(createEmptyFile(filesDir.filePath(u"IMG_0001.dnf"_s))); // sidecar (other image suffix)
+    QVERIFY(createEmptyFile(filesDir.filePath(u"IMG_0001.dnf.xmp"_s))); // sidecar of sidecar
+    QVERIFY(createEmptyFile(filesDir.filePath(u"IMG_0001.dnf.xmp.bak"_s))); // sidecar of sidecar of sidecar
+    QVERIFY(createEmptyFile(filesDir.filePath(u"IMG_0001.dnf.xmp.old"_s))); // other sidecar of sidecar of sidecar
+    QVERIFY(createEmptyFile(filesDir.filePath(u"IMG_0001.txt"_s))); // sidecar (other suffix)
+    QVERIFY(createEmptyFile(filesDir.filePath(u"IMG_0001.webp"_s))); // sidecar (other image suffix)
+    QVERIFY(createEmptyFile(filesDir.filePath(u"IMG_0001.tar.gz"_s))); // other suffix (gz) not sidecar
+    QVERIFY(createEmptyFile(filesDir.filePath(u"IMG_0001.jpg.foo.bar"_s))); // other suffix of not sidecar
+    QVERIFY(QImage(8, 8, QImage::Format_RGB888).save(filesDir.filePath(u"IMG_0001.1.jpg"_s))); // other image file
+    QVERIFY(QImage(8, 8, QImage::Format_RGB888).save(filesDir.filePath(u"IMG_0002.JPG"_s))); // other image file
+
+    const QList<const FileGroup *> fileGroupList = FileGroup::fileGroupList(settings, filesDir);
+    const QString dbPath = dbDir.filePath(u"thumbnails.sqlite"_s);
+
+    QSortFilterProxyModel proxyModel;
+    {
+        Model* model = new Model(settings, new CompleterModel(this));
+        model->load(fileGroupList, filesDir, dbPath);
+        proxyModel.setSourceModel(model);
+    }
+    proxyModel.sort(IdentifierCol, Qt::AscendingOrder);
+
+    QVERIFY(QFile::exists(dbPath));
+    QSqlDatabase db = QSqlDatabase::addDatabase(u"QSQLITE"_s, u"update"_s);
+    db.setDatabaseName(dbPath);
+    QVERIFY(db.open());
+
+    QCOMPARE(proxyModel.columnCount(), FirstNameCol + settings.maxNames);
+    QCOMPARE(proxyModel.rowCount(), 3);
+
+    QCOMPARE(proxyModel.data(proxyModel.index(0, ThumbnailCol), ImagePathRole),
+             filesDir.filePath(u"IMG_0001.jpg"_s));
+    QCOMPARE(proxyModel.data(proxyModel.index(0, IdentifierCol), Qt::DisplayRole),
+             u"IMG_0001"_s);
+    for (int name = 1; name <= settings.maxNames; name++) {
+        QCOMPARE(proxyModel.data(proxyModel.index(0, name + FirstNameCol - 1), Qt::DisplayRole),
+                 QVariant());
+    }
+
+    QCOMPARE(proxyModel.data(proxyModel.index(1, ThumbnailCol), ImagePathRole),
+             filesDir.filePath(u"IMG_0001.1.jpg"_s));
+    QCOMPARE(proxyModel.data(proxyModel.index(1, IdentifierCol), Qt::DisplayRole),
+             u"IMG_0001.1"_s);
+
+    QCOMPARE(proxyModel.data(proxyModel.index(2, ThumbnailCol), ImagePathRole),
+             filesDir.filePath(u"IMG_0002.JPG"_s));
+    QCOMPARE(proxyModel.data(proxyModel.index(2, IdentifierCol), Qt::DisplayRole),
+             u"IMG_0002"_s);
+
+    EditCommand edit1(u"ABC"_s, &proxyModel, proxyModel.index(0, FirstNameCol));
+    edit1.redo();
+
+    EditCommand edit2(u"DEF"_s, &proxyModel, proxyModel.index(0, FirstNameCol + 1));
+    edit2.redo();
+
+    EditCommand edit3(u"GHI"_s, &proxyModel, proxyModel.index(0, FirstNameCol + 2));
+    edit3.redo();
+
+    QCOMPARE(filesDir.entryList(QDir::Files, QDir::Name),
+             QStringList()
+                 << u"IMG_0001 - ABC, DEF, GHI.dnf"_s
+                 << u"IMG_0001 - ABC, DEF, GHI.dnf.xmp"_s
+                 << u"IMG_0001 - ABC, DEF, GHI.dnf.xmp.bak"_s
+                 << u"IMG_0001 - ABC, DEF, GHI.dnf.xmp.old"_s
+                 << u"IMG_0001 - ABC, DEF, GHI.jpg"_s
+                 << u"IMG_0001 - ABC, DEF, GHI.jpg.xmp"_s
+                 << u"IMG_0001 - ABC, DEF, GHI.txt"_s
+                 << u"IMG_0001 - ABC, DEF, GHI.webp"_s
+                 << u"IMG_0001.1.jpg"_s
+                 << u"IMG_0001.jpg.foo.bar"_s
+                 << u"IMG_0001.tar.gz"_s
+                 << u"IMG_0002.JPG"_s);
+
+    edit3.undo();
+    edit2.undo();
+
+    QCOMPARE(filesDir.entryList(QDir::Files, QDir::Name),
+             QStringList()
+                 << u"IMG_0001 - ABC.dnf"_s
+                 << u"IMG_0001 - ABC.dnf.xmp"_s
+                 << u"IMG_0001 - ABC.dnf.xmp.bak"_s
+                 << u"IMG_0001 - ABC.dnf.xmp.old"_s
+                 << u"IMG_0001 - ABC.jpg"_s
+                 << u"IMG_0001 - ABC.jpg.xmp"_s
+                 << u"IMG_0001 - ABC.txt"_s
+                 << u"IMG_0001 - ABC.webp"_s
+                 << u"IMG_0001.1.jpg"_s
+                 << u"IMG_0001.jpg.foo.bar"_s
+                 << u"IMG_0001.tar.gz"_s
+                 << u"IMG_0002.JPG"_s);
+
+    edit2.redo();
+
+    QCOMPARE(filesDir.entryList(QDir::Files, QDir::Name),
+             QStringList()
+                 << u"IMG_0001 - ABC, DEF.dnf"_s
+                 << u"IMG_0001 - ABC, DEF.dnf.xmp"_s
+                 << u"IMG_0001 - ABC, DEF.dnf.xmp.bak"_s
+                 << u"IMG_0001 - ABC, DEF.dnf.xmp.old"_s
+                 << u"IMG_0001 - ABC, DEF.jpg"_s
+                 << u"IMG_0001 - ABC, DEF.jpg.xmp"_s
+                 << u"IMG_0001 - ABC, DEF.txt"_s
+                 << u"IMG_0001 - ABC, DEF.webp"_s
+                 << u"IMG_0001.1.jpg"_s
+                 << u"IMG_0001.jpg.foo.bar"_s
+                 << u"IMG_0001.tar.gz"_s
+                 << u"IMG_0002.JPG"_s);
+
+    QVERIFY(createEmptyFile(filesDir.filePath(u"IMG_0001 - ABC, DEF, GHI.dnf"_s))); // prepares conflict
+
+    edit3.redo(); // fails because of conflict
+
+    QCOMPARE(filesDir.entryList(QDir::Files, QDir::Name),
+             QStringList()
+                 << u"IMG_0001 - ABC, DEF, GHI.dnf"_s
+                 << u"IMG_0001 - ABC, DEF.dnf"_s
+                 << u"IMG_0001 - ABC, DEF.dnf.xmp"_s
+                 << u"IMG_0001 - ABC, DEF.dnf.xmp.bak"_s
+                 << u"IMG_0001 - ABC, DEF.dnf.xmp.old"_s
+                 << u"IMG_0001 - ABC, DEF.jpg"_s
+                 << u"IMG_0001 - ABC, DEF.jpg.xmp"_s
+                 << u"IMG_0001 - ABC, DEF.txt"_s
+                 << u"IMG_0001 - ABC, DEF.webp"_s
+                 << u"IMG_0001.1.jpg"_s
+                 << u"IMG_0001.jpg.foo.bar"_s
+                 << u"IMG_0001.tar.gz"_s
+                 << u"IMG_0002.JPG"_s);
+
+    db.close();
+}
+
+void ModelTest::cleanup()
 {
     QSqlDatabase::removeDatabase(u"update"_s);
 

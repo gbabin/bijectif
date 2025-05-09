@@ -13,12 +13,14 @@ class ModelTest : public QObject
     Q_OBJECT
 
 public:
+    static bool createEmptyFile(const QString &path);
     explicit ModelTest(const Settings &settings, QObject *parent = nullptr);
 
 private Q_SLOTS:
-    void initTestCase();
+    void init();
     void test_1();
-    void cleanupTestCase();
+    void test_2();
+    void cleanup();
 
 private:
     const Settings& settings;
