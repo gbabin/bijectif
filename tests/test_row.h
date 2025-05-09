@@ -16,7 +16,7 @@ class RowTest : public QObject
     Q_OBJECT
 
 public:
-    RowTest(const Settings &settings, QObject *parent = nullptr);
+    explicit RowTest(const Settings &settings, QObject *parent = nullptr);
 
 private Q_SLOTS:
     void initTestCase();
@@ -42,7 +42,7 @@ private:
                      const QString &name6,
                      const QString &name7,
                      const QString &name8);
-    const Settings settings;
+    const Settings& settings;
     QDir rootDir;
     QDir dbDir;
     QDir filesDir;

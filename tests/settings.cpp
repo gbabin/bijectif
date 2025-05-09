@@ -23,5 +23,7 @@ Settings::Settings()
 Settings::Settings(const QSettings &settings)
     : Settings()
 {
+    Q_UNUSED(settings)
+
     throw;
 }

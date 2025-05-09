@@ -13,7 +13,7 @@ class ModelTest : public QObject
     Q_OBJECT
 
 public:
-    ModelTest(const Settings &settings, QObject *parent = nullptr);
+    explicit ModelTest(const Settings &settings, QObject *parent = nullptr);
 
 private Q_SLOTS:
     void initTestCase();
@@ -21,7 +21,7 @@ private Q_SLOTS:
     void cleanupTestCase();
 
 private:
-    const Settings settings;
+    const Settings& settings;
     QDir rootDir;
     QDir dbDir;
     QDir filesDir;

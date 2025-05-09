@@ -18,6 +18,7 @@ mkdir -p build/msys2/Bijectif
 
 cmake -DCMAKE_BUILD_TYPE=Release . -G Ninja -B ./build/msys2
 cmake --build ./build/msys2
+ctest --test-dir ./build/msys2 --no-tests=error
 
 cp build/msys2/*.exe build/msys2/Bijectif
 cp build/msys2/*.qm build/msys2/Bijectif

@@ -23,10 +23,7 @@ build() {
 check() {
   cd "${pkgname}-${pkgver}"
 
-  cd tests
-  cmake -B build -G 'Unix Makefiles'
-  cmake --build build
-  ./build/tester
+  ctest --test-dir build --no-tests=error
 }
 
 package() {

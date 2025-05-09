@@ -14,6 +14,8 @@
 #include <QSqlDatabase>
 #include <QStandardPaths>
 
+using namespace Qt::Literals::StringLiterals;
+
 ModelTest::ModelTest(const Settings &settings, QObject *parent)
     : QObject(parent)
     , settings(settings)
@@ -22,12 +24,12 @@ ModelTest::ModelTest(const Settings &settings, QObject *parent)
 
 void ModelTest::initTestCase()
 {
-    QDir tmpDir(QStandardPaths::writableLocation(QStandardPaths::TempLocation));
-    rootDir = tmpDir.filePath("bijectif-tests");
+    const QDir tmpDir(QStandardPaths::writableLocation(QStandardPaths::TempLocation));
+    rootDir = tmpDir.filePath(u"bijectif-tests"_s);
     QDir().mkpath(rootDir.path());
-    dbDir = rootDir.filePath("db");
+    dbDir = rootDir.filePath(u"db"_s);
     QDir().mkpath(dbDir.path());
-    filesDir = rootDir.filePath("files");
+    filesDir = rootDir.filePath(u"files"_s);
     QDir().mkpath(filesDir.path());
     for (int i = 99; i >= 0; i--) {
         QList<int> numbers(i%(1+settings.maxNames));
@@ -36,11 +38,10 @@ void ModelTest::initTestCase()
         std::transform(numbers.cbegin(), numbers.cend(),
                        std::back_inserter(namesPart),
                        [](int num){ return QString::number(num); });
-        QString names = namesPart.join(", ");
-        QStringList all;
-        all.append(QString::asprintf("IMG_%04d", i));
-        if (! names.isEmpty()) all.append(names);
-        QString filename = all.join(" - ") + ".jpg";
+        const QString names = namesPart.join(u", "_s);
+        QString filename = QString::asprintf("IMG_%04d", i);
+        if (! names.isEmpty()) filename += u" - "_s + names;
+        filename += u".jpg"_s;
         QImage(8, 8, QImage::Format_RGB888).save(filesDir.filePath(filename));
     }
 }
@@ -48,7 +49,7 @@ void ModelTest::initTestCase()
 void ModelTest::test_1()
 {
     const QList<const FileGroup *> fileGroupList = FileGroup::fileGroupList(settings, filesDir);
-    const QString dbPath = dbDir.filePath("thumbnails.sqlite");
+    const QString dbPath = dbDir.filePath(u"thumbnails.sqlite"_s);
 
     QSortFilterProxyModel proxyModel;
     {
@@ -59,7 +60,7 @@ void ModelTest::test_1()
     proxyModel.sort(IdentifierCol, Qt::AscendingOrder);
 
     QVERIFY(QFile::exists(dbPath));
-    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", "update");
+    QSqlDatabase db = QSqlDatabase::addDatabase(u"QSQLITE"_s, u"update"_s);
     db.setDatabaseName(dbPath);
     QVERIFY(db.open());
 
@@ -124,39 +125,39 @@ void ModelTest::test_1()
         }
     }
 
-    QSignalSpy spy(&undoStack, &QUndoStack::indexChanged);
+    const QSignalSpy spy(&undoStack, &QUndoStack::indexChanged);
 
     QCOMPARE(proxyModel.data(proxyModel.index(5, IdentifierCol), Qt::DisplayRole),
-             QVariant("IMG_0005"));
-    undoStack.push(new ChangeIdCommand("IMG_0010", &proxyModel, proxyModel.index(5, IdentifierCol)));
+             QVariant(u"IMG_0005"_s));
+    undoStack.push(new ChangeIdCommand(u"IMG_0010"_s, &proxyModel, proxyModel.index(5, IdentifierCol)));
     QCOMPARE(spy.count(), 0);
     QVERIFY(! undoStack.canUndo());
     QCOMPARE(proxyModel.data(proxyModel.index(5, IdentifierCol), Qt::DisplayRole),
-             QVariant("IMG_0005"));
+             QVariant(u"IMG_0005"_s));
 
     QCOMPARE(proxyModel.data(proxyModel.index(50, FirstNameCol + 4), Qt::DisplayRole),
              QVariant(QString::number(5)));
     QCOMPARE(proxyModel.data(proxyModel.index(50, FirstNameCol + 5), Qt::DisplayRole),
              QVariant());
 
-    undoStack.push(new ChangeIdCommand("IMG_0100", &proxyModel, proxyModel.index(10, IdentifierCol)));
+    undoStack.push(new ChangeIdCommand(u"IMG_0100"_s, &proxyModel, proxyModel.index(10, IdentifierCol)));
     QVERIFY(undoStack.canUndo());
     QCOMPARE(proxyModel.data(proxyModel.index(10, IdentifierCol), Qt::DisplayRole),
-             QVariant("IMG_0011"));
+             QVariant(u"IMG_0011"_s));
     QCOMPARE(proxyModel.data(proxyModel.index(11, IdentifierCol), Qt::DisplayRole),
-             QVariant("IMG_0012"));
+             QVariant(u"IMG_0012"_s));
     QCOMPARE(proxyModel.data(proxyModel.index(99, IdentifierCol), Qt::DisplayRole),
-             QVariant("IMG_0100"));
+             QVariant(u"IMG_0100"_s));
 
     QCOMPARE(proxyModel.data(proxyModel.index(49, FirstNameCol + 4), Qt::DisplayRole),
              QVariant(QString::number(5)));
     QCOMPARE(proxyModel.data(proxyModel.index(49, FirstNameCol + 5), Qt::DisplayRole),
              QVariant());
 
-    undoStack.push(new EditCommand("XYZ", &proxyModel, proxyModel.index(49, FirstNameCol + 4)));
+    undoStack.push(new EditCommand(u"XYZ"_s, &proxyModel, proxyModel.index(49, FirstNameCol + 4)));
 
     QCOMPARE(proxyModel.data(proxyModel.index(49, FirstNameCol + 4), Qt::DisplayRole),
-             QVariant("XYZ"));
+             QVariant(u"XYZ"_s));
     QCOMPARE(proxyModel.data(proxyModel.index(49, FirstNameCol + 5), Qt::DisplayRole),
              QVariant());
 
@@ -191,8 +192,8 @@ void ModelTest::test_1()
 
 void ModelTest::cleanupTestCase()
 {
-    QSqlDatabase::removeDatabase("update");
+    QSqlDatabase::removeDatabase(u"update"_s);
 
-    if (rootDir.path().startsWith("/tmp/"))
+    if (rootDir.path().startsWith(u"/tmp/"_s))
         rootDir.removeRecursively();
 }

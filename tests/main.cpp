@@ -6,7 +6,7 @@
 #include "../src/settings.h"
 
 #include <QApplication>
-#include <QtTest>
+#include <QTest>
 
 int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
@@ -16,8 +16,11 @@ int main(int argc, char *argv[]) {
     ModelTest modelTest(settings);
     RowTest rowTest(settings);
 
-    bool test1 = QTest::qExec(&modelTest, argc, argv);
-    bool test2 = QTest::qExec(&rowTest, argc, argv);
+    const bool okModel = QTest::qExec(&modelTest, argc, argv) == 0;
+    const bool okRow = QTest::qExec(&rowTest, argc, argv) == 0;
 
-    return test1 || test2;
+    if (okModel && okRow)
+        return EXIT_SUCCESS;
+    else
+        return EXIT_FAILURE;
 }

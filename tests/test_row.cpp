@@ -14,6 +14,8 @@
 #include <QSortFilterProxyModel>
 #include <QStandardPaths>
 
+using namespace Qt::Literals::StringLiterals;
+
 RowTest::RowTest(const Settings &settings, QObject *parent)
     : QObject(parent)
     , settings(settings)
@@ -34,13 +36,13 @@ void RowTest::compare_row(const QAbstractItemModel &model,
     QCOMPARE(settings.maxNames, 8);
 
     QStringList names = QStringList{name1, name2, name3, name4, name5, name6, name7, name8};
-    int indexFirstEmpty = names.indexOf("");
+    const int indexFirstEmpty = names.indexOf(u""_s);
 
     QCOMPARE(model.data(model.index(0, IdentifierCol), Qt::DisplayRole), QVariant(id));
 
     for (int i = 0; i < 8; i++) {
         if (indexFirstEmpty != -1 && i > indexFirstEmpty)
-            QCOMPARE(names.at(i), "");
+            QCOMPARE(names.at(i), u""_s);
 
         if (names.at(i).isEmpty())
             QCOMPARE(model.data(model.index(0, i + FirstNameCol), Qt::DisplayRole), QVariant());
@@ -48,37 +50,37 @@ void RowTest::compare_row(const QAbstractItemModel &model,
             QCOMPARE(model.data(model.index(0, i + FirstNameCol), Qt::DisplayRole), QVariant(names.at(i)));
     }
 
-    names.removeAll("");
+    names.removeAll(u""_s);
 
-    QString allNames = names.join(", ");
+    const QString allNames = names.join(u", "_s);
     QStringList all;
     all.append(id);
     if (! allNames.isEmpty()) all.append(allNames);
-    const QString filename = all.join(" - ") + ".jpg";
-    const QFileInfoList files = filesDir.entryInfoList({"*.jpg"}, QDir::Files, QDir::Name);
+    const QString filename = all.join(u" - "_s) + u".jpg"_s;
+    const QFileInfoList files = filesDir.entryInfoList({u"*.jpg"_s}, QDir::Files, QDir::Name);
     QCOMPARE(files.size(), 1);
     QCOMPARE(files.first().fileName(), filename);
 }
 
 void RowTest::initTestCase()
 {
-    QDir tmpDir(QStandardPaths::writableLocation(QStandardPaths::TempLocation));
-    rootDir = tmpDir.filePath("bijectif-tests");
+    const QDir tmpDir(QStandardPaths::writableLocation(QStandardPaths::TempLocation));
+    rootDir = tmpDir.filePath(u"bijectif-tests"_s);
     QDir().mkpath(rootDir.path());
-    dbDir = rootDir.filePath("db");
+    dbDir = rootDir.filePath(u"db"_s);
     QDir().mkpath(dbDir.path());
-    filesDir = rootDir.filePath("files");
+    filesDir = rootDir.filePath(u"files"_s);
     QDir().mkpath(filesDir.path());
-    QImage(8, 8, QImage::Format_RGB888).save(filesDir.filePath("image.jpg"));
+    QImage(8, 8, QImage::Format_RGB888).save(filesDir.filePath(u"image.jpg"_s));
 
     const QList<const FileGroup *> fileGroupList = FileGroup::fileGroupList(settings, filesDir);
-    const QString dbPath = dbDir.filePath("thumbnails.sqlite");
+    const QString dbPath = dbDir.filePath(u"thumbnails.sqlite"_s);
 
     Model* tableModel = new Model(settings, new CompleterModel(this));
     tableModel->load(fileGroupList, filesDir, dbPath);
 
     QVERIFY(QFile::exists(dbPath));
-    db = QSqlDatabase::addDatabase("QSQLITE", "update");
+    db = QSqlDatabase::addDatabase(u"QSQLITE"_s, u"update"_s);
     db.setDatabaseName(dbPath);
     QVERIFY(db.open());
 
@@ -90,75 +92,75 @@ void RowTest::initTestCase()
     QCOMPARE(model->columnCount(), FirstNameCol + settings.maxNames);
     QCOMPARE(model->rowCount(), 1);
 
-    compare_row(*model, "image", "", "", "", "", "", "", "", "");
+    compare_row(*model, u"image"_s, u""_s, u""_s, u""_s, u""_s, u""_s, u""_s, u""_s, u""_s);
 }
 
 void RowTest::test_0()
 {
-    compare_row(*model, "image", "", "", "", "", "", "", "", "");
+    compare_row(*model, u"image"_s, u""_s, u""_s, u""_s, u""_s, u""_s, u""_s, u""_s, u""_s);
 
     QSignalSpy spy(&undoStack, &QUndoStack::indexChanged);
 
     undoStack.push(new DeleteCommand(model, model->index(0, FirstNameCol)));
-    compare_row(*model, "image", "", "", "", "", "", "", "", "");
+    compare_row(*model, u"image"_s, u""_s, u""_s, u""_s, u""_s, u""_s, u""_s, u""_s, u""_s);
     QCOMPARE(spy.count(), 0);
 
-    undoStack.push(new EditCommand("ABC", model, model->index(0, FirstNameCol)));
-    compare_row(*model, "image", "ABC", "", "", "", "", "", "", "");
+    undoStack.push(new EditCommand(u"ABC"_s, model, model->index(0, FirstNameCol)));
+    compare_row(*model, u"image"_s, u"ABC"_s, u""_s, u""_s, u""_s, u""_s, u""_s, u""_s, u""_s);
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 1);
 
-    undoStack.push(new EditCommand("", model, model->index(0, FirstNameCol)));
-    compare_row(*model, "image", "ABC", "", "", "", "", "", "", "");
+    undoStack.push(new EditCommand(u""_s, model, model->index(0, FirstNameCol)));
+    compare_row(*model, u"image"_s, u"ABC"_s, u""_s, u""_s, u""_s, u""_s, u""_s, u""_s, u""_s);
     QCOMPARE(spy.count(), 0);
 
-    undoStack.push(new EditCommand("ABC", model, model->index(0, FirstNameCol)));
-    compare_row(*model, "image", "ABC", "", "", "", "", "", "", "");
+    undoStack.push(new EditCommand(u"ABC"_s, model, model->index(0, FirstNameCol)));
+    compare_row(*model, u"image"_s, u"ABC"_s, u""_s, u""_s, u""_s, u""_s, u""_s, u""_s, u""_s);
     QCOMPARE(spy.count(), 0);
 
     undoStack.undo();
-    compare_row(*model, "image", "", "", "", "", "", "", "", "");
+    compare_row(*model, u"image"_s, u""_s, u""_s, u""_s, u""_s, u""_s, u""_s, u""_s, u""_s);
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 0);
 
-    undoStack.push(new InsertCommand("thing", model, model->index(0, FirstNameCol)));
-    compare_row(*model, "image", "thing", "", "", "", "", "", "", "");
+    undoStack.push(new InsertCommand(u"thing"_s, model, model->index(0, FirstNameCol)));
+    compare_row(*model, u"image"_s, u"thing"_s, u""_s, u""_s, u""_s, u""_s, u""_s, u""_s, u""_s);
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 1);
 
     undoStack.undo();
-    compare_row(*model, "image", "", "", "", "", "", "", "", "");
+    compare_row(*model, u"image"_s, u""_s, u""_s, u""_s, u""_s, u""_s, u""_s, u""_s, u""_s);
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 0);
 
-    undoStack.push(new InsertCommand("nothing", model, model->index(0, 1 + FirstNameCol)));
-    compare_row(*model, "image", "", "", "", "", "", "", "", "");
+    undoStack.push(new InsertCommand(u"nothing"_s, model, model->index(0, 1 + FirstNameCol)));
+    compare_row(*model, u"image"_s, u""_s, u""_s, u""_s, u""_s, u""_s, u""_s, u""_s, u""_s);
     QCOMPARE(spy.count(), 0);
 
-    undoStack.push(new PasteCommand("text1", model, model->index(0, 1 + FirstNameCol)));
-    compare_row(*model, "image", "", "", "", "", "", "", "", "");
+    undoStack.push(new PasteCommand(u"text1"_s, model, model->index(0, 1 + FirstNameCol)));
+    compare_row(*model, u"image"_s, u""_s, u""_s, u""_s, u""_s, u""_s, u""_s, u""_s, u""_s);
     QCOMPARE(spy.count(), 0);
 
-    undoStack.push(new PasteCommand("", model, model->index(0, FirstNameCol)));
-    compare_row(*model, "image", "", "", "", "", "", "", "", "");
+    undoStack.push(new PasteCommand(u""_s, model, model->index(0, FirstNameCol)));
+    compare_row(*model, u"image"_s, u""_s, u""_s, u""_s, u""_s, u""_s, u""_s, u""_s, u""_s);
     QCOMPARE(spy.count(), 0);
 
-    undoStack.push(new PasteCommand("text1", model, model->index(0, FirstNameCol)));
-    compare_row(*model, "image", "text1", "", "", "", "", "", "", "");
+    undoStack.push(new PasteCommand(u"text1"_s, model, model->index(0, FirstNameCol)));
+    compare_row(*model, u"image"_s, u"text1"_s, u""_s, u""_s, u""_s, u""_s, u""_s, u""_s, u""_s);
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 1);
 
-    undoStack.push(new PasteCommand("text1", model, model->index(0, FirstNameCol)));
-    compare_row(*model, "image", "text1", "", "", "", "", "", "", "");
+    undoStack.push(new PasteCommand(u"text1"_s, model, model->index(0, FirstNameCol)));
+    compare_row(*model, u"image"_s, u"text1"_s, u""_s, u""_s, u""_s, u""_s, u""_s, u""_s, u""_s);
     QCOMPARE(spy.count(), 0);
 
     undoStack.undo();
-    compare_row(*model, "image", "", "", "", "", "", "", "", "");
+    compare_row(*model, u"image"_s, u""_s, u""_s, u""_s, u""_s, u""_s, u""_s, u""_s, u""_s);
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 0);
 
     undoStack.redo();
-    compare_row(*model, "image", "text1", "", "", "", "", "", "", "");
+    compare_row(*model, u"image"_s, u"text1"_s, u""_s, u""_s, u""_s, u""_s, u""_s, u""_s, u""_s);
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 1);
 
@@ -168,82 +170,82 @@ void RowTest::test_1()
 {
     QSignalSpy spy(&undoStack, &QUndoStack::indexChanged);
 
-    compare_row(*model, "image", "text1", "", "", "", "", "", "", "");
+    compare_row(*model, u"image"_s, u"text1"_s, u""_s, u""_s, u""_s, u""_s, u""_s, u""_s, u""_s);
 
     undoStack.push(new DeleteCommand(model, model->index(0, 1 + FirstNameCol)));
-    compare_row(*model, "image", "text1", "", "", "", "", "", "", "");
+    compare_row(*model, u"image"_s, u"text1"_s, u""_s, u""_s, u""_s, u""_s, u""_s, u""_s, u""_s);
     QCOMPARE(spy.count(), 0);
 
     undoStack.push(new DeleteCommand(model, model->index(0, FirstNameCol)));
-    compare_row(*model, "image", "", "", "", "", "", "", "", "");
+    compare_row(*model, u"image"_s, u""_s, u""_s, u""_s, u""_s, u""_s, u""_s, u""_s, u""_s);
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 2);
 
     undoStack.undo();
-    compare_row(*model, "image", "text1", "", "", "", "", "", "", "");
+    compare_row(*model, u"image"_s, u"text1"_s, u""_s, u""_s, u""_s, u""_s, u""_s, u""_s, u""_s);
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 1);
 
-    undoStack.push(new EditCommand("DEF", model, model->index(0, 1 + FirstNameCol)));
-    compare_row(*model, "image", "text1", "DEF", "", "", "", "", "", "");
+    undoStack.push(new EditCommand(u"DEF"_s, model, model->index(0, 1 + FirstNameCol)));
+    compare_row(*model, u"image"_s, u"text1"_s, u"DEF"_s, u""_s, u""_s, u""_s, u""_s, u""_s, u""_s);
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 2);
 
-    undoStack.push(new EditCommand("", model, model->index(0, 1 + FirstNameCol)));
-    compare_row(*model, "image", "text1", "DEF", "", "", "", "", "", "");
+    undoStack.push(new EditCommand(u""_s, model, model->index(0, 1 + FirstNameCol)));
+    compare_row(*model, u"image"_s, u"text1"_s, u"DEF"_s, u""_s, u""_s, u""_s, u""_s, u""_s, u""_s);
     QCOMPARE(spy.count(), 0);
 
-    undoStack.push(new EditCommand("DEF", model, model->index(0, 1 + FirstNameCol)));
-    compare_row(*model, "image", "text1", "DEF", "", "", "", "", "", "");
+    undoStack.push(new EditCommand(u"DEF"_s, model, model->index(0, 1 + FirstNameCol)));
+    compare_row(*model, u"image"_s, u"text1"_s, u"DEF"_s, u""_s, u""_s, u""_s, u""_s, u""_s, u""_s);
     QCOMPARE(spy.count(), 0);
 
     undoStack.undo();
-    compare_row(*model, "image", "text1", "", "", "", "", "", "", "");
+    compare_row(*model, u"image"_s, u"text1"_s, u""_s, u""_s, u""_s, u""_s, u""_s, u""_s, u""_s);
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 1);
 
-    undoStack.push(new InsertCommand("thing", model, model->index(0, FirstNameCol)));
-    compare_row(*model, "image", "thing", "text1", "", "", "", "", "", "");
+    undoStack.push(new InsertCommand(u"thing"_s, model, model->index(0, FirstNameCol)));
+    compare_row(*model, u"image"_s, u"thing"_s, u"text1"_s, u""_s, u""_s, u""_s, u""_s, u""_s, u""_s);
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 2);
 
     undoStack.undo();
-    compare_row(*model, "image", "text1", "", "", "", "", "", "", "");
+    compare_row(*model, u"image"_s, u"text1"_s, u""_s, u""_s, u""_s, u""_s, u""_s, u""_s, u""_s);
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 1);
 
-    undoStack.push(new InsertCommand("thing", model, model->index(0, 1 + FirstNameCol)));
-    compare_row(*model, "image", "text1", "thing", "", "", "", "", "", "");
+    undoStack.push(new InsertCommand(u"thing"_s, model, model->index(0, 1 + FirstNameCol)));
+    compare_row(*model, u"image"_s, u"text1"_s, u"thing"_s, u""_s, u""_s, u""_s, u""_s, u""_s, u""_s);
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 2);
 
     undoStack.undo();
-    compare_row(*model, "image", "text1", "", "", "", "", "", "", "");
+    compare_row(*model, u"image"_s, u"text1"_s, u""_s, u""_s, u""_s, u""_s, u""_s, u""_s, u""_s);
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 1);
 
-    undoStack.push(new PasteCommand("text2", model, model->index(0, FirstNameCol)));
-    compare_row(*model, "image", "text2", "", "", "", "", "", "", "");
+    undoStack.push(new PasteCommand(u"text2"_s, model, model->index(0, FirstNameCol)));
+    compare_row(*model, u"image"_s, u"text2"_s, u""_s, u""_s, u""_s, u""_s, u""_s, u""_s, u""_s);
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 2);
 
     undoStack.undo();
-    compare_row(*model, "image", "text1", "", "", "", "", "", "", "");
+    compare_row(*model, u"image"_s, u"text1"_s, u""_s, u""_s, u""_s, u""_s, u""_s, u""_s, u""_s);
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 1);
 
-    undoStack.push(new PasteCommand("text2", model, model->index(0, 1 + FirstNameCol)));
-    compare_row(*model, "image", "text1", "text2", "", "", "", "", "", "");
+    undoStack.push(new PasteCommand(u"text2"_s, model, model->index(0, 1 + FirstNameCol)));
+    compare_row(*model, u"image"_s, u"text1"_s, u"text2"_s, u""_s, u""_s, u""_s, u""_s, u""_s, u""_s);
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 2);
 
     undoStack.undo();
-    compare_row(*model, "image", "text1", "", "", "", "", "", "", "");
+    compare_row(*model, u"image"_s, u"text1"_s, u""_s, u""_s, u""_s, u""_s, u""_s, u""_s, u""_s);
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 1);
 
     undoStack.redo();
-    compare_row(*model, "image", "text1", "text2", "", "", "", "", "", "");
+    compare_row(*model, u"image"_s, u"text1"_s, u"text2"_s, u""_s, u""_s, u""_s, u""_s, u""_s, u""_s);
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 2);
 }
@@ -252,10 +254,10 @@ void RowTest::test_2()
 {
     QSignalSpy spy(&undoStack, &QUndoStack::indexChanged);
 
-    compare_row(*model, "image", "text1", "text2", "", "", "", "", "", "");
+    compare_row(*model, u"image"_s, u"text1"_s, u"text2"_s, u""_s, u""_s, u""_s, u""_s, u""_s, u""_s);
 
-    undoStack.push(new PasteCommand("text3", model, model->index(0, 2 + FirstNameCol)));
-    compare_row(*model, "image", "text1", "text2", "text3", "", "", "", "", "");
+    undoStack.push(new PasteCommand(u"text3"_s, model, model->index(0, 2 + FirstNameCol)));
+    compare_row(*model, u"image"_s, u"text1"_s, u"text2"_s, u"text3"_s, u""_s, u""_s, u""_s, u""_s, u""_s);
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 3);
 }
@@ -264,10 +266,10 @@ void RowTest::test_3()
 {
     QSignalSpy spy(&undoStack, &QUndoStack::indexChanged);
 
-    compare_row(*model, "image", "text1", "text2", "text3", "", "", "", "", "");
+    compare_row(*model, u"image"_s, u"text1"_s, u"text2"_s, u"text3"_s, u""_s, u""_s, u""_s, u""_s, u""_s);
 
-    undoStack.push(new PasteCommand("text4", model, model->index(0, 3 + FirstNameCol)));
-    compare_row(*model, "image", "text1", "text2", "text3", "text4", "", "", "", "");
+    undoStack.push(new PasteCommand(u"text4"_s, model, model->index(0, 3 + FirstNameCol)));
+    compare_row(*model, u"image"_s, u"text1"_s, u"text2"_s, u"text3"_s, u"text4"_s, u""_s, u""_s, u""_s, u""_s);
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 4);
 }
@@ -276,10 +278,10 @@ void RowTest::test_4()
 {
     QSignalSpy spy(&undoStack, &QUndoStack::indexChanged);
 
-    compare_row(*model, "image", "text1", "text2", "text3", "text4", "", "", "", "");
+    compare_row(*model, u"image"_s, u"text1"_s, u"text2"_s, u"text3"_s, u"text4"_s, u""_s, u""_s, u""_s, u""_s);
 
-    undoStack.push(new PasteCommand("text5", model, model->index(0, 4 + FirstNameCol)));
-    compare_row(*model, "image", "text1", "text2", "text3", "text4", "text5", "", "", "");
+    undoStack.push(new PasteCommand(u"text5"_s, model, model->index(0, 4 + FirstNameCol)));
+    compare_row(*model, u"image"_s, u"text1"_s, u"text2"_s, u"text3"_s, u"text4"_s, u"text5"_s, u""_s, u""_s, u""_s);
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 5);
 }
@@ -288,10 +290,10 @@ void RowTest::test_5()
 {
     QSignalSpy spy(&undoStack, &QUndoStack::indexChanged);
 
-    compare_row(*model, "image", "text1", "text2", "text3", "text4", "text5", "", "", "");
+    compare_row(*model, u"image"_s, u"text1"_s, u"text2"_s, u"text3"_s, u"text4"_s, u"text5"_s, u""_s, u""_s, u""_s);
 
-    undoStack.push(new PasteCommand("text6", model, model->index(0, 5 + FirstNameCol)));
-    compare_row(*model, "image", "text1", "text2", "text3", "text4", "text5", "text6", "", "");
+    undoStack.push(new PasteCommand(u"text6"_s, model, model->index(0, 5 + FirstNameCol)));
+    compare_row(*model, u"image"_s, u"text1"_s, u"text2"_s, u"text3"_s, u"text4"_s, u"text5"_s, u"text6"_s, u""_s, u""_s);
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 6);
 }
@@ -300,10 +302,10 @@ void RowTest::test_6()
 {
     QSignalSpy spy(&undoStack, &QUndoStack::indexChanged);
 
-    compare_row(*model, "image", "text1", "text2", "text3", "text4", "text5", "text6", "", "");
+    compare_row(*model, u"image"_s, u"text1"_s, u"text2"_s, u"text3"_s, u"text4"_s, u"text5"_s, u"text6"_s, u""_s, u""_s);
 
-    undoStack.push(new PasteCommand("text7", model, model->index(0, 6 + FirstNameCol)));
-    compare_row(*model, "image", "text1", "text2", "text3", "text4", "text5", "text6", "text7", "");
+    undoStack.push(new PasteCommand(u"text7"_s, model, model->index(0, 6 + FirstNameCol)));
+    compare_row(*model, u"image"_s, u"text1"_s, u"text2"_s, u"text3"_s, u"text4"_s, u"text5"_s, u"text6"_s, u"text7"_s, u""_s);
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 7);
 }
@@ -312,92 +314,92 @@ void RowTest::test_7()
 {
     QSignalSpy spy(&undoStack, &QUndoStack::indexChanged);
 
-    compare_row(*model, "image", "text1", "text2", "text3", "text4", "text5", "text6", "text7", "");
+    compare_row(*model, u"image"_s, u"text1"_s, u"text2"_s, u"text3"_s, u"text4"_s, u"text5"_s, u"text6"_s, u"text7"_s, u""_s);
 
     undoStack.push(new DeleteCommand(model, model->index(0, 7 + FirstNameCol)));
-    compare_row(*model, "image", "text1", "text2", "text3", "text4", "text5", "text6", "text7", "");
+    compare_row(*model, u"image"_s, u"text1"_s, u"text2"_s, u"text3"_s, u"text4"_s, u"text5"_s, u"text6"_s, u"text7"_s, u""_s);
     QCOMPARE(spy.count(), 0);
 
     undoStack.push(new DeleteCommand(model, model->index(0, 6 + FirstNameCol)));
-    compare_row(*model, "image", "text1", "text2", "text3", "text4", "text5", "text6", "", "");
+    compare_row(*model, u"image"_s, u"text1"_s, u"text2"_s, u"text3"_s, u"text4"_s, u"text5"_s, u"text6"_s, u""_s, u""_s);
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 8);
 
     undoStack.undo();
-    compare_row(*model, "image", "text1", "text2", "text3", "text4", "text5", "text6", "text7", "");
+    compare_row(*model, u"image"_s, u"text1"_s, u"text2"_s, u"text3"_s, u"text4"_s, u"text5"_s, u"text6"_s, u"text7"_s, u""_s);
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 7);
 
-    undoStack.push(new EditCommand("UVW", model, model->index(0, 7 + FirstNameCol)));
-    compare_row(*model, "image", "text1", "text2", "text3", "text4", "text5", "text6", "text7", "UVW");
+    undoStack.push(new EditCommand(u"UVW"_s, model, model->index(0, 7 + FirstNameCol)));
+    compare_row(*model, u"image"_s, u"text1"_s, u"text2"_s, u"text3"_s, u"text4"_s, u"text5"_s, u"text6"_s, u"text7"_s, u"UVW"_s);
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 8);
 
-    undoStack.push(new EditCommand("", model, model->index(0, 7 + FirstNameCol)));
-    compare_row(*model, "image", "text1", "text2", "text3", "text4", "text5", "text6", "text7", "UVW");
+    undoStack.push(new EditCommand(u""_s, model, model->index(0, 7 + FirstNameCol)));
+    compare_row(*model, u"image"_s, u"text1"_s, u"text2"_s, u"text3"_s, u"text4"_s, u"text5"_s, u"text6"_s, u"text7"_s, u"UVW"_s);
     QCOMPARE(spy.count(), 0);
 
-    undoStack.push(new EditCommand("UVW", model, model->index(0, 7 + FirstNameCol)));
-    compare_row(*model, "image", "text1", "text2", "text3", "text4", "text5", "text6", "text7", "UVW");
+    undoStack.push(new EditCommand(u"UVW"_s, model, model->index(0, 7 + FirstNameCol)));
+    compare_row(*model, u"image"_s, u"text1"_s, u"text2"_s, u"text3"_s, u"text4"_s, u"text5"_s, u"text6"_s, u"text7"_s, u"UVW"_s);
     QCOMPARE(spy.count(), 0);
 
     undoStack.undo();
-    compare_row(*model, "image", "text1", "text2", "text3", "text4", "text5", "text6", "text7", "");
+    compare_row(*model, u"image"_s, u"text1"_s, u"text2"_s, u"text3"_s, u"text4"_s, u"text5"_s, u"text6"_s, u"text7"_s, u""_s);
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 7);
 
-    undoStack.push(new InsertCommand("thing", model, model->index(0, 5 + FirstNameCol)));
-    compare_row(*model, "image", "text1", "text2", "text3", "text4", "text5", "thing", "text6", "text7");
+    undoStack.push(new InsertCommand(u"thing"_s, model, model->index(0, 5 + FirstNameCol)));
+    compare_row(*model, u"image"_s, u"text1"_s, u"text2"_s, u"text3"_s, u"text4"_s, u"text5"_s, u"thing"_s, u"text6"_s, u"text7"_s);
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 8);
 
     undoStack.undo();
-    compare_row(*model, "image", "text1", "text2", "text3", "text4", "text5", "text6", "text7", "");
+    compare_row(*model, u"image"_s, u"text1"_s, u"text2"_s, u"text3"_s, u"text4"_s, u"text5"_s, u"text6"_s, u"text7"_s, u""_s);
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 7);
 
-    undoStack.push(new InsertCommand("thing", model, model->index(0, 6 + FirstNameCol)));
-    compare_row(*model, "image", "text1", "text2", "text3", "text4", "text5", "text6", "thing", "text7");
+    undoStack.push(new InsertCommand(u"thing"_s, model, model->index(0, 6 + FirstNameCol)));
+    compare_row(*model, u"image"_s, u"text1"_s, u"text2"_s, u"text3"_s, u"text4"_s, u"text5"_s, u"text6"_s, u"thing"_s, u"text7"_s);
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 8);
 
     undoStack.undo();
-    compare_row(*model, "image", "text1", "text2", "text3", "text4", "text5", "text6", "text7", "");
+    compare_row(*model, u"image"_s, u"text1"_s, u"text2"_s, u"text3"_s, u"text4"_s, u"text5"_s, u"text6"_s, u"text7"_s, u""_s);
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 7);
 
-    undoStack.push(new InsertCommand("thing", model, model->index(0, 7 + FirstNameCol)));
-    compare_row(*model, "image", "text1", "text2", "text3", "text4", "text5", "text6", "text7", "thing");
+    undoStack.push(new InsertCommand(u"thing"_s, model, model->index(0, 7 + FirstNameCol)));
+    compare_row(*model, u"image"_s, u"text1"_s, u"text2"_s, u"text3"_s, u"text4"_s, u"text5"_s, u"text6"_s, u"text7"_s, u"thing"_s);
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 8);
 
     undoStack.undo();
-    compare_row(*model, "image", "text1", "text2", "text3", "text4", "text5", "text6", "text7", "");
+    compare_row(*model, u"image"_s, u"text1"_s, u"text2"_s, u"text3"_s, u"text4"_s, u"text5"_s, u"text6"_s, u"text7"_s, u""_s);
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 7);
 
-    undoStack.push(new PasteCommand("textX", model, model->index(0, 6 + FirstNameCol)));
-    compare_row(*model, "image", "text1", "text2", "text3", "text4", "text5", "text6", "textX", "");
+    undoStack.push(new PasteCommand(u"textX"_s, model, model->index(0, 6 + FirstNameCol)));
+    compare_row(*model, u"image"_s, u"text1"_s, u"text2"_s, u"text3"_s, u"text4"_s, u"text5"_s, u"text6"_s, u"textX"_s, u""_s);
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 8);
 
     undoStack.undo();
-    compare_row(*model, "image", "text1", "text2", "text3", "text4", "text5", "text6", "text7", "");
+    compare_row(*model, u"image"_s, u"text1"_s, u"text2"_s, u"text3"_s, u"text4"_s, u"text5"_s, u"text6"_s, u"text7"_s, u""_s);
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 7);
 
-    undoStack.push(new PasteCommand("text8", model, model->index(0, 7 + FirstNameCol)));
-    compare_row(*model, "image", "text1", "text2", "text3", "text4", "text5", "text6", "text7", "text8");
+    undoStack.push(new PasteCommand(u"text8"_s, model, model->index(0, 7 + FirstNameCol)));
+    compare_row(*model, u"image"_s, u"text1"_s, u"text2"_s, u"text3"_s, u"text4"_s, u"text5"_s, u"text6"_s, u"text7"_s, u"text8"_s);
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 8);
 
     undoStack.undo();
-    compare_row(*model, "image", "text1", "text2", "text3", "text4", "text5", "text6", "text7", "");
+    compare_row(*model, u"image"_s, u"text1"_s, u"text2"_s, u"text3"_s, u"text4"_s, u"text5"_s, u"text6"_s, u"text7"_s, u""_s);
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 7);
 
     undoStack.redo();
-    compare_row(*model, "image", "text1", "text2", "text3", "text4", "text5", "text6", "text7", "text8");
+    compare_row(*model, u"image"_s, u"text1"_s, u"text2"_s, u"text3"_s, u"text4"_s, u"text5"_s, u"text6"_s, u"text7"_s, u"text8"_s);
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 8);
 }
@@ -406,64 +408,64 @@ void RowTest::test_8()
 {
     QSignalSpy spy(&undoStack, &QUndoStack::indexChanged);
 
-    compare_row(*model, "image", "text1", "text2", "text3", "text4", "text5", "text6", "text7", "text8");
+    compare_row(*model, u"image"_s, u"text1"_s, u"text2"_s, u"text3"_s, u"text4"_s, u"text5"_s, u"text6"_s, u"text7"_s, u"text8"_s);
 
     undoStack.push(new DeleteCommand(model, model->index(0, 8 + FirstNameCol)));
-    compare_row(*model, "image", "text1", "text2", "text3", "text4", "text5", "text6", "text7", "text8");
+    compare_row(*model, u"image"_s, u"text1"_s, u"text2"_s, u"text3"_s, u"text4"_s, u"text5"_s, u"text6"_s, u"text7"_s, u"text8"_s);
     QCOMPARE(spy.count(), 0);
 
     undoStack.push(new DeleteCommand(model, model->index(0, 7 + FirstNameCol)));
-    compare_row(*model, "image", "text1", "text2", "text3", "text4", "text5", "text6", "text7", "");
+    compare_row(*model, u"image"_s, u"text1"_s, u"text2"_s, u"text3"_s, u"text4"_s, u"text5"_s, u"text6"_s, u"text7"_s, u""_s);
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 9);
 
     undoStack.undo();
-    compare_row(*model, "image", "text1", "text2", "text3", "text4", "text5", "text6", "text7", "text8");
+    compare_row(*model, u"image"_s, u"text1"_s, u"text2"_s, u"text3"_s, u"text4"_s, u"text5"_s, u"text6"_s, u"text7"_s, u"text8"_s);
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 8);
 
-    undoStack.push(new EditCommand("UVW", model, model->index(0, 8 + FirstNameCol)));
-    compare_row(*model, "image", "text1", "text2", "text3", "text4", "text5", "text6", "text7", "text8");
+    undoStack.push(new EditCommand(u"UVW"_s, model, model->index(0, 8 + FirstNameCol)));
+    compare_row(*model, u"image"_s, u"text1"_s, u"text2"_s, u"text3"_s, u"text4"_s, u"text5"_s, u"text6"_s, u"text7"_s, u"text8"_s);
     QCOMPARE(spy.count(), 0);
 
-    undoStack.push(new EditCommand("", model, model->index(0, 7 + FirstNameCol)));
-    compare_row(*model, "image", "text1", "text2", "text3", "text4", "text5", "text6", "text7", "text8");
+    undoStack.push(new EditCommand(u""_s, model, model->index(0, 7 + FirstNameCol)));
+    compare_row(*model, u"image"_s, u"text1"_s, u"text2"_s, u"text3"_s, u"text4"_s, u"text5"_s, u"text6"_s, u"text7"_s, u"text8"_s);
     QCOMPARE(spy.count(), 0);
 
-    undoStack.push(new EditCommand("UVW", model, model->index(0, 7 + FirstNameCol)));
-    compare_row(*model, "image", "text1", "text2", "text3", "text4", "text5", "text6", "text7", "UVW");
+    undoStack.push(new EditCommand(u"UVW"_s, model, model->index(0, 7 + FirstNameCol)));
+    compare_row(*model, u"image"_s, u"text1"_s, u"text2"_s, u"text3"_s, u"text4"_s, u"text5"_s, u"text6"_s, u"text7"_s, u"UVW"_s);
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 9);
 
     undoStack.undo();
-    compare_row(*model, "image", "text1", "text2", "text3", "text4", "text5", "text6", "text7", "text8");
+    compare_row(*model, u"image"_s, u"text1"_s, u"text2"_s, u"text3"_s, u"text4"_s, u"text5"_s, u"text6"_s, u"text7"_s, u"text8"_s);
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 8);
 
-    undoStack.push(new InsertCommand("nothing", model, model->index(0, 5 + FirstNameCol)));
-    compare_row(*model, "image", "text1", "text2", "text3", "text4", "text5", "text6", "text7", "text8");
+    undoStack.push(new InsertCommand(u"nothing"_s, model, model->index(0, 5 + FirstNameCol)));
+    compare_row(*model, u"image"_s, u"text1"_s, u"text2"_s, u"text3"_s, u"text4"_s, u"text5"_s, u"text6"_s, u"text7"_s, u"text8"_s);
     QCOMPARE(spy.count(), 0);
 
-    undoStack.push(new InsertCommand("nothing", model, model->index(0, 7 + FirstNameCol)));
-    compare_row(*model, "image", "text1", "text2", "text3", "text4", "text5", "text6", "text7", "text8");
+    undoStack.push(new InsertCommand(u"nothing"_s, model, model->index(0, 7 + FirstNameCol)));
+    compare_row(*model, u"image"_s, u"text1"_s, u"text2"_s, u"text3"_s, u"text4"_s, u"text5"_s, u"text6"_s, u"text7"_s, u"text8"_s);
     QCOMPARE(spy.count(), 0);
 
-    undoStack.push(new InsertCommand("nothing", model, model->index(0, 8 + FirstNameCol)));
-    compare_row(*model, "image", "text1", "text2", "text3", "text4", "text5", "text6", "text7", "text8");
+    undoStack.push(new InsertCommand(u"nothing"_s, model, model->index(0, 8 + FirstNameCol)));
+    compare_row(*model, u"image"_s, u"text1"_s, u"text2"_s, u"text3"_s, u"text4"_s, u"text5"_s, u"text6"_s, u"text7"_s, u"text8"_s);
     QCOMPARE(spy.count(), 0);
 
-    undoStack.push(new PasteCommand("textY", model, model->index(0, 7 + FirstNameCol)));
-    compare_row(*model, "image", "text1", "text2", "text3", "text4", "text5", "text6", "text7", "textY");
+    undoStack.push(new PasteCommand(u"textY"_s, model, model->index(0, 7 + FirstNameCol)));
+    compare_row(*model, u"image"_s, u"text1"_s, u"text2"_s, u"text3"_s, u"text4"_s, u"text5"_s, u"text6"_s, u"text7"_s, u"textY"_s);
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 9);
 
     undoStack.undo();
-    compare_row(*model, "image", "text1", "text2", "text3", "text4", "text5", "text6", "text7", "text8");
+    compare_row(*model, u"image"_s, u"text1"_s, u"text2"_s, u"text3"_s, u"text4"_s, u"text5"_s, u"text6"_s, u"text7"_s, u"text8"_s);
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.takeFirst().constFirst().toInt(), 8);
 
-    undoStack.push(new PasteCommand("text8", model, model->index(0, 8 + FirstNameCol)));
-    compare_row(*model, "image", "text1", "text2", "text3", "text4", "text5", "text6", "text7", "text8");
+    undoStack.push(new PasteCommand(u"text8"_s, model, model->index(0, 8 + FirstNameCol)));
+    compare_row(*model, u"image"_s, u"text1"_s, u"text2"_s, u"text3"_s, u"text4"_s, u"text5"_s, u"text6"_s, u"text7"_s, u"text8"_s);
     QCOMPARE(spy.count(), 0);
 }
 
@@ -472,8 +474,8 @@ void RowTest::cleanupTestCase()
     db.close();
     db = QSqlDatabase();
 
-    QSqlDatabase::removeDatabase("update");
+    QSqlDatabase::removeDatabase(u"update"_s);
 
-    if (rootDir.path().startsWith("/tmp/"))
+    if (rootDir.path().startsWith(u"/tmp/"_s))
         rootDir.removeRecursively();
 }
