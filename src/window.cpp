@@ -231,6 +231,12 @@ void Window::modelLoadingStart()
     connect(&model, &Model::fileRenameFailed,
             this, &Window::fileRenameFailed);
 
+    connect(&model, &Model::invalidCharacters,
+            this, &Window::invalidCharacters);
+
+    connect(&model, &Model::invalidCharacterSequence,
+            this, &Window::invalidCharacterSequence);
+
     future = QtConcurrent::run([this, fileGroupList] {
         model.load(fileGroupList, directory, getThumbnailsDatabasePath());
         qDeleteAll(fileGroupList);
@@ -284,6 +290,20 @@ void Window::fileRenameFailed(const QString &before, const QString &after)
     QMessageBox::critical(this,
                           tr("Unable to rename file"),
                           tr("Before : %1\nAfter : %2").arg(before, after));
+}
+
+void Window::invalidCharacters()
+{
+    QMessageBox::information(this,
+                             tr("Forbidden characters"),
+                             tr("The following characters are not allowed:\n< > : \" / \\ | ? * ,"));
+}
+
+void Window::invalidCharacterSequence()
+{
+    QMessageBox::information(this,
+                             tr("Forbidden character sequence"),
+                             tr("The following character sequence is not allowed: \" - \" (hyphen with surrounding spaces)"));
 }
 
 void Window::selectionChanged(const QItemSelection &selected, const QItemSelection &deselected)

@@ -47,6 +47,8 @@ Q_SIGNALS:
     void loadingProgressed(int step = 1);
     void loadingFinished(qint64 dbFileSize);
     void fileRenameFailed(const QString &before, const QString &after);
+    void invalidCharacters();
+    void invalidCharacterSequence();
 
 private:
     const Settings &settings;

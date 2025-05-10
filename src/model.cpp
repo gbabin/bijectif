@@ -108,6 +108,10 @@ void Model::load(const QList<const FileGroup *> &fileGroupList, const QDir &dire
                 ModelItem *item = new ModelItem(settings, directory, thumbnailCache, fileGroup, possibleLocation, possibleThumbnail);
                 connect(item, &ModelItem::fileRenameFailed,
                         this, &Model::fileRenameFailed);
+                connect(item, &ModelItem::invalidCharacters,
+                        this, &Model::invalidCharacters);
+                connect(item, &ModelItem::invalidCharacterSequence,
+                        this, &Model::invalidCharacterSequence);
                 images.append(item);
                 Q_EMIT loadingProgressed(11);
             } else {
@@ -174,6 +178,10 @@ void Model::load(const QList<const FileGroup *> &fileGroupList, const QDir &dire
         for (const NewItem &item : std::as_const(newThumbnails)) {
             connect(item.modelItem, &ModelItem::fileRenameFailed,
                     this, &Model::fileRenameFailed);
+            connect(item.modelItem, &ModelItem::invalidCharacters,
+                    this, &Model::invalidCharacters);
+            connect(item.modelItem, &ModelItem::invalidCharacterSequence,
+                    this, &Model::invalidCharacterSequence);
             images.append(item.modelItem);
 
             QVariant latitude, longitude, thumbnail;

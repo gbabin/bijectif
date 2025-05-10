@@ -8,7 +8,6 @@
 #include <QBuffer>
 #include <QCache>
 #include <QImageReader>
-#include <QMessageBox>
 #include <QSqlQuery>
 #include <QStack>
 
@@ -221,17 +220,15 @@ bool ModelItem::isValidPathChars(const QString &str)
         || str.contains(u"*"_s)
         || str.contains(u","_s))
     {
-        QMessageBox::information(nullptr,
-                                 tr("Forbidden characters"),
-                                 tr("The following characters are not allowed:\n< > : \" / \\ | ? * ,"));
+        Q_EMIT invalidCharacters();
+
         return false;
     }
 
     if (str.contains(u" - "_s))
     {
-        QMessageBox::information(nullptr,
-                                 tr("Forbidden character sequence"),
-                                 tr("The following character sequence is not allowed: \" - \" (hyphen with surrounding spaces)"));
+        Q_EMIT invalidCharacterSequence();
+
         return false;
     }
 

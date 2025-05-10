@@ -40,14 +40,16 @@ public:
 
 Q_SIGNALS:
     void fileRenameFailed(const QString &before, const QString &after);
+    void invalidCharacters();
+    void invalidCharacterSequence();
 
 private:
-    [[nodiscard]] static bool isValidPathChars(const QString &str);
     [[nodiscard]] static QString computeBasePath(const QDir &folder, const QString &id, const QStringList &names);
     [[nodiscard]] static QList<QPair<QString, QString>> computeNewPaths(const QDir &folder,
                                                                         const QString &oldId, const QStringList &oldNames,
                                                                         const QString &newId, const QStringList &newNames,
                                                                         const QStringList &extensions);
+    [[nodiscard]] bool isValidPathChars(const QString &str);
     bool syncFilename(const QList<QPair<QString, QString>> &pathsList);
 
     const Settings &settings;
