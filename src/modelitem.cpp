@@ -290,11 +290,8 @@ bool ModelItem::syncFilename(const QList<QPair<QString, QString>> &pathsList)
                     qDebug() << "Failed to revert" << renamedFile.second << "to" << renamedFile.first;
             }
 
-#ifndef NO_POPUP
-            QMessageBox::critical(nullptr,
-                                  tr("Unable to rename file"),
-                                  tr("Before : %1\nAfter : %2").arg(paths.first, paths.second));
-#endif
+            Q_EMIT fileRenameFailed(paths.first, paths.second);
+
             return false;
         }
     }

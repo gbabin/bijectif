@@ -225,6 +225,9 @@ void ModelTest::test_2()
     }
     proxyModel.sort(IdentifierCol, Qt::AscendingOrder);
 
+    QSignalSpy fileRenameFailedSpy(qobject_cast<Model*>(proxyModel.sourceModel()), &Model::fileRenameFailed);
+    QVERIFY(fileRenameFailedSpy.isValid());
+
     QVERIFY(QFile::exists(dbPath));
     QSqlDatabase db = QSqlDatabase::addDatabase(u"QSQLITE"_s, u"update"_s);
     db.setDatabaseName(dbPath);
@@ -313,7 +316,14 @@ void ModelTest::test_2()
 
     QVERIFY(createEmptyFile(filesDir.filePath(u"IMG_0001 - ABC, DEF, GHI.dnf"_s))); // prepares conflict
 
+    QCOMPARE(fileRenameFailedSpy.count(), 0);
     edit3.redo(); // fails because of conflict
+    QCOMPARE(fileRenameFailedSpy.count(), 1);
+    {
+        const QList<QVariant> arguments = fileRenameFailedSpy.takeFirst();
+        QCOMPARE(arguments.at(0).toString(), filesDir.filePath(u"IMG_0001 - ABC, DEF.dnf"_s));
+        QCOMPARE(arguments.at(1).toString(), filesDir.filePath(u"IMG_0001 - ABC, DEF, GHI.dnf"_s));
+    }
 
     QCOMPARE(filesDir.entryList(QDir::Files, QDir::Name),
              QStringList()

@@ -38,6 +38,9 @@ public:
     bool deleteName(int index);
     bool insertName(int index, const QString &name);
 
+Q_SIGNALS:
+    void fileRenameFailed(const QString &before, const QString &after);
+
 private:
     [[nodiscard]] static bool isValidPathChars(const QString &str);
     [[nodiscard]] static QString computeBasePath(const QDir &folder, const QString &id, const QStringList &names);
@@ -45,7 +48,7 @@ private:
                                                                         const QString &oldId, const QStringList &oldNames,
                                                                         const QString &newId, const QStringList &newNames,
                                                                         const QStringList &extensions);
-    static bool syncFilename(const QList<QPair<QString, QString>> &pathsList);
+    bool syncFilename(const QList<QPair<QString, QString>> &pathsList);
 
     const Settings &settings;
     QCache<QString, QString> &thumbnailCache;

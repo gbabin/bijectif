@@ -228,6 +228,9 @@ void Window::modelLoadingStart()
     connect(&model, &Model::loadingFinished,
             this, &Window::modelLoadingDone);
 
+    connect(&model, &Model::fileRenameFailed,
+            this, &Window::fileRenameFailed);
+
     future = QtConcurrent::run([this, fileGroupList] {
         model.load(fileGroupList, directory, getThumbnailsDatabasePath());
         qDeleteAll(fileGroupList);
@@ -274,6 +277,13 @@ void Window::modelLoadingDone(qint64 dbFileSize)
     db = QSqlDatabase::addDatabase(u"QSQLITE"_s, u"update"_s);
     db.setDatabaseName(getThumbnailsDatabasePath());
     db.open();
+}
+
+void Window::fileRenameFailed(const QString &before, const QString &after)
+{
+    QMessageBox::critical(this,
+                          tr("Unable to rename file"),
+                          tr("Before : %1\nAfter : %2").arg(before, after));
 }
 
 void Window::selectionChanged(const QItemSelection &selected, const QItemSelection &deselected)

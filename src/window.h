@@ -31,6 +31,7 @@ public Q_SLOTS:
     void modelLoadingStart();
     void modelLoadingProgressed(int step);
     void modelLoadingDone(qint64 dbFileSize);
+    void fileRenameFailed(const QString &before, const QString &after);
     void selectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
     void clipboardChanged();
     void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QList<int> &roles = QList<int>());

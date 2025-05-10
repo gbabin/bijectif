@@ -106,6 +106,8 @@ void Model::load(const QList<const FileGroup *> &fileGroupList, const QDir &dire
 
                 qInfo() << "Thumbnail retrieval result is not null:" << fileGroup->filePath;
                 ModelItem *item = new ModelItem(settings, directory, thumbnailCache, fileGroup, possibleLocation, possibleThumbnail);
+                connect(item, &ModelItem::fileRenameFailed,
+                        this, &Model::fileRenameFailed);
                 images.append(item);
                 Q_EMIT loadingProgressed(11);
             } else {
@@ -170,6 +172,8 @@ void Model::load(const QList<const FileGroup *> &fileGroupList, const QDir &dire
             qWarning() << "Thumbnail storing transaction begin query failed:" << query.lastError();
         }
         for (const NewItem &item : std::as_const(newThumbnails)) {
+            connect(item.modelItem, &ModelItem::fileRenameFailed,
+                    this, &Model::fileRenameFailed);
             images.append(item.modelItem);
 
             QVariant latitude, longitude, thumbnail;
