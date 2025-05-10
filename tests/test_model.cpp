@@ -8,7 +8,6 @@
 #include "../src/command_id.h"
 #include "../src/model.h"
 
-#include <QFileInfoList>
 #include <QSignalSpy>
 #include <QSortFilterProxyModel>
 #include <QSqlDatabase>

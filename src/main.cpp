@@ -51,8 +51,8 @@ int main(int argc, char *argv[])
     QApplication::setApplicationVersion(Window::versionString);
 
     const Settings settings;
-
     setLogVerbosity(settings);
+    settings.log();
 
     const QStringList uiLanguages = QLocale::system().uiLanguages();
 

@@ -25,9 +25,6 @@ class Loader : public QObject
     Q_DISABLE_COPY_MOVE(Loader)
 
 public:
-    static const QStringList imageExtensions;
-    static const QStringList videoExtensions;
-
     explicit Loader(QQueue<const FileGroup *> &fileGroups, QMutex &fileGroupsMutex,
                     QList<NewItem> &newThumbnails, QMutex &newThumbnailsMutex,
                     const Settings &settings, const QDir &directory, QCache<QString, QString> &thumbnailCache,

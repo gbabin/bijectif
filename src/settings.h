@@ -11,6 +11,7 @@ class Settings
 {
 public:
     Settings();
+    void log() const;
 
     /// Settings file path
     const QString fileName;
@@ -26,6 +27,19 @@ public:
 
     /// Minimal window height (in pixels)
     const int minHeight;
+
+    /// Extensions of listed files (comma-separated list, lower case)
+    /// The order determines the main files from the sidecar files.
+    const QStringList listedExtensions;
+
+    /// Extensions of image files for thumbnails (comma-separated list, lower case)
+    /// https://doc.qt.io/qt-6/qimagereader.html#supportedImageFormats
+    /// https://doc.qt.io/qt-6/qtimageformats-index.html#the-image-i-o-plugins
+    const QStringList imageExtensions;
+
+    /// Extensions of video files for thumbnails (comma-separated list, lower case)
+    /// https://doc.qt.io/qt-6/qmediaformat.html#FileFormat-enum
+    const QStringList videoExtensions;
 
     /// Maximal number of name parts
     const int maxNames;

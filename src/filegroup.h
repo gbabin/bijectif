@@ -25,7 +25,6 @@ class FileGroup
     Q_DISABLE_COPY_MOVE(FileGroup)
 
 public:
-    static const QStringList fileExtensions;
     static QList<const FileGroup *> fileGroupList(const Settings &settings, const QDir &directory);
 
     FileGroup(QString filePath, QString id, QStringList names, const QString &extension, qint64 lastModified, qint64 size);

@@ -3,12 +3,17 @@
 
 #include "../src/settings.h"
 
+using namespace Qt::Literals::StringLiterals;
+
 Settings::Settings()
     : fileName(QStringLiteral("/fake.ini"))
     , thumbnailSize(128)
     , tooltipSize(512)
     , minWidth(800)
     , minHeight(600)
+    , listedExtensions(QString(u"jpg,dnf,webp"_s).toLower().split(u","_s))
+    , imageExtensions(QString(u"jpg,webp"_s).toLower().split(u","_s))
+    , videoExtensions(QString(u""_s).toLower().split(u","_s))
     , maxNames(8)
     , maxFileSize(20*1024*1024)
     , fontSize(16)

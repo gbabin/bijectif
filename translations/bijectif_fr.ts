@@ -32,34 +32,34 @@
 <context>
     <name>ModelItem</name>
     <message>
-        <location filename="../src/modelitem.cpp" line="56"/>
+        <location filename="../src/modelitem.cpp" line="54"/>
         <source>Thumbnail unavailable</source>
         <translation>Miniature indisponible</translation>
     </message>
     <message>
-        <location filename="../src/modelitem.cpp" line="58"/>
+        <location filename="../src/modelitem.cpp" line="56"/>
         <source>Video</source>
         <translation>Vidéo</translation>
     </message>
     <message>
-        <location filename="../src/modelitem.cpp" line="227"/>
+        <location filename="../src/modelitem.cpp" line="225"/>
         <source>Forbidden characters</source>
         <translation>Caractères interdits</translation>
     </message>
     <message>
-        <location filename="../src/modelitem.cpp" line="228"/>
+        <location filename="../src/modelitem.cpp" line="226"/>
         <source>The following characters are not allowed:
 &lt; &gt; : &quot; / \ | ? * ,</source>
         <translation>Les caractères suivants ne sont pas autorisés :
 &lt; &gt; : &quot; / \ | ? * ,</translation>
     </message>
     <message>
-        <location filename="../src/modelitem.cpp" line="235"/>
+        <location filename="../src/modelitem.cpp" line="233"/>
         <source>Forbidden character sequence</source>
         <translation>Séquence de caractères interdite</translation>
     </message>
     <message>
-        <location filename="../src/modelitem.cpp" line="236"/>
+        <location filename="../src/modelitem.cpp" line="234"/>
         <source>The following character sequence is not allowed: &quot; - &quot; (hyphen with surrounding spaces)</source>
         <translation>Cette séquence de caractères est interdite : &quot; - &quot; (trait d&apos;union entouré d&apos;espaces)</translation>
     </message>

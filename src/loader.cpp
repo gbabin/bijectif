@@ -13,29 +13,6 @@
 #include <QVideoFrame>
 #include <QVideoSink>
 
-using namespace Qt::Literals::StringLiterals;
-
-// https://doc.qt.io/qt-6/qimagereader.html#supportedImageFormats
-// https://doc.qt.io/qt-6/qtimageformats-index.html#the-image-i-o-plugins
-const QStringList Loader::imageExtensions = {u"bmp"_s,
-                                             u"gif"_s,
-                                             u"heic"_s,
-                                             u"jp2"_s,
-                                             u"jpg"_s,
-                                             u"jpeg"_s,
-                                             u"png"_s,
-                                             u"tif"_s,
-                                             u"tiff"_s,
-                                             u"webp"_s};
-
-// https://doc.qt.io/qt-6/qmediaformat.html#FileFormat-enum
-const QStringList Loader::videoExtensions = {u"avi"_s,
-                                             u"mkv"_s,
-                                             u"mov"_s,
-                                             u"mp4"_s,
-                                             u"webm"_s,
-                                             u"wmv"_s};
-
 Loader::Loader(QQueue<const FileGroup *> &fileGroups, QMutex &fileGroupsMutex,
                QList<NewItem> &newThumbnails, QMutex &newThumbnailsMutex,
                const Settings &settings, const QDir &directory, QCache<QString, QString> &thumbnailCache,
@@ -86,7 +63,7 @@ std::pair<std::optional<Location>, std::optional<QPixmap>> Loader::load(const Se
     std::optional<Location> possibleLocation;
     std::optional<QPixmap> possibleThumbnail;
 
-    if (imageExtensions.contains(fileGroup->getMainExtension().toLower())) {
+    if (settings.imageExtensions.contains(fileGroup->getMainExtension().toLower())) {
         if (fileGroup->size <= settings.maxFileSize) {
             QFile file(fileGroup->filePath);
             file.open(QIODevice::ReadOnly);
@@ -97,7 +74,7 @@ std::pair<std::optional<Location>, std::optional<QPixmap>> Loader::load(const Se
         } else {
             qInfo() << "Image ignored because of size:" << fileGroup->filePath;
         }
-    } else if (videoExtensions.contains(fileGroup->getMainExtension().toLower())) {
+    } else if (settings.videoExtensions.contains(fileGroup->getMainExtension().toLower())) {
         possibleThumbnail = computeVideoThumbnail(settings, fileGroup->filePath);
     } else {
         qInfo() << "File ignored because of extension:" << fileGroup->filePath;

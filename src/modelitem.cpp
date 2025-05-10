@@ -3,8 +3,6 @@
 
 #include "modelitem.h"
 
-#include "loader.h"
-
 #include <libexif/exif-data.h>
 
 #include <QBuffer>
@@ -54,7 +52,7 @@ QString ModelItem::getTooltip() const
 {
     if (! possibleThumbnail.has_value()) {
         return tr("Thumbnail unavailable");
-    } else if (Loader::videoExtensions.contains(QFileInfo(getPath()).suffix().toLower())) {
+    } else if (settings.videoExtensions.contains(getExtension().toLower())) {
         return tr("Video");
     } else {
         const QString path = getPath();
