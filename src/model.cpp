@@ -21,12 +21,12 @@ Model::Model(const Settings &settings, CompleterModel* completerModel, QObject *
     , settings(settings)
     , thumbnailCache(settings.thumbnailCacheSize)
     , completerModel(completerModel)
+    , mapIcon(QImage(u":/resources/map.png"_s)
+                  .scaled(settings.thumbnailSize / 4,
+                          settings.thumbnailSize / 4,
+                          Qt::KeepAspectRatio,
+                          Qt::SmoothTransformation))
 {
-    mapIcon = QImage(u":/resources/map.png"_s)
-        .scaled(settings.thumbnailSize / 4,
-                settings.thumbnailSize / 4,
-                Qt::KeepAspectRatio,
-                Qt::SmoothTransformation);
 }
 
 Model::~Model()
