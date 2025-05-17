@@ -12,24 +12,24 @@ source=("${pkgname}-${pkgver}.tar.gz::https://github.com/gbabin/bijectif/archive
 sha256sums=('SKIP')
 
 build() {
-  cd "${pkgname}-${pkgver}"
-
-  cmake -B build -G 'Unix Makefiles' \
-        -DCMAKE_INSTALL_PREFIX=/usr \
-        -DCMAKE_BUILD_TYPE=RelWithDebInfo
+  cmake -B build \
+        -S "${pkgname}-${pkgver}" \
+        -W no-dev \
+        -D CMAKE_BUILD_TYPE=None \
+        -D CMAKE_INSTALL_PREFIX=/usr
   cmake --build build
 }
 
 check() {
-  cd "${pkgname}-${pkgver}"
-
-  ctest --test-dir build --no-tests=error
+  ctest --test-dir build \
+        --output-on-failure \
+        --no-tests=error
 }
 
 package() {
-  cd "${pkgname}-${pkgver}"
-
   DESTDIR="$pkgdir" cmake --install build
+
+  cd "${pkgname}-${pkgver}"
   install -Dm644 LICENSE "$pkgdir"/usr/share/licenses/bijectif/COPYING
   install -Dm644 bijectif.desktop "$pkgdir"/usr/share/applications/bijectif.desktop
 }
