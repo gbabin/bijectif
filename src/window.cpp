@@ -20,6 +20,7 @@
 #include <QMessageBox>
 #include <QSortFilterProxyModel>
 #include <QSpacerItem>
+#include <QSqlError>
 #include <QStandardPaths>
 #include <QStatusBar>
 #include <QUndoView>
@@ -282,7 +283,9 @@ void Window::modelLoadingDone(qint64 dbFileSize)
 
     db = QSqlDatabase::addDatabase(u"QSQLITE"_s, u"update"_s);
     db.setDatabaseName(getThumbnailsDatabasePath());
-    db.open();
+    if (! db.open()) {
+        qWarning() << "Thumbnails database opening failure:" << db.lastError();
+    }
 }
 
 void Window::fileRenameFailed(const QString &before, const QString &after)
