@@ -32,16 +32,6 @@ ModelItem::ModelItem(const Settings &settings,
 {
 }
 
-void ModelItem::setLocation(const Location &location)
-{
-    possibleLocation.emplace(location);
-}
-
-void ModelItem::setThumbnail(const QPixmap &thumbnail)
-{
-    possibleThumbnail.emplace(thumbnail);
-}
-
 QString ModelItem::getPath() const
 {
     return computeBasePath(folder, id, names) + u"."_s + getExtension();

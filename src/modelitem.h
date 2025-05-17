@@ -58,8 +58,8 @@ private:
     QString id;
     QStringList names;
     const QStringList extensions;
-    std::optional<Location> possibleLocation;
-    std::optional<QPixmap> possibleThumbnail;
+    const std::optional<Location> possibleLocation;
+    const std::optional<QPixmap> possibleThumbnail;
 };
 
 #endif // MODELITEM_H
