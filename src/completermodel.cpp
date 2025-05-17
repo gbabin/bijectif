@@ -55,9 +55,10 @@ void CompleterModel::insert(const QString &item)
                                                                 [](const QString &a, const QString &b) {
                                                                     return QString::compare(a, b, Qt::CaseInsensitive) < 0;
                                                                 });
-        beginResetModel();
+        const int row = std::distance(items.cbegin(), it);
+        beginInsertRows(QModelIndex(), row, row);
         items.insert(it, item);
-        endResetModel();
+        endInsertRows();
     }
 }
 
@@ -70,9 +71,10 @@ void CompleterModel::remove(const QString &item)
                                                                     [](const QString &a, const QString &b) {
                                                                         return QString::compare(a, b, Qt::CaseInsensitive) < 0;
                                                                     });
-            beginResetModel();
+            const int row = std::distance(items.cbegin(), it);
+            beginRemoveRows(QModelIndex(), row, row);
             items.erase(it);
-            endResetModel();
+            endRemoveRows();
         }
     }
 }
