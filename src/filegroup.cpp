@@ -53,7 +53,7 @@ QList<const FileGroup *> FileGroup::fileGroupList(const Settings &settings, cons
         while (itFile != fileInfoList.end()) {
             const QString basename = (*itFile).completeBaseName();
             const QString suffix = (*itFile).suffix();
-            if (auto prefix = prefixes.find(basename); prefix != prefixes.end()) {
+            if (const auto prefix = prefixes.find(basename); prefix != prefixes.end()) {
                 const QString completeSuffix = prefix->first.isEmpty() ?
                                                    suffix :
                                                    prefix->first + u"."_s + suffix;

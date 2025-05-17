@@ -39,7 +39,7 @@ void Loader::loadAll()
         FileGroup const * const fileGroup = fileGroups.dequeue();
         fileGroupsMutex.unlock();
 
-        auto [possibleLocation, possibleThumbnail] = load(settings, fileGroup);
+        const auto [possibleLocation, possibleThumbnail] = load(settings, fileGroup);
         ModelItem * const item = new ModelItem(settings, directory, thumbnailCache, fileGroup, possibleLocation, possibleThumbnail);
         QByteArray *bytes = nullptr;
         if (possibleThumbnail.has_value()) {
