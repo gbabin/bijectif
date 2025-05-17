@@ -8,6 +8,7 @@
 
 #include <QAbstractItemModel>
 #include <QDir>
+#include <QSignalSpy>
 #include <QSqlDatabase>
 #include <QUndoStack>
 
@@ -42,6 +43,7 @@ private:
                      const QString &name6,
                      const QString &name7,
                      const QString &name8);
+    void verify_dataChanged(QSignalSpy &spy, int left, int right);
     const Settings& settings;
     QDir rootDir;
     QDir dbDir;

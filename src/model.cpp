@@ -392,20 +392,22 @@ bool Model::setData(const QModelIndex &index, const QVariant &value, int role)
         else if (role == InsertRole) {
             const QString valueStr = value.toString();
             if (images.at(index.row())->insertName(nameIdx, valueStr)) {
+                const int namesSize = images.at(index.row())->getNamesSize();
                 const QString afterStr = images.at(index.row())->getName(nameIdx);
                 completerModel->insert(afterStr);
-                Q_EMIT dataChanged(index, index.siblingAtColumn(FirstNameCol + settings.maxNames - 1));
+                Q_EMIT dataChanged(index, index.siblingAtColumn(FirstNameCol + namesSize - 1));
                 return true;
             }
         }
         else if (role == DeleteRole) {
+            const int namesSize = images.at(index.row())->getNamesSize();
             QString beforeStr;
-            if (nameIdx < images.at(index.row())->getNamesSize())
+            if (nameIdx < namesSize)
                 beforeStr = images.at(index.row())->getName(nameIdx);
             if (images.at(index.row())->deleteName(nameIdx)) {
                 if (! beforeStr.isEmpty())
                     completerModel->remove(beforeStr);
-                Q_EMIT dataChanged(index, index.siblingAtColumn(FirstNameCol + settings.maxNames - 1));
+                Q_EMIT dataChanged(index, index.siblingAtColumn(FirstNameCol + namesSize - 1));
                 return true;
             }
         }

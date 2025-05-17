@@ -62,10 +62,18 @@ void ModelTest::test_1()
     QSortFilterProxyModel proxyModel;
     {
         Model* model = new Model(settings, new CompleterModel(this));
+        QSignalSpy spyLoadingProgressed(model, &Model::loadingProgressed);
+        QVERIFY(spyLoadingProgressed.isValid());
+        QSignalSpy spyLoadingFinished(model, &Model::loadingFinished);
+        QVERIFY(spyLoadingFinished.isValid());
         model->load(fileGroupList, filesDir, dbPath);
+        QCOMPARE(spyLoadingProgressed.count(), 2 * 100);
+        QCOMPARE(spyLoadingFinished.count(), 1);
         proxyModel.setSourceModel(model);
     }
     proxyModel.sort(IdentifierCol, Qt::AscendingOrder);
+
+    QSignalSpy spyModelDataChanged(&proxyModel, &QAbstractItemModel::dataChanged);
 
     QVERIFY(QFile::exists(dbPath));
     QSqlDatabase db = QSqlDatabase::addDatabase(u"QSQLITE"_s, u"update"_s);
@@ -92,11 +100,20 @@ void ModelTest::test_1()
 
     QUndoStack undoStack;
 
-    for (int row = 0; row <= settings.maxNames; row++) {
+    for (int row = 0; row < 100; row++) {
+        QCOMPARE(spyModelDataChanged.count(), 0);
         undoStack.push(new DeleteCommand(&proxyModel, proxyModel.index(row, FirstNameCol)));
+        if (row % (1+settings.maxNames) == 0) {
+            QCOMPARE(spyModelDataChanged.count(), 0);
+        } else {
+            QCOMPARE(spyModelDataChanged.count(), 1);
+            QList<QVariant> arguments = spyModelDataChanged.takeFirst();
+            QCOMPARE(arguments.at(0).toModelIndex(), proxyModel.index(row, FirstNameCol));
+            QCOMPARE(arguments.at(1).toModelIndex(), proxyModel.index(row, FirstNameCol + row % (1+settings.maxNames) - 1));
+        }
     }
 
-    for (int row = 0; row <= settings.maxNames; row++) {
+    for (int row = 0; row < 100; row++) {
         QCOMPARE(proxyModel.data(proxyModel.index(row, IdentifierCol), Qt::DisplayRole),
                  QVariant(QString::asprintf("IMG_%04d", row)));
 
@@ -111,10 +128,19 @@ void ModelTest::test_1()
         }
     }
 
-    QCOMPARE(undoStack.index(), settings.maxNames);
-    for (int row = 0; row < settings.maxNames; row++) {
-        QVERIFY(undoStack.canUndo());
-        undoStack.undo();
+    QCOMPARE(undoStack.index(), 100 - (100/(1+settings.maxNames) + 1));
+    for (int row = 99; row >= 0; row--) {
+        if (row % (1+settings.maxNames) == 0) {
+            continue;
+        } else {
+            QVERIFY(undoStack.canUndo());
+            QCOMPARE(spyModelDataChanged.count(), 0);
+            undoStack.undo();
+            QCOMPARE(spyModelDataChanged.count(), 1);
+            QList<QVariant> arguments = spyModelDataChanged.takeFirst();
+            QCOMPARE(arguments.at(0).toModelIndex(), proxyModel.index(row, FirstNameCol));
+            QCOMPARE(arguments.at(1).toModelIndex(), proxyModel.index(row, FirstNameCol + row % (1+settings.maxNames) - 1));
+        }
     }
     QVERIFY(! undoStack.canUndo());
 
@@ -133,12 +159,13 @@ void ModelTest::test_1()
         }
     }
 
-    const QSignalSpy spy(&undoStack, &QUndoStack::indexChanged);
+    const QSignalSpy spyUndoStackIndexChanged(&undoStack, &QUndoStack::indexChanged);
 
     QCOMPARE(proxyModel.data(proxyModel.index(5, IdentifierCol), Qt::DisplayRole),
              QVariant(u"IMG_0005"_s));
     undoStack.push(new ChangeIdCommand(u"IMG_0010"_s, &proxyModel, proxyModel.index(5, IdentifierCol)));
-    QCOMPARE(spy.count(), 0);
+    QCOMPARE(spyUndoStackIndexChanged.count(), 0);
+    QCOMPARE(spyModelDataChanged.count(), 0);
     QVERIFY(! undoStack.canUndo());
     QCOMPARE(proxyModel.data(proxyModel.index(5, IdentifierCol), Qt::DisplayRole),
              QVariant(u"IMG_0005"_s));
@@ -150,6 +177,12 @@ void ModelTest::test_1()
 
     undoStack.push(new ChangeIdCommand(u"IMG_0100"_s, &proxyModel, proxyModel.index(10, IdentifierCol)));
     QVERIFY(undoStack.canUndo());
+    QCOMPARE(spyModelDataChanged.count(), 1);
+    QList<QVariant> arguments = spyModelDataChanged.takeFirst();
+    QCOMPARE(arguments.at(0).toModelIndex(), proxyModel.index(99, IdentifierCol));
+    QCOMPARE(arguments.at(1).toModelIndex(), proxyModel.index(99, IdentifierCol));
+    QCOMPARE(proxyModel.data(proxyModel.index(9, IdentifierCol), Qt::DisplayRole),
+             QVariant(u"IMG_0009"_s));
     QCOMPARE(proxyModel.data(proxyModel.index(10, IdentifierCol), Qt::DisplayRole),
              QVariant(u"IMG_0011"_s));
     QCOMPARE(proxyModel.data(proxyModel.index(11, IdentifierCol), Qt::DisplayRole),
@@ -163,6 +196,10 @@ void ModelTest::test_1()
              QVariant());
 
     undoStack.push(new EditCommand(u"XYZ"_s, &proxyModel, proxyModel.index(49, FirstNameCol + 4)));
+    QCOMPARE(spyModelDataChanged.count(), 1);
+    arguments = spyModelDataChanged.takeFirst();
+    QCOMPARE(arguments.at(0).toModelIndex(), proxyModel.index(49, FirstNameCol + 4));
+    QCOMPARE(arguments.at(1).toModelIndex(), proxyModel.index(49, FirstNameCol + 4));
 
     QCOMPARE(proxyModel.data(proxyModel.index(49, FirstNameCol + 4), Qt::DisplayRole),
              QVariant(u"XYZ"_s));
@@ -170,6 +207,10 @@ void ModelTest::test_1()
              QVariant());
 
     undoStack.undo();
+    QCOMPARE(spyModelDataChanged.count(), 1);
+    arguments = spyModelDataChanged.takeFirst();
+    QCOMPARE(arguments.at(0).toModelIndex(), proxyModel.index(49, FirstNameCol + 4));
+    QCOMPARE(arguments.at(1).toModelIndex(), proxyModel.index(49, FirstNameCol + 4));
 
     QCOMPARE(proxyModel.data(proxyModel.index(49, FirstNameCol + 4), Qt::DisplayRole),
              QVariant(QString::number(5)));
@@ -178,6 +219,10 @@ void ModelTest::test_1()
 
     QVERIFY(undoStack.canUndo());
     undoStack.undo();
+    QCOMPARE(spyModelDataChanged.count(), 1);
+    arguments = spyModelDataChanged.takeFirst();
+    QCOMPARE(arguments.at(0).toModelIndex(), proxyModel.index(10, IdentifierCol));
+    QCOMPARE(arguments.at(1).toModelIndex(), proxyModel.index(10, IdentifierCol));
     for (int row = 0; row < 100; row++) {
         QCOMPARE(proxyModel.data(proxyModel.index(row, IdentifierCol), Qt::DisplayRole),
                  QVariant(QString::asprintf("IMG_%04d", row)));
