@@ -159,7 +159,7 @@ void ModelTest::test_1()
         }
     }
 
-    const QSignalSpy spyUndoStackIndexChanged(&undoStack, &QUndoStack::indexChanged);
+    QSignalSpy spyUndoStackIndexChanged(&undoStack, &QUndoStack::indexChanged);
 
     QCOMPARE(proxyModel.data(proxyModel.index(5, IdentifierCol), Qt::DisplayRole),
              QVariant(u"IMG_0005"_s));
@@ -239,6 +239,29 @@ void ModelTest::test_1()
     }
 
     QVERIFY(! undoStack.canUndo());
+    spyUndoStackIndexChanged.clear();
+
+    QSignalSpy spyModelInvalidCharacters(qobject_cast<Model*>(proxyModel.sourceModel()), &Model::invalidCharacters);
+    QVERIFY(spyModelInvalidCharacters.isValid());
+
+    QSignalSpy spyModelInvalidCharacterSequence(qobject_cast<Model*>(proxyModel.sourceModel()), &Model::invalidCharacterSequence);
+    QVERIFY(spyModelInvalidCharacterSequence.isValid());
+
+    undoStack.push(new EditCommand(u"foo: bar"_s, &proxyModel, proxyModel.index(0, FirstNameCol)));
+    QCOMPARE(spyUndoStackIndexChanged.count(), 0);
+    QCOMPARE(spyModelDataChanged.count(), 0);
+    QVERIFY(! undoStack.canUndo());
+    QCOMPARE(spyModelInvalidCharacters.count(), 1);
+    QCOMPARE(spyModelInvalidCharacterSequence.count(), 0);
+
+    spyModelInvalidCharacters.clear();
+
+    undoStack.push(new EditCommand(u"foo - bar"_s, &proxyModel, proxyModel.index(0, FirstNameCol)));
+    QCOMPARE(spyUndoStackIndexChanged.count(), 0);
+    QCOMPARE(spyModelDataChanged.count(), 0);
+    QVERIFY(! undoStack.canUndo());
+    QCOMPARE(spyModelInvalidCharacters.count(), 0);
+    QCOMPARE(spyModelInvalidCharacterSequence.count(), 1);
 
     db.close();
 }
