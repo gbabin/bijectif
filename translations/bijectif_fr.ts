@@ -32,12 +32,12 @@
 <context>
     <name>ModelItem</name>
     <message>
-        <location filename="../src/modelitem.cpp" line="53"/>
+        <location filename="../src/modelitem.cpp" line="43"/>
         <source>Thumbnail unavailable</source>
         <translation>Miniature indisponible</translation>
     </message>
     <message>
-        <location filename="../src/modelitem.cpp" line="55"/>
+        <location filename="../src/modelitem.cpp" line="45"/>
         <source>Video</source>
         <translation>Vidéo</translation>
     </message>
@@ -83,102 +83,117 @@
 <context>
     <name>Window</name>
     <message>
-        <location filename="../src/window.cpp" line="34"/>
+        <location filename="../src/window.cpp" line="35"/>
         <source>&lt;b&gt;Bijectif %1&lt;/b&gt;&lt;br&gt;Edit titles in filenames&lt;br&gt;&lt;a href=&quot;%2&quot;&gt;%2&lt;/a&gt;&lt;br&gt;Licensed under the terms of the GNU General Public License v3.0&lt;br&gt;&lt;br&gt;Thumbnails database:&lt;br&gt;%3&lt;br&gt;Settings file:&lt;br&gt;%4&lt;br&gt;&lt;br&gt;&lt;a href=&quot;https://www.flaticon.com/free-icon/map_1865269&quot;&gt;Map icon&lt;/a&gt; by &lt;a href=&quot;https://www.flaticon.com/authors/freepik&quot;&gt;Freepik&lt;/a&gt; from &lt;a href=&quot;https://www.flaticon.com/&quot;&gt;Flaticon.com&lt;/a&gt;</source>
         <translation>&lt;b&gt;Bijectif %1&lt;/b&gt;&lt;br&gt;Modifier les titres dans les noms de fichiers&lt;br&gt;&lt;a href=&quot;%2&quot;&gt;%2&lt;/a&gt;&lt;br&gt;Sous licence selon les termes de la GNU General Public License v3.0&lt;br&gt;&lt;br&gt;Base de données des miniatures :&lt;br&gt;%3&lt;br&gt;Fichier de réglages :&lt;br&gt;%4&lt;br&gt;&lt;br&gt;&lt;a href=&quot;https://www.flaticon.com/free-icon/map_1865269&quot;&gt;Icône carte&lt;/a&gt; par &lt;a href=&quot;https://www.flaticon.com/authors/freepik&quot;&gt;Freepik&lt;/a&gt; de &lt;a href=&quot;https://www.flaticon.com/&quot;&gt;Flaticon.com&lt;/a&gt;</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="66"/>
+        <location filename="../src/window.cpp" line="67"/>
         <source>Folder: %1</source>
         <translation>Dossier : %1</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="92"/>
+        <location filename="../src/window.cpp" line="93"/>
         <source>&amp;Undo</source>
         <translation>&amp;Annuler</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="96"/>
+        <location filename="../src/window.cpp" line="97"/>
         <source>&amp;Redo</source>
         <translation>&amp;Refaire</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="104"/>
+        <location filename="../src/window.cpp" line="105"/>
         <source>&amp;Copy</source>
         <translation>Co&amp;pier</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="111"/>
+        <location filename="../src/window.cpp" line="112"/>
         <source>&amp;Paste</source>
         <translation>C&amp;oller</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="118"/>
+        <location filename="../src/window.cpp" line="119"/>
         <source>&amp;Insert</source>
         <translation>&amp;Insérer</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="125"/>
+        <location filename="../src/window.cpp" line="126"/>
         <source>&amp;Delete</source>
         <translation>&amp;Supprimer</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="136"/>
+        <location filename="../src/window.cpp" line="137"/>
         <source>&amp;Help</source>
         <translation>Ai&amp;de</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="138"/>
+        <location filename="../src/window.cpp" line="139"/>
         <source>&amp;Website</source>
         <translation>&amp;Site web</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="143"/>
+        <location filename="../src/window.cpp" line="144"/>
         <source>&amp;About</source>
         <translation>À &amp;propos</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="145"/>
+        <location filename="../src/window.cpp" line="146"/>
         <source>About</source>
         <translation>À propos</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="153"/>
+        <location filename="../src/window.cpp" line="154"/>
         <source>About &amp;Qt</source>
         <translation>À propos de &amp;Qt</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="168"/>
+        <location filename="../src/window.cpp" line="169"/>
         <source>Command history</source>
         <translation>Historique des commandes</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="212"/>
+        <location filename="../src/window.cpp" line="213"/>
         <source>No file found</source>
         <translation>Aucun fichier trouvé</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="213"/>
+        <location filename="../src/window.cpp" line="214"/>
         <source>No appropriate file has been found in %1.</source>
         <translation>Aucun fichier approprié n&apos;a été trouvé dans %1.</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="218"/>
+        <location filename="../src/window.cpp" line="219"/>
         <source>Cancel</source>
         <translation>Annuler</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="218"/>
+        <location filename="../src/window.cpp" line="219"/>
         <source>Loading thumbnails...</source>
         <translation>Chargement des miniatures...</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="200"/>
+        <location filename="../src/window.cpp" line="312"/>
+        <source>The following character sequence is not allowed: &quot; - &quot; (hyphen with surrounding spaces).</source>
+        <translation>Cette séquence de caractères est interdite : &quot; - &quot; (trait d&apos;union entouré d&apos;espaces).</translation>
+    </message>
+    <message>
+        <location filename="../src/window.cpp" line="318"/>
+        <source>Identifiers must be unique</source>
+        <translation>Les identifiants doivent être uniques</translation>
+    </message>
+    <message>
+        <location filename="../src/window.cpp" line="319"/>
+        <source>Identifier &quot;%1&quot; is already used.</source>
+        <translation>L&apos;identifiant &quot;%1&quot; est déjà utilisé.</translation>
+    </message>
+    <message>
+        <location filename="../src/window.cpp" line="201"/>
         <source>Too many name parts</source>
         <translation>Trop d&apos;éléments de noms</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="201"/>
+        <location filename="../src/window.cpp" line="202"/>
         <source>The file &quot;%1&quot; has too many parts in its name.
 The maximum number allowed is %2.
 This can be changed with the setting &quot;max names&quot;.</source>
@@ -187,63 +202,58 @@ Le nombre maximum autorisé est %2.
 Cela peut être modifié avec le paramètre &quot;max names&quot;.</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="273"/>
+        <location filename="../src/window.cpp" line="277"/>
         <source>Load completed (Thumbnails database: %1)</source>
         <translation>Chargement terminé (Base de données des miniatures : %1)</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="291"/>
+        <location filename="../src/window.cpp" line="297"/>
         <source>Unable to rename file</source>
         <translation>Impossible de renommer le fichier</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="292"/>
+        <location filename="../src/window.cpp" line="298"/>
         <source>Before : %1
 After : %2</source>
         <translation>Avant : %1
 Après : %2</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="298"/>
+        <location filename="../src/window.cpp" line="304"/>
         <source>Forbidden characters</source>
         <translation>Caractères interdits</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="299"/>
+        <location filename="../src/window.cpp" line="305"/>
         <source>The following characters are not allowed:
 &lt; &gt; : &quot; / \ | ? * ,</source>
         <translation>Les caractères suivants ne sont pas autorisés :
 &lt; &gt; : &quot; / \ | ? * ,</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="305"/>
+        <location filename="../src/window.cpp" line="311"/>
         <source>Forbidden character sequence</source>
         <translation>Séquence de caractères interdite</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="306"/>
-        <source>The following character sequence is not allowed: &quot; - &quot; (hyphen with surrounding spaces)</source>
-        <translation>Cette séquence de caractères est interdite : &quot; - &quot; (trait d&apos;union entouré d&apos;espaces)</translation>
-    </message>
-    <message>
-        <location filename="../src/window.cpp" line="445"/>
-        <location filename="../src/window.cpp" line="459"/>
+        <location filename="../src/window.cpp" line="458"/>
+        <location filename="../src/window.cpp" line="472"/>
         <source>Pasting multiple cells</source>
         <translation>Coller plusieurs cellules</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="446"/>
-        <location filename="../src/window.cpp" line="460"/>
+        <location filename="../src/window.cpp" line="459"/>
+        <location filename="../src/window.cpp" line="473"/>
         <source>The pasted content has %1 parts. Therefore, each modifed row must have %1 selected cells.</source>
         <translation>Le contenu collé comporte %1 parties. Par conséquent, chaque ligne modifiée doit avoir %1 cellules sélectionnées.</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="493"/>
+        <location filename="../src/window.cpp" line="506"/>
         <source>Insertion</source>
         <translation>Insertion</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="493"/>
+        <location filename="../src/window.cpp" line="506"/>
         <source>Name:</source>
         <translation>Nom :</translation>
     </message>

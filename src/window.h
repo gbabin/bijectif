@@ -34,6 +34,7 @@ public Q_SLOTS:
     void fileRenameFailed(const QString &before, const QString &after);
     void invalidCharacters();
     void invalidCharacterSequence();
+    void identifiersMustBeUnique(const QString &id);
     void selectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
     void clipboardChanged();
     void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QList<int> &roles = QList<int>());

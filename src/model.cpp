@@ -365,7 +365,10 @@ bool Model::setData(const QModelIndex &index, const QVariant &value, int role)
             if (std::any_of(images.cbegin(), images.cend(),
                             [&valueStr](const ModelItem *item){
                                 return QString::compare(valueStr, item->getId()) == 0; }))
+            {
+                Q_EMIT identifiersMustBeUnique(valueStr);
                 return false;
+            }
             if (images.at(index.row())->setId(valueStr)) {
                 Q_EMIT dataChanged(index, index, {Qt::DisplayRole, Qt::EditRole});
                 Q_EMIT dataChanged(index.siblingAtColumn(ThumbnailCol),

@@ -82,6 +82,7 @@ void ModelTest::test_1()
     proxyModel.sort(IdentifierCol, Qt::AscendingOrder);
 
     QSignalSpy spyModelDataChanged(&proxyModel, &QAbstractItemModel::dataChanged);
+    QSignalSpy spyModelIdentifiersMustBeUnique(qobject_cast<Model*>(proxyModel.sourceModel()), &Model::identifiersMustBeUnique);
 
     QVERIFY(QFile::exists(dbPath));
     QSqlDatabase db = QSqlDatabase::addDatabase(u"QSQLITE"_s, u"update"_s);
@@ -173,9 +174,12 @@ void ModelTest::test_1()
 
     QCOMPARE(proxyModel.data(proxyModel.index(5, IdentifierCol), Qt::DisplayRole),
              QVariant(u"IMG_0005"_s));
+    QCOMPARE(spyModelIdentifiersMustBeUnique.count(), 0);
     undoStack.push(new ChangeIdCommand(u"IMG_0010"_s, &proxyModel, proxyModel.index(5, IdentifierCol)));
     QCOMPARE(spyUndoStackIndexChanged.count(), 0);
     QCOMPARE(spyModelDataChanged.count(), 0);
+    QCOMPARE(spyModelIdentifiersMustBeUnique.count(), 1);
+    spyModelIdentifiersMustBeUnique.clear();
     QVERIFY(! undoStack.canUndo());
     QCOMPARE(proxyModel.data(proxyModel.index(5, IdentifierCol), Qt::DisplayRole),
              QVariant(u"IMG_0005"_s));
@@ -276,6 +280,8 @@ void ModelTest::test_1()
     QVERIFY(! undoStack.canUndo());
     QCOMPARE(spyModelInvalidCharacters.count(), 0);
     QCOMPARE(spyModelInvalidCharacterSequence.count(), 1);
+
+    QCOMPARE(spyModelIdentifiersMustBeUnique.count(), 0);
 
     db.close();
 }

@@ -238,6 +238,9 @@ void Window::modelLoadingStart()
     connect(&model, &Model::invalidCharacterSequence,
             this, &Window::invalidCharacterSequence);
 
+    connect(&model, &Model::identifiersMustBeUnique,
+            this, &Window::identifiersMustBeUnique);
+
     future = QtConcurrent::run([this, fileGroupList] {
         model.load(fileGroupList, directory, getThumbnailsDatabasePath());
         qDeleteAll(fileGroupList);
@@ -306,7 +309,14 @@ void Window::invalidCharacterSequence()
 {
     QMessageBox::information(this,
                              tr("Forbidden character sequence"),
-                             tr("The following character sequence is not allowed: \" - \" (hyphen with surrounding spaces)"));
+                             tr("The following character sequence is not allowed: \" - \" (hyphen with surrounding spaces)."));
+}
+
+void Window::identifiersMustBeUnique(const QString &id)
+{
+    QMessageBox::information(this,
+                             tr("Identifiers must be unique"),
+                             tr("Identifier \"%1\" is already used.").arg(id));
 }
 
 void Window::selectionChanged(const QItemSelection &selected, const QItemSelection &deselected)

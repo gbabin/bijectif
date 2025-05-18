@@ -49,6 +49,7 @@ Q_SIGNALS:
     void fileRenameFailed(const QString &before, const QString &after);
     void invalidCharacters();
     void invalidCharacterSequence();
+    void identifiersMustBeUnique(const QString &id);
 
 private:
     const Settings &settings;
