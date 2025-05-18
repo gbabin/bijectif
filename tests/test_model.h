@@ -6,6 +6,7 @@
 
 #include "../src/settings.h"
 
+#include <QSignalSpy>
 #include <QTest>
 
 class ModelTest : public QObject
@@ -14,6 +15,7 @@ class ModelTest : public QObject
 
 public:
     static bool createEmptyFile(const QString &path);
+    static void keepOnlyDisplayRole(QSignalSpy &spy);
     explicit ModelTest(const Settings &settings, QObject *parent = nullptr);
 
 private Q_SLOTS:

@@ -65,6 +65,10 @@ void RowTest::verify_dataChanged(QSignalSpy &spy, int left, int right)
 {
     QCOMPARE(spy.signal(), QByteArrayLiteral("dataChanged(QModelIndex,QModelIndex,QList<int>)"));
 
+    spy.removeIf([](const QList<QVariant> &args) {
+                     return ! args.at(2).toList().contains(Qt::DisplayRole);
+                 });
+
     QCOMPARE(spy.count(), 1);
     QList<QVariant> arguments = spy.takeFirst();
     QCOMPARE(arguments.at(0).toModelIndex(), model->index(0, left));

@@ -367,7 +367,10 @@ bool Model::setData(const QModelIndex &index, const QVariant &value, int role)
                                 return QString::compare(valueStr, item->getId()) == 0; }))
                 return false;
             if (images.at(index.row())->setId(valueStr)) {
-                Q_EMIT dataChanged(index, index);
+                Q_EMIT dataChanged(index, index, {Qt::DisplayRole, Qt::EditRole});
+                Q_EMIT dataChanged(index.siblingAtColumn(ThumbnailCol),
+                                   index.siblingAtColumn(ThumbnailCol),
+                                   {ImagePathRole});
                 return true;
             }
         }
@@ -385,7 +388,10 @@ bool Model::setData(const QModelIndex &index, const QVariant &value, int role)
                 completerModel->insert(afterStr);
                 if (! beforeStr.isEmpty())
                     completerModel->remove(beforeStr);
-                Q_EMIT dataChanged(index, index);
+                Q_EMIT dataChanged(index, index, {Qt::DisplayRole, Qt::EditRole});
+                Q_EMIT dataChanged(index.siblingAtColumn(ThumbnailCol),
+                                   index.siblingAtColumn(ThumbnailCol),
+                                   {ImagePathRole});
                 return true;
             }
         }
@@ -395,7 +401,12 @@ bool Model::setData(const QModelIndex &index, const QVariant &value, int role)
                 const int namesSize = images.at(index.row())->getNamesSize();
                 const QString afterStr = images.at(index.row())->getName(nameIdx);
                 completerModel->insert(afterStr);
-                Q_EMIT dataChanged(index, index.siblingAtColumn(FirstNameCol + namesSize - 1));
+                Q_EMIT dataChanged(index,
+                                   index.siblingAtColumn(FirstNameCol + namesSize - 1),
+                                   {Qt::DisplayRole, Qt::EditRole});
+                Q_EMIT dataChanged(index.siblingAtColumn(ThumbnailCol),
+                                   index.siblingAtColumn(ThumbnailCol),
+                                   {ImagePathRole});
                 return true;
             }
         }
@@ -407,7 +418,12 @@ bool Model::setData(const QModelIndex &index, const QVariant &value, int role)
             if (images.at(index.row())->deleteName(nameIdx)) {
                 if (! beforeStr.isEmpty())
                     completerModel->remove(beforeStr);
-                Q_EMIT dataChanged(index, index.siblingAtColumn(FirstNameCol + namesSize - 1));
+                Q_EMIT dataChanged(index,
+                                   index.siblingAtColumn(FirstNameCol + namesSize - 1),
+                                   {Qt::DisplayRole, Qt::EditRole});
+                Q_EMIT dataChanged(index.siblingAtColumn(ThumbnailCol),
+                                   index.siblingAtColumn(ThumbnailCol),
+                                   {ImagePathRole});
                 return true;
             }
         }

@@ -8,7 +8,6 @@
 #include "../src/command_id.h"
 #include "../src/model.h"
 
-#include <QSignalSpy>
 #include <QSortFilterProxyModel>
 #include <QSqlDatabase>
 #include <QStandardPaths>
@@ -27,6 +26,15 @@ bool ModelTest::createEmptyFile(const QString &path)
     const bool ret = file.open(QIODevice::WriteOnly);
     file.close();
     return ret;
+}
+
+void ModelTest::keepOnlyDisplayRole(QSignalSpy &spy)
+{
+    QCOMPARE(spy.signal(), QByteArrayLiteral("dataChanged(QModelIndex,QModelIndex,QList<int>)"));
+
+    spy.removeIf([](const QList<QVariant> &args) {
+                     return ! args.at(2).toList().contains(Qt::DisplayRole);
+                 });
 }
 
 void ModelTest::init()
@@ -106,6 +114,7 @@ void ModelTest::test_1()
         if (row % (1+settings.maxNames) == 0) {
             QCOMPARE(spyModelDataChanged.count(), 0);
         } else {
+            keepOnlyDisplayRole(spyModelDataChanged);
             QCOMPARE(spyModelDataChanged.count(), 1);
             QList<QVariant> arguments = spyModelDataChanged.takeFirst();
             QCOMPARE(arguments.at(0).toModelIndex(), proxyModel.index(row, FirstNameCol));
@@ -136,6 +145,7 @@ void ModelTest::test_1()
             QVERIFY(undoStack.canUndo());
             QCOMPARE(spyModelDataChanged.count(), 0);
             undoStack.undo();
+            keepOnlyDisplayRole(spyModelDataChanged);
             QCOMPARE(spyModelDataChanged.count(), 1);
             QList<QVariant> arguments = spyModelDataChanged.takeFirst();
             QCOMPARE(arguments.at(0).toModelIndex(), proxyModel.index(row, FirstNameCol));
@@ -177,6 +187,7 @@ void ModelTest::test_1()
 
     undoStack.push(new ChangeIdCommand(u"IMG_0100"_s, &proxyModel, proxyModel.index(10, IdentifierCol)));
     QVERIFY(undoStack.canUndo());
+    keepOnlyDisplayRole(spyModelDataChanged);
     QCOMPARE(spyModelDataChanged.count(), 1);
     QList<QVariant> arguments = spyModelDataChanged.takeFirst();
     QCOMPARE(arguments.at(0).toModelIndex(), proxyModel.index(99, IdentifierCol));
@@ -196,6 +207,7 @@ void ModelTest::test_1()
              QVariant());
 
     undoStack.push(new EditCommand(u"XYZ"_s, &proxyModel, proxyModel.index(49, FirstNameCol + 4)));
+    keepOnlyDisplayRole(spyModelDataChanged);
     QCOMPARE(spyModelDataChanged.count(), 1);
     arguments = spyModelDataChanged.takeFirst();
     QCOMPARE(arguments.at(0).toModelIndex(), proxyModel.index(49, FirstNameCol + 4));
@@ -207,6 +219,7 @@ void ModelTest::test_1()
              QVariant());
 
     undoStack.undo();
+    keepOnlyDisplayRole(spyModelDataChanged);
     QCOMPARE(spyModelDataChanged.count(), 1);
     arguments = spyModelDataChanged.takeFirst();
     QCOMPARE(arguments.at(0).toModelIndex(), proxyModel.index(49, FirstNameCol + 4));
@@ -219,6 +232,7 @@ void ModelTest::test_1()
 
     QVERIFY(undoStack.canUndo());
     undoStack.undo();
+    keepOnlyDisplayRole(spyModelDataChanged);
     QCOMPARE(spyModelDataChanged.count(), 1);
     arguments = spyModelDataChanged.takeFirst();
     QCOMPARE(arguments.at(0).toModelIndex(), proxyModel.index(10, IdentifierCol));
