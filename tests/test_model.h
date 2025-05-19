@@ -26,7 +26,7 @@ private Q_SLOTS:
 
 private:
     const Settings& settings;
-    QDir rootDir;
+    QTemporaryDir rootDir;
     QDir dbDir;
     QDir filesDir;
 };

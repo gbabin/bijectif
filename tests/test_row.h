@@ -45,7 +45,7 @@ private:
                      const QString &name8);
     void verify_dataChanged(QSignalSpy &spy, int left, int right);
     const Settings& settings;
-    QDir rootDir;
+    QTemporaryDir rootDir;
     QDir dbDir;
     QDir filesDir;
     QAbstractItemModel* model = nullptr;

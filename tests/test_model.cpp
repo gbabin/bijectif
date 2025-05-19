@@ -39,9 +39,7 @@ void ModelTest::keepOnlyDisplayRole(QSignalSpy &spy)
 
 void ModelTest::init()
 {
-    const QDir tmpDir(QStandardPaths::writableLocation(QStandardPaths::TempLocation));
-    rootDir = tmpDir.filePath(u"bijectif-tests"_s);
-    QDir().mkpath(rootDir.path());
+    QVERIFY(rootDir.isValid());
     dbDir = rootDir.filePath(u"db"_s);
     QDir().mkpath(dbDir.path());
     filesDir = rootDir.filePath(u"files"_s);
@@ -50,6 +48,9 @@ void ModelTest::init()
 
 void ModelTest::test_1()
 {
+    QStringList filenames;
+    filenames.reserve(100);
+
     for (int i = 99; i >= 0; i--) {
         QList<int> numbers(i%(1+settings.maxNames));
         std::iota(numbers.begin(), numbers.end(), 1);
@@ -61,7 +62,11 @@ void ModelTest::test_1()
         QString filename = QString::asprintf("IMG_%04d", i);
         if (! names.isEmpty()) filename += u" - "_s + names;
         filename += u".jpg"_s;
-        QImage(8, 8, QImage::Format_RGB888).save(filesDir.filePath(filename));
+        filenames.append(filesDir.filePath(filename));
+    }
+
+    for (const QString &filename : std::as_const(filenames)) {
+        QVERIFY(QImage(8, 8, QImage::Format_RGB888).save(filename));
     }
 
     const QList<const FileGroup *> fileGroupList = FileGroup::fileGroupList(settings, filesDir);
@@ -284,6 +289,10 @@ void ModelTest::test_1()
     QCOMPARE(spyModelIdentifiersMustBeUnique.count(), 0);
 
     db.close();
+
+    for (const QString &filename : std::as_const(filenames)) {
+        QVERIFY(QFile::remove(filename));
+    }
 }
 
 void ModelTest::test_2()
@@ -434,7 +443,4 @@ void ModelTest::test_2()
 void ModelTest::cleanup()
 {
     QSqlDatabase::removeDatabase(u"update"_s);
-
-    if (rootDir.path().startsWith(u"/tmp/"_s))
-        rootDir.removeRecursively();
 }

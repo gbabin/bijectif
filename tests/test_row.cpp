@@ -81,9 +81,7 @@ void RowTest::verify_dataChanged(QSignalSpy &spy, int left, int right)
 
 void RowTest::initTestCase()
 {
-    const QDir tmpDir(QStandardPaths::writableLocation(QStandardPaths::TempLocation));
-    rootDir = tmpDir.filePath(u"bijectif-tests"_s);
-    QDir().mkpath(rootDir.path());
+    QVERIFY(rootDir.isValid());
     dbDir = rootDir.filePath(u"db"_s);
     QDir().mkpath(dbDir.path());
     filesDir = rootDir.filePath(u"files"_s);
@@ -574,7 +572,4 @@ void RowTest::cleanupTestCase()
     db = QSqlDatabase();
 
     QSqlDatabase::removeDatabase(u"update"_s);
-
-    if (rootDir.path().startsWith(u"/tmp/"_s))
-        rootDir.removeRecursively();
 }
