@@ -123,7 +123,7 @@ std::optional<QPixmap> Loader::computeVideoThumbnail(const Settings &settings, c
                            [&eventLoop](){ eventLoop.exit(1); });
         QObject::connect(&mediaPlayer, &QMediaPlayer::mediaStatusChanged,
                          &eventLoop,
-                         [&eventLoop](const QMediaPlayer::MediaStatus status){
+                         [&eventLoop](const QMediaPlayer::MediaStatus status) {
                              switch (status) {
                              case QMediaPlayer::LoadingMedia:
                                  break;
@@ -149,7 +149,7 @@ std::optional<QPixmap> Loader::computeVideoThumbnail(const Settings &settings, c
                            [&eventLoop](){ eventLoop.exit(1); });
         QObject::connect(&videoSink, &QVideoSink::videoFrameChanged,
                          &eventLoop,
-                         [&eventLoop, &image](const QVideoFrame &frame){
+                         [&eventLoop, &image](const QVideoFrame &frame) {
                              if (image.isNull()) image = frame.toImage();
                              eventLoop.exit();
                          });

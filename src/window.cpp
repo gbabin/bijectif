@@ -357,8 +357,9 @@ void Window::selectionChanged(const QItemSelection &selected, const QItemSelecti
         insertAct->setDisabled(anyEmpty
                                || anyId
                                || std::any_of(selectedIndexes.cbegin(), selectedIndexes.cend(),
-                                              [this](const QModelIndex &index){
-                                                  return ! view.model()->data(index.siblingAtColumn(FirstNameCol + settings.maxNames - 1)).isNull(); }));
+                                              [this](const QModelIndex &index) {
+                                                  return ! view.model()->data(index.siblingAtColumn(FirstNameCol + settings.maxNames - 1)).isNull();
+                                              }));
     }
 }
 
