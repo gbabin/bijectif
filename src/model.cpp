@@ -360,11 +360,13 @@ bool Model::setData(const QModelIndex &index, const QVariant &value, int role)
 
     if (index.column() == IdentifierCol) {
         if (role == ChangeIdRole) {
-            QString valueStr = value.toString();
-            valueStr = valueStr.trimmed();
+            const QString valueStr = value.toString().trimmed();
+            if (images.at(index.row())->getId() == valueStr)
+                return false;
             if (std::any_of(images.cbegin(), images.cend(),
-                            [&valueStr](const ModelItem *item){
-                                return QString::compare(valueStr, item->getId()) == 0; }))
+                            [&valueStr](const ModelItem *item) {
+                                return valueStr == item->getId();
+                            }))
             {
                 Q_EMIT identifiersMustBeUnique(valueStr);
                 return false;

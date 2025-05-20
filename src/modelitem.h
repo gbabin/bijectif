@@ -27,7 +27,7 @@ public:
     void setThumbnail(const QPixmap &thumbnail);
     [[nodiscard]] QString getPath() const;
     [[nodiscard]] QString getTooltip() const;
-    [[nodiscard]] QString getId() const;
+    [[nodiscard]] const QString& getId() const;
     bool setId(const QString &id);
     [[nodiscard]] int getNamesSize() const;
     [[nodiscard]] const QString& getName(int index) const;

@@ -70,7 +70,7 @@ QString ModelItem::getTooltip() const
     }
 }
 
-QString ModelItem::getId() const
+const QString& ModelItem::getId() const
 {
     return id;
 }
