@@ -5,11 +5,11 @@
 
 #include "model.h"
 
-InsertCommand::InsertCommand(QString text, QAbstractItemModel *model, const QModelIndex &index, QUndoCommand *parent)
+InsertCommand::InsertCommand(const QString &text, QAbstractItemModel *model, const QModelIndex &index, QUndoCommand *parent)
     : QUndoCommand(parent)
     , model(model)
     , index(index)
-    , newValue(std::move(text))
+    , newValue(text.simplified())
 {
     setText(QObject::tr("Insert (%1) [%2] \"%3\"\n")
                 .arg(model->data(index.siblingAtColumn(IdentifierCol)).toString(),

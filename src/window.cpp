@@ -435,12 +435,10 @@ void Window::pasteIntoSelection()
     if (selection == nullptr) return;
 
     QString mode = u"plain"_s;
-    QString text = QApplication::clipboard()->text(mode).trimmed();
+    const QString text = QApplication::clipboard()->text(mode).trimmed();
 
     if (! text.isEmpty()) {
-        static const QRegularExpression reCommaSpaces(u" *, *"_s);
-        text.replace(reCommaSpaces, u","_s);
-        QStringList texts = text.split(u","_s);
+        const QStringList texts = text.split(u","_s);
 
         if (texts.size() == 1) {
             QModelIndexList indexes = selection->selectedIndexes();

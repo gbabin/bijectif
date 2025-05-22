@@ -360,7 +360,7 @@ bool Model::setData(const QModelIndex &index, const QVariant &value, int role)
 
     if (index.column() == IdentifierCol) {
         if (role == ChangeIdRole) {
-            const QString valueStr = value.toString().trimmed();
+            const QString valueStr = value.toString();
             if (images.at(index.row())->getId() == valueStr)
                 return false;
             if (std::any_of(images.cbegin(), images.cend(),

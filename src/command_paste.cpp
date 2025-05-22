@@ -5,12 +5,12 @@
 
 #include "model.h"
 
-PasteCommand::PasteCommand(QString text, QAbstractItemModel *model, const QModelIndex &index, QUndoCommand *parent)
+PasteCommand::PasteCommand(const QString &text, QAbstractItemModel *model, const QModelIndex &index, QUndoCommand *parent)
     : QUndoCommand(parent)
     , model(model)
     , index(index)
     , oldValue(index.data().toString())
-    , newValue(std::move(text))
+    , newValue(text.simplified())
 {
     setText(QObject::tr("Paste (%1) [%2] \"%3\" > \"%4\"\n")
                 .arg(model->data(index.siblingAtColumn(IdentifierCol)).toString(),

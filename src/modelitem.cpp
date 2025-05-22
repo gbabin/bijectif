@@ -123,18 +123,16 @@ bool ModelItem::setName(int index, const QString &name)
 {
     if (! isValidPathChars(name)) return false;
 
-    const QString nameT = name.trimmed();
-
-    if (nameT.isEmpty()) return false;
-    if (index < names.size() && names.at(index) == nameT) return false;
+    if (name.isEmpty()) return false;
+    if (index < names.size() && names.at(index) == name) return false;
     if (index > names.size()) return false;
 
     QStringList newNames(names);
 
     if (index == newNames.size()) {
-        newNames.append(nameT);
+        newNames.append(name);
     } else {
-        newNames.replace(index, nameT);
+        newNames.replace(index, name);
     }
 
     const QList<QPair<QString, QString>> newPaths = computeNewPaths(folder,
@@ -175,15 +173,13 @@ bool ModelItem::insertName(int index, const QString &name)
 {
     if (! isValidPathChars(name)) return false;
 
-    const QString nameT = name.trimmed();
-
-    if (nameT.isEmpty()) return false;
+    if (name.isEmpty()) return false;
     if (index > names.size()) return false;
     if (names.size() == settings.maxNames) return false;
 
     QStringList newNames(names);
 
-    newNames.insert(index, nameT);
+    newNames.insert(index, name);
 
     const QList<QPair<QString, QString>> newPaths = computeNewPaths(folder,
                                                                     this->id, this->names,
