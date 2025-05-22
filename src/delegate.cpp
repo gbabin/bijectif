@@ -47,7 +47,7 @@ void Delegate::setModelData(QWidget *editor, QAbstractItemModel *model, const QM
         if (v.userType() == QMetaType::QString) {
             if (index.column() == IdentifierCol)
                 undoStack->push(new ChangeIdCommand(v.toString(), model, index));
-            else
+            else if (index.column() >= FirstNameCol)
                 undoStack->push(new EditCommand(v.toString(), model, index));
         }
     }

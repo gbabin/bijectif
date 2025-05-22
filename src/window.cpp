@@ -4,6 +4,7 @@
 #include "window.h"
 
 #include "command_delete.h"
+#include "command_id.h"
 #include "command_insert.h"
 #include "command_paste.h"
 #include "delegate.h"
@@ -158,9 +159,6 @@ Window::Window(const Settings &settings, const QDir &directory, bool benchmark, 
 
     menuBar()->setFont(font);
     helpMenu->setFont(font);
-
-    connect(QApplication::clipboard(), &QClipboard::dataChanged,
-            this, &Window::clipboardChanged);
 
     // dock
 
@@ -341,10 +339,8 @@ void Window::selectionChanged(const QItemSelection &selected, const QItemSelecti
         const bool anyEmpty = std::any_of(selectedIndexes.cbegin(), selectedIndexes.cend(),
                                           [this](const QModelIndex &index){ return view.model()->data(index).isNull(); });
 
-        QString mode = u"plain"_s;
-        pasteAct->setEnabled((! QApplication::clipboard()->text(mode).trimmed().isEmpty())
-                             && (selectedIndexes.size() == 1
-                                 || !anyId));
+        pasteAct->setEnabled(selectedIndexes.size() == 1
+                             || !anyId);
 
         copyAct->setEnabled((selectedIndexes.size() == 1
                              && ! view.model()->data(selectedIndexes.first()).isNull())
@@ -361,11 +357,6 @@ void Window::selectionChanged(const QItemSelection &selected, const QItemSelecti
                                                   return ! view.model()->data(index.siblingAtColumn(FirstNameCol + settings.maxNames - 1)).isNull();
                                               }));
     }
-}
-
-void Window::clipboardChanged()
-{
-    selectionChanged(QItemSelection(), QItemSelection());
 }
 
 void Window::dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QList<int> &roles)
@@ -442,13 +433,22 @@ void Window::pasteIntoSelection()
 
         if (texts.size() == 1) {
             QModelIndexList indexes = selection->selectedIndexes();
-            std::sort(indexes.begin(), indexes.end(),
-                      [](const QModelIndex& a, const QModelIndex& b) {
-                          return a.row() < b.row()
-                                 || (a.row() == b.row() && a.column() < b.column()); });
+            if (indexes.size() == 1) {
+                const QModelIndex& index = indexes.constFirst();
+                if (index.column() == IdentifierCol)
+                    undoStack->push(new ChangeIdCommand(text, view.model(), index));
+                else if (index.column() >= FirstNameCol)
+                    undoStack->push(new PasteCommand(text, view.model(), index));
+            } else {
+                std::sort(indexes.begin(), indexes.end(),
+                          [](const QModelIndex& a, const QModelIndex& b) {
+                              return a.row() < b.row()
+                                     || (a.row() == b.row() && a.column() < b.column()); });
 
-            for (const QModelIndex index : std::as_const(indexes)) {
-                undoStack->push(new PasteCommand(text, view.model(), index));
+                for (const QModelIndex& index : std::as_const(indexes)) {
+                    if (index.column() >= FirstNameCol)
+                        undoStack->push(new PasteCommand(text, view.model(), index));
+                }
             }
         }
         else if (texts.size() > 1) {
@@ -475,7 +475,8 @@ void Window::pasteIntoSelection()
                 }
             }
             for (int i = 0 ; i < indexes.size() ; i++) {
-                undoStack->push(new PasteCommand(texts[i % texts.size()], view.model(), indexes[i]));
+                if (indexes[i].column() >= FirstNameCol)
+                    undoStack->push(new PasteCommand(texts[i % texts.size()], view.model(), indexes[i]));
             }
         }
     }
@@ -493,7 +494,8 @@ void Window::deleteSelection()
                          || (a.row() == b.row() && a.column() > b.column()); });
 
     for (const QModelIndex index : std::as_const(indexes)) {
-        undoStack->push(new DeleteCommand(view.model(), index));
+        if (index.column() >= FirstNameCol)
+            undoStack->push(new DeleteCommand(view.model(), index));
     }
 }
 
@@ -512,6 +514,7 @@ void Window::insertAtSelection()
                          || (a.row() == b.row() && a.column() > b.column()); });
 
     for (const QModelIndex index : std::as_const(indexes)) {
-        undoStack->push(new InsertCommand(text, view.model(), index));
+        if (index.column() >= FirstNameCol)
+            undoStack->push(new InsertCommand(text, view.model(), index));
     }
 }
