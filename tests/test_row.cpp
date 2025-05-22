@@ -58,7 +58,7 @@ void RowTest::compare_row(const QAbstractItemModel &model,
     const QString filename = all.join(u" - "_s) + u".jpg"_s;
     const QFileInfoList files = filesDir.entryInfoList({u"*.jpg"_s}, QDir::Files, QDir::Name);
     QCOMPARE(files.size(), 1);
-    QCOMPARE(files.first().fileName(), filename);
+    QCOMPARE(files.constFirst().fileName(), filename);
 }
 
 void RowTest::verify_dataChanged(QSignalSpy &spy, int left, int right)

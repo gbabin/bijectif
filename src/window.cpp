@@ -343,7 +343,7 @@ void Window::selectionChanged(const QItemSelection &selected, const QItemSelecti
                              || !anyId);
 
         copyAct->setEnabled((selectedIndexes.size() == 1
-                             && ! view.model()->data(selectedIndexes.first()).isNull())
+                             && ! view.model()->data(selectedIndexes.constFirst()).isNull())
                             || (selectedIndexes.size() > 1
                                 && !anyId
                                 && !anyEmpty));
@@ -393,7 +393,7 @@ void Window::copySelection()
     if (selection == nullptr) return;
 
     if (selection->selectedIndexes().size() == 1) {
-        const QModelIndex index = selection->selectedIndexes().first();
+        const QModelIndex index = selection->selectedIndexes().constFirst();
         if (index.column() == IdentifierCol || index.column() >= FirstNameCol) {
             const QVariant data = index.data(Qt::DisplayRole);
             if (data.userType() == QMetaType::QString) {
