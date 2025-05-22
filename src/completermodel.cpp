@@ -32,7 +32,7 @@ void CompleterModel::insert(const QList<ModelItem *> &images)
     for (const ModelItem* image : images) {
         const int size = image->getNamesSize();
         for (int i = 0 ; i < size ; i++) {
-            const QString name = image->getName(i);
+            const QString& name = image->getName(i);
             if (counts.contains(name)) {
                 ++counts[name];
             } else {

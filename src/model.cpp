@@ -389,7 +389,7 @@ bool Model::setData(const QModelIndex &index, const QVariant &value, int role)
                 beforeStr = images.at(index.row())->getName(nameIdx);
             const QString valueStr = value.toString();
             if (images.at(index.row())->setName(nameIdx, valueStr)) {
-                const QString afterStr = images.at(index.row())->getName(nameIdx);
+                const QString& afterStr = images.at(index.row())->getName(nameIdx);
                 completerModel->insert(afterStr);
                 if (! beforeStr.isEmpty())
                     completerModel->remove(beforeStr);
@@ -404,7 +404,7 @@ bool Model::setData(const QModelIndex &index, const QVariant &value, int role)
             const QString valueStr = value.toString();
             if (images.at(index.row())->insertName(nameIdx, valueStr)) {
                 const int namesSize = images.at(index.row())->getNamesSize();
-                const QString afterStr = images.at(index.row())->getName(nameIdx);
+                const QString& afterStr = images.at(index.row())->getName(nameIdx);
                 completerModel->insert(afterStr);
                 Q_EMIT dataChanged(index,
                                    index.siblingAtColumn(FirstNameCol + namesSize - 1),

@@ -408,7 +408,7 @@ void Window::copySelection()
                       return a.column() < b.column()
                              || (a.column() == b.column() && a.row() < b.row()); });
         QStringList names;
-        for (const QModelIndex index : std::as_const(indexes)) {
+        for (const QModelIndex& index : std::as_const(indexes)) {
             if (index.column() >= FirstNameCol) {
                 const QVariant data = index.data(Qt::DisplayRole);
                 if (data.userType() == QMetaType::QString) {
@@ -493,7 +493,7 @@ void Window::deleteSelection()
                   return a.row() < b.row()
                          || (a.row() == b.row() && a.column() > b.column()); });
 
-    for (const QModelIndex index : std::as_const(indexes)) {
+    for (const QModelIndex& index : std::as_const(indexes)) {
         if (index.column() >= FirstNameCol)
             undoStack->push(new DeleteCommand(view.model(), index));
     }
@@ -513,7 +513,7 @@ void Window::insertAtSelection()
                   return a.row() < b.row()
                          || (a.row() == b.row() && a.column() > b.column()); });
 
-    for (const QModelIndex index : std::as_const(indexes)) {
+    for (const QModelIndex& index : std::as_const(indexes)) {
         if (index.column() >= FirstNameCol)
             undoStack->push(new InsertCommand(text, view.model(), index));
     }
