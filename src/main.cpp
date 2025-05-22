@@ -56,6 +56,9 @@ int main(int argc, char *argv[])
 
     const QStringList uiLanguages = QLocale::system().uiLanguages();
 
+#ifdef QT_NO_TRANSLATION
+    qDebug() << "Build without translation";
+#else
     QTranslator qtTranslator;
     for (const QString &locale : uiLanguages) {
         if (qtTranslator.load(QLocale(locale), u"qt"_s, u"_"_s, QLibraryInfo::path(QLibraryInfo::TranslationsPath))) {
@@ -86,6 +89,7 @@ int main(int argc, char *argv[])
         }
         qWarning() << "No app translation found for" << locale;
     }
+#endif
 
     QCommandLineParser parser;
     parser.addHelpOption();
