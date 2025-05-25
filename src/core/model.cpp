@@ -125,6 +125,8 @@ void Model::load(const QList<const FileGroup *> &fileGroupList, const QDir &dire
         // compute new thumbnails
         const qint64 timestamp = QDateTime::currentSecsSinceEpoch();
         QList<NewItem> newThumbnails;
+
+        if (! newFiles.empty())
         {
             newThumbnails.reserve(newFiles.size());
 
@@ -134,7 +136,7 @@ void Model::load(const QList<const FileGroup *> &fileGroupList, const QDir &dire
             QVector<Loader*> loaders;
             QEventLoop eventLoop;
             QAtomicInt finishedCount = 0;
-            const int threadCount = QThread::idealThreadCount();
+            const int threadCount = qMin(QThread::idealThreadCount(), newFiles.size());
 
             threads.reserve(threadCount);
             loaders.reserve(threadCount);

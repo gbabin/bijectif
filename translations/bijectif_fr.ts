@@ -4,27 +4,27 @@
 <context>
     <name>Model</name>
     <message>
-        <location filename="../src/core/model.cpp" line="287"/>
+        <location filename="../src/core/model.cpp" line="289"/>
         <source>Thumbnail</source>
         <translation>Miniature</translation>
     </message>
     <message>
-        <location filename="../src/core/model.cpp" line="288"/>
+        <location filename="../src/core/model.cpp" line="290"/>
         <source>Identifier</source>
         <translation>Identifiant</translation>
     </message>
     <message>
-        <location filename="../src/core/model.cpp" line="289"/>
+        <location filename="../src/core/model.cpp" line="291"/>
         <source>Map</source>
         <translation>Carte</translation>
     </message>
     <message>
-        <location filename="../src/core/model.cpp" line="290"/>
+        <location filename="../src/core/model.cpp" line="292"/>
         <source>Name %1</source>
         <translation>Nom %1</translation>
     </message>
     <message>
-        <location filename="../src/core/model.cpp" line="314"/>
+        <location filename="../src/core/model.cpp" line="316"/>
         <source>%1 file</source>
         <translation>Fichier %1</translation>
     </message>
