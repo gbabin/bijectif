@@ -147,11 +147,8 @@ void Model::load(const QList<const FileGroup *> &fileGroupList, const QDir &dire
                 loader->moveToThread(thread);
 
                 connect(thread, &QThread::started, loader, &Loader::loadAll);
-                connect(thread, &QThread::finished, thread, &QThread::deleteLater);
 
                 connect(loader, &Loader::loadingProgressed, this, &Model::loadingProgressed);
-                connect(loader, &Loader::finished, thread, &QThread::quit);
-                connect(loader, &Loader::finished, loader, &Loader::deleteLater);
                 connect(loader, &Loader::finished,
                         this,
                         [&eventLoop, &finishedCount, threadCount]() {
@@ -167,6 +164,14 @@ void Model::load(const QList<const FileGroup *> &fileGroupList, const QDir &dire
             }
 
             eventLoop.exec();
+
+            for (QThread* thread : std::as_const(threads)) {
+                thread->quit();
+                thread->wait();
+            }
+
+            qDeleteAll(loaders);
+            qDeleteAll(threads);
         }
 
         // store new thumbnails

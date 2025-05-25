@@ -163,7 +163,7 @@ Window::Window(const Settings &settings, const QDir &directory, bool benchmark, 
     // dock
 
     if (settings.showCommandHistory) {
-        QDockWidget *undoDockWidget = new QDockWidget;
+        QDockWidget *undoDockWidget = new QDockWidget(this);
         undoDockWidget->setWindowTitle(tr("Command history"));
         undoDockWidget->setWidget(new QUndoView(undoStack));
         addDockWidget(Qt::RightDockWidgetArea, undoDockWidget);
