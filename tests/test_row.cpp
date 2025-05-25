@@ -134,6 +134,7 @@ void RowTest::initTestCase()
     QSignalSpy spyLoadingFinished(tableModel, &Model::loadingFinished);
     QVERIFY(spyLoadingFinished.isValid());
     tableModel->load(fileGroupList, filesDir, dbPath);
+    qDeleteAll(fileGroupList);
     QCOMPARE(spyLoadingProgressed.count(), 2);
     QCOMPARE(spyLoadingProgressed.takeFirst().constFirst().toInt(), 10);
     QCOMPARE(spyLoadingProgressed.takeFirst().constFirst().toInt(), 1);
@@ -609,6 +610,9 @@ void RowTest::cleanupTestCase()
     db = QSqlDatabase();
 
     QSqlDatabase::removeDatabase(u"update"_s);
+
+    delete qobject_cast<QSortFilterProxyModel*>(model)->sourceModel();
+    delete model;
 }
 
 QTEST_MAIN(RowTest)

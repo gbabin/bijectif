@@ -95,6 +95,7 @@ void ModelTest::test_1()
         QSignalSpy spyLoadingFinished(model, &Model::loadingFinished);
         QVERIFY(spyLoadingFinished.isValid());
         model->load(fileGroupList, filesDir, dbPath);
+        qDeleteAll(fileGroupList);
         QCOMPARE(spyLoadingProgressed.count(), 2 * 100);
         QCOMPARE(spyLoadingFinished.count(), 1);
         proxyModel.setSourceModel(model);
@@ -305,6 +306,8 @@ void ModelTest::test_1()
 
     db.close();
 
+    delete proxyModel.sourceModel();
+
     for (const QString &filename : std::as_const(filenames)) {
         QVERIFY(QFile::remove(filename));
     }
@@ -332,6 +335,7 @@ void ModelTest::test_2()
     {
         Model* model = new Model(settings, new CompleterModel(this));
         model->load(fileGroupList, filesDir, dbPath);
+        qDeleteAll(fileGroupList);
         proxyModel.setSourceModel(model);
     }
     proxyModel.sort(IdentifierCol, Qt::AscendingOrder);
@@ -453,6 +457,8 @@ void ModelTest::test_2()
                  << u"IMG_0002.JPG"_s);
 
     db.close();
+
+    delete proxyModel.sourceModel();
 }
 
 void ModelTest::cleanup()
