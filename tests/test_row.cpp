@@ -1,25 +1,62 @@
 // Copyright (C) 2023 gbabin
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include "test_row.h"
+#include "command_delete.h"
+#include "command_edit.h"
+#include "command_insert.h"
+#include "command_paste.h"
+#include "model.h"
+#include "settings.h"
 
-#include "../src/command_delete.h"
-#include "../src/command_edit.h"
-#include "../src/command_insert.h"
-#include "../src/command_paste.h"
-#include "../src/model.h"
-
+#include <QAbstractItemModel>
+#include <QDir>
 #include <QFileInfoList>
+#include <QSignalSpy>
 #include <QSortFilterProxyModel>
+#include <QSqlDatabase>
 #include <QStandardPaths>
+#include <QTest>
+#include <QUndoStack>
 
 using namespace Qt::Literals::StringLiterals;
 
-RowTest::RowTest(const Settings &settings, QObject *parent)
-    : QObject(parent)
-    , settings(settings)
+class RowTest : public QObject
 {
-}
+    Q_OBJECT
+
+private Q_SLOTS:
+    void initTestCase();
+    void test_0();
+    void test_1();
+    void test_2();
+    void test_3();
+    void test_4();
+    void test_5();
+    void test_6();
+    void test_7();
+    void test_8();
+    void cleanupTestCase();
+
+private:
+    void compare_row(const QAbstractItemModel &model,
+                     const QString &id,
+                     const QString &name1,
+                     const QString &name2,
+                     const QString &name3,
+                     const QString &name4,
+                     const QString &name5,
+                     const QString &name6,
+                     const QString &name7,
+                     const QString &name8);
+    void verify_dataChanged(QSignalSpy &spy, int left, int right);
+    const Settings settings;
+    QTemporaryDir rootDir;
+    QDir dbDir;
+    QDir filesDir;
+    QAbstractItemModel* model = nullptr;
+    QUndoStack undoStack;
+    QSqlDatabase db;
+};
 
 void RowTest::compare_row(const QAbstractItemModel &model,
                           const QString &id,
@@ -573,3 +610,6 @@ void RowTest::cleanupTestCase()
 
     QSqlDatabase::removeDatabase(u"update"_s);
 }
+
+QTEST_MAIN(RowTest)
+#include "test_row.moc"

@@ -16,12 +16,12 @@ pacman -S --needed --noconfirm \
 rm -rf build/msys2
 mkdir -p build/msys2/Bijectif
 
-cmake -DCMAKE_BUILD_TYPE=Release . -G Ninja -B ./build/msys2
-cmake --build ./build/msys2
-ctest --test-dir ./build/msys2 --output-on-failure --no-tests=error
+cmake -DCMAKE_BUILD_TYPE=Release . -G Ninja -B build/msys2
+cmake --build build/msys2
+ctest --test-dir build/msys2/tests --output-on-failure --no-tests=error
 
 cp build/msys2/*.exe build/msys2/Bijectif
-cp build/msys2/*.qm build/msys2/Bijectif
+cp build/msys2/src/app/*.qm build/msys2/Bijectif
 
 cd build/msys2/Bijectif
 windeployqt-qt6 ./*.exe

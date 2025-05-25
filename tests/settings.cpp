@@ -1,7 +1,7 @@
 // Copyright (C) 2024 gbabin
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include "../src/settings.h"
+#include "settings.h"
 
 using namespace Qt::Literals::StringLiterals;
 
@@ -11,9 +11,9 @@ Settings::Settings()
     , tooltipSize(512)
     , minWidth(800)
     , minHeight(600)
-    , listedExtensions(QString(u"jpg,dnf,webp"_s).toLower().split(u","_s))
-    , imageExtensions(QString(u"jpg,webp"_s).toLower().split(u","_s))
-    , videoExtensions(QString(u""_s).toLower().split(u","_s))
+    , listedExtensions(QString(u"jpg,dnf,webp"_s).split(u","_s))
+    , imageExtensions(QString(u"jpg,webp"_s).split(u","_s))
+    , videoExtensions(QString(u""_s).split(u","_s))
     , maxNames(8)
     , maxFileSize(20*1024*1024)
     , fontSize(16)
@@ -30,5 +30,5 @@ Settings::Settings(const QSettings &settings)
 {
     Q_UNUSED(settings)
 
-    throw;
+    std::abort();
 }

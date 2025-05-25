@@ -21,7 +21,7 @@ build() {
 }
 
 check() {
-  ctest --test-dir build \
+  ctest --test-dir build/tests \
         --output-on-failure \
         --no-tests=error
 }

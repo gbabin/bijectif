@@ -14,7 +14,7 @@ Use `PKGBUILD`.
 sudo apt install cmake make g++ libexif-dev qt6-base-dev qt6-multimedia-dev qt6-tools-dev
 cmake -DCMAKE_BUILD_TYPE=Release . -B build
 cmake --build build
-ctest --test-dir build --no-tests=error
+ctest --test-dir build/tests --no-tests=error
 ```
 
 ### Fedora
@@ -23,7 +23,7 @@ ctest --test-dir build --no-tests=error
 sudo dnf install cmake make gcc-c++ libexif-devel qt6-qtbase-devel qt6-qtmultimedia-devel qt6-qttools-devel
 cmake -DCMAKE_BUILD_TYPE=Release . -B build
 cmake --build build
-ctest --test-dir build --no-tests=error
+ctest --test-dir build/tests --no-tests=error
 ```
 
 ### openSUSE
@@ -32,7 +32,7 @@ ctest --test-dir build --no-tests=error
 sudo zypper install cmake make gcc-c++ libexif-devel qt6-base-devel qt6-multimedia-devel qt6-linguist-devel
 cmake -DCMAKE_BUILD_TYPE=Release . -B build
 cmake --build build
-ctest --test-dir build --no-tests=error
+ctest --test-dir build/tests --no-tests=error
 ```
 
 ### Windows

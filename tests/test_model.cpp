@@ -1,24 +1,39 @@
 // Copyright (C) 2023 gbabin
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include "test_model.h"
+#include "command_delete.h"
+#include "command_edit.h"
+#include "command_id.h"
+#include "model.h"
+#include "settings.h"
 
-#include "../src/command_delete.h"
-#include "../src/command_edit.h"
-#include "../src/command_id.h"
-#include "../src/model.h"
-
+#include <QSignalSpy>
 #include <QSortFilterProxyModel>
 #include <QSqlDatabase>
 #include <QStandardPaths>
+#include <QTest>
 
 using namespace Qt::Literals::StringLiterals;
 
-ModelTest::ModelTest(const Settings &settings, QObject *parent)
-    : QObject(parent)
-    , settings(settings)
+class ModelTest : public QObject
 {
-}
+    Q_OBJECT
+
+private Q_SLOTS:
+    void init();
+    void test_1();
+    void test_2();
+    void cleanup();
+
+private:
+    static bool createEmptyFile(const QString &path);
+    static void keepOnlyDisplayRole(QSignalSpy &spy);
+
+    const Settings settings;
+    QTemporaryDir rootDir;
+    QDir dbDir;
+    QDir filesDir;
+};
 
 bool ModelTest::createEmptyFile(const QString &path)
 {
@@ -444,3 +459,6 @@ void ModelTest::cleanup()
 {
     QSqlDatabase::removeDatabase(u"update"_s);
 }
+
+QTEST_MAIN(ModelTest)
+#include "test_model.moc"
