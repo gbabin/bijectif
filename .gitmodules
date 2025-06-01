@@ -1,0 +1,3 @@
+[submodule "src/QGeoView"]
+	path = src/QGeoView
+	url = ../QGeoView.git

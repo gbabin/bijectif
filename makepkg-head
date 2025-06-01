@@ -8,7 +8,11 @@ rm -rf build/makepkg-head
 mkdir -p build/makepkg-head
 
 cp PKGBUILD build/makepkg-head/
-git archive --format=tar.gz -o "build/makepkg-head/bijectif-$version.tar.gz" --prefix="bijectif-$version/" HEAD
+git archive --format=tar -o "build/makepkg-head/bijectif-$version.tar" --prefix="bijectif-$version/" HEAD
+git submodule foreach --recursive 'git archive --format=tar -o "$toplevel/build/makepkg-head/bijectif-sm-$sha1.tar" --prefix="bijectif-'"$version"'/$sm_path/" HEAD \
+                                   && tar --concatenate --file="$toplevel/build/makepkg-head/bijectif-'"$version"'.tar" "$toplevel/build/makepkg-head/bijectif-sm-$sha1.tar" \
+                                   && rm "$toplevel/build/makepkg-head/bijectif-sm-$sha1.tar"'
+gzip -c9 "build/makepkg-head/bijectif-$version.tar" > "build/makepkg-head/bijectif-$version.tar.gz"
 
 cd build/makepkg-head/
 

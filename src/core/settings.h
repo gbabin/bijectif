@@ -45,6 +45,7 @@ public:
     const int maxNames;
 
     /// Maximal file size considered for computing thumbnails (in bytes)
+    /// [in megabytes in settings file]
     const int maxFileSize;
 
     /// Font size (in pixels)
@@ -64,6 +65,13 @@ public:
 
     /// Show command history (true or false)
     const bool showCommandHistory;
+
+    /// Initial map widget width (in pixels)
+    const int initialMapWidth;
+
+    /// Maximal cache size for map tiles (in bytes)
+    /// [in megabytes in settings file]
+    const int mapCacheSize;
 
 private:
     explicit Settings(const QSettings &settings);

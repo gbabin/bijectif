@@ -17,7 +17,10 @@ enum UserRole {
     DeleteRole,
     ChangeIdRole,
     ImagePathRole,
-    MapUrlRole
+    MapUrlRole,
+    LocationRole,
+    MapIconRole,
+    MapSelectedRole
 };
 
 enum Columns {

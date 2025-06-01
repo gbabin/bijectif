@@ -11,11 +11,15 @@
 #include <QDir>
 #include <QPixmap>
 
+class QGVIcon;
+
 class ModelItem : public QObject
 {
     Q_OBJECT
+    Q_DISABLE_COPY_MOVE(ModelItem)
 
 public:
+    static void loadIcons();
     explicit ModelItem(const Settings &settings,
                        const QDir &directory,
                        QCache<QString, QString> &thumbnailCache,
@@ -23,8 +27,8 @@ public:
                        const std::optional<Location> &possibleLocation,
                        const std::optional<QPixmap> &possibleThumbnail,
                        QObject *parent = nullptr);
-    void setLocation(const Location &location);
-    void setThumbnail(const QPixmap &thumbnail);
+    ~ModelItem() override;
+    void setSelected(bool selected);
     [[nodiscard]] QString getPath() const;
     [[nodiscard]] QString getTooltip() const;
     [[nodiscard]] const QString& getId() const;
@@ -33,6 +37,7 @@ public:
     [[nodiscard]] const QString& getName(int index) const;
     [[nodiscard]] const QString& getExtension() const;
     [[nodiscard]] const std::optional<Location>& getLocation() const;
+    [[nodiscard]] QGVIcon* getMapIcon() const;
     [[nodiscard]] const std::optional<QPixmap>& getThumbnail() const;
     bool setName(int index, const QString &name);
     bool deleteName(int index);
@@ -52,6 +57,8 @@ private:
     [[nodiscard]] bool isValidPathChars(const QString &str);
     bool syncFilename(const QList<QPair<QString, QString>> &pathsList);
 
+    static QImage selectedPlaceholderIcon;
+    static QImage unselectedPlaceholderIcon;
     const Settings &settings;
     QCache<QString, QString> &thumbnailCache;
     const QDir &folder;
@@ -60,6 +67,7 @@ private:
     const QStringList extensions;
     const std::optional<Location> possibleLocation;
     const std::optional<QPixmap> possibleThumbnail;
+    QGVIcon* possibleMapIcon;
 };
 
 #endif // MODELITEM_H

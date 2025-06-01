@@ -52,13 +52,15 @@ listed extensions = jpg,jpeg,tif,tiff,png,bmp,gif,dng,mp4,mov,avi
 image extensions = jpg,jpeg,tif,tiff,png,bmp,gif
 video extensions = mp4,mov,avi
 max names = 8
-max file size = 20971520
+max file size = 20
 font size = 16
 thumbnail cache size = 100
 thumbnail database limit = 10000
 log verbosity = 2
 resizable columns = false
 show command history = true
+initial map width = 400
+map cache size = 200
 ```
 
 See [`settings.h`](src/settings.h).

@@ -7,7 +7,9 @@ target_include_directories(widgets INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 
 target_link_libraries(widgets PRIVATE
     core
+    QGeoView
     Qt::Concurrent
+    Qt::Network
     Qt::Sql
     Qt::Widgets
 )

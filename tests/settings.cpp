@@ -22,6 +22,8 @@ Settings::Settings()
     , logVerbosity(2)
     , resizableColumns(false)
     , showCommandHistory(true)
+    , initialMapWidth(400)
+    , mapCacheSize(100*1024*1024)
 {
 }
 

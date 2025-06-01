@@ -22,13 +22,15 @@ Settings::Settings(const QSettings &settings)
     , imageExtensions(settings.value("image extensions", u"jpg,jpeg,tif,tiff,png,bmp,gif"_s.split(u","_s)).toStringList())
     , videoExtensions(settings.value("video extensions", u"mp4,mov,avi"_s.split(u","_s)).toStringList())
     , maxNames(settings.value("max names", 8).toInt())
-    , maxFileSize(settings.value("max file size", 20*1024*1024).toInt())
+    , maxFileSize(settings.value("max file size", 20).toInt() * 1024 * 1024)
     , fontSize(settings.value("font size", 16).toInt())
     , thumbnailCacheSize(settings.value("thumbnail cache size", 100).toInt())
     , thumbnailDatabaseLimit(settings.value("thumbnail database limit", 10000).toInt())
     , logVerbosity(settings.value("log verbosity", 2).toInt())
     , resizableColumns(settings.value("resizable columns", false).toBool())
     , showCommandHistory(settings.value("show command history", true).toBool())
+    , initialMapWidth(settings.value("initial map width", 400).toInt())
+    , mapCacheSize(settings.value("map cache size", 200).toInt() * 1024 * 1024)
 {
 }
 
@@ -49,4 +51,6 @@ void Settings::log() const
     qDebug() << "Settings: logVerbosity =" << logVerbosity;
     qDebug() << "Settings: resizableColumns =" << resizableColumns;
     qDebug() << "Settings: showCommandHistory =" << showCommandHistory;
+    qDebug() << "Settings: initialMapWidth =" << initialMapWidth;
+    qDebug() << "Settings: mapCacheSize =" << mapCacheSize;
 }

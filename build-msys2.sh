@@ -21,6 +21,7 @@ cmake --build build/msys2
 ctest --test-dir build/msys2/tests --output-on-failure --no-tests=error
 
 cp build/msys2/*.exe build/msys2/Bijectif
+cp build/msys2/*.dll build/msys2/Bijectif
 cp build/msys2/src/app/*.qm build/msys2/Bijectif
 
 cd build/msys2/Bijectif

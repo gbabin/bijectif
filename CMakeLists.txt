@@ -14,26 +14,31 @@ endif()
 
 qt_standard_project_setup()
 
-add_compile_definitions(
-    QT_NO_CAST_FROM_ASCII
-    QT_NO_CAST_FROM_BYTEARRAY
-    QT_NO_CAST_TO_ASCII
-    QT_NO_CONTEXTLESS_CONNECT
-    QT_NO_FOREACH
-    QT_NO_KEYWORDS
-    QT_NO_NARROWING_CONVERSIONS_IN_CONNECT
-    QT_NO_URL_CAST_FROM_STRING
-    QT_STRICT_ITERATORS
-    QT_USE_QSTRINGBUILDER
-)
+option(BUILD_EXAMPLES "Build QGeoView examples" OFF)
+add_subdirectory(src/QGeoView)
+
+add_subdirectory(src/app)
+add_subdirectory(src/core)
+add_subdirectory(src/widgets)
+add_subdirectory(tests)
+
+foreach(TARGET core widgets bijectif)
+    target_compile_definitions(${TARGET} PUBLIC
+        QT_NO_CAST_FROM_ASCII
+        QT_NO_CAST_FROM_BYTEARRAY
+        QT_NO_CAST_TO_ASCII
+        QT_NO_CONTEXTLESS_CONNECT
+        QT_NO_FOREACH
+        QT_NO_KEYWORDS
+        QT_NO_NARROWING_CONVERSIONS_IN_CONNECT
+        QT_NO_URL_CAST_FROM_STRING
+        QT_STRICT_ITERATORS
+        QT_USE_QSTRINGBUILDER
+    )
+endforeach()
 
 if (MSVC)
     add_compile_options(/W4)
 else()
     add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
-
-add_subdirectory(src/app)
-add_subdirectory(src/core)
-add_subdirectory(src/widgets)
-add_subdirectory(tests)

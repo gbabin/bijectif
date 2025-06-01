@@ -16,6 +16,8 @@
 #include <QTableView>
 #include <QUndoStack>
 
+class QGVMap;
+
 class Window : public QMainWindow
 {
     Q_OBJECT
@@ -41,6 +43,7 @@ public Q_SLOTS:
     void pasteIntoSelection();
     void deleteSelection();
     void insertAtSelection();
+    void mapSelectionChanged();
 
 private Q_SLOTS:
     static void doubleClickedHandler(const QModelIndex &index);
@@ -59,6 +62,8 @@ private:
     CompleterModel completerModel;
     QFuture<void> future;
     QUndoStack* undoStack = nullptr;
+    QDockWidget* mapDockWidget = nullptr;
+    QGVMap* map = nullptr;
     QAction* copyAct = nullptr;
     QAction* pasteAct = nullptr;
     QAction* insertAct = nullptr;

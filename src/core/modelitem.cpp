@@ -5,6 +5,8 @@
 
 #include <libexif/exif-data.h>
 
+#include <QGeoView/Raster/QGVIcon.h>
+
 #include <QBuffer>
 #include <QCache>
 #include <QImageReader>
@@ -12,6 +14,25 @@
 #include <QStack>
 
 using namespace Qt::Literals::StringLiterals;
+
+
+QImage ModelItem::selectedPlaceholderIcon;
+QImage ModelItem::unselectedPlaceholderIcon;
+
+void ModelItem::loadIcons()
+{
+    selectedPlaceholderIcon = QImage(u":/resources/placeholder.png"_s)
+                                  .scaled(32,
+                                          32,
+                                          Qt::KeepAspectRatio,
+                                          Qt::SmoothTransformation);
+
+    unselectedPlaceholderIcon = QImage(u":/resources/placeholder_grayscale.png"_s)
+                                    .scaled(32,
+                                            32,
+                                            Qt::KeepAspectRatio,
+                                            Qt::SmoothTransformation);
+}
 
 ModelItem::ModelItem(const Settings &settings,
                      const QDir &directory,
@@ -30,6 +51,43 @@ ModelItem::ModelItem(const Settings &settings,
     , possibleLocation(possibleLocation)
     , possibleThumbnail(possibleThumbnail)
 {
+    if (possibleLocation) {
+        const Location& location = possibleLocation.value();
+        possibleMapIcon = new QGVIcon();
+        possibleMapIcon->setFlag(QGV::ItemFlag::SelectCustom);
+        possibleMapIcon->setGeometry(QGV::GeoPos(location.getLatitude(), location.getLongitude()));
+        possibleMapIcon->setSelectable(true);
+        possibleMapIcon->loadImage(unselectedPlaceholderIcon);
+        possibleMapIcon->setZValue(0);
+    } else {
+        possibleMapIcon = nullptr;
+    }
+}
+
+ModelItem::~ModelItem()
+{
+    delete possibleMapIcon;
+}
+
+void ModelItem::setSelected(bool selected)
+{
+    if (possibleMapIcon != nullptr) {
+        if (selected) {
+            if (! possibleMapIcon->isSelected())
+                possibleMapIcon->select();
+            if (possibleMapIcon->getZValue() != 1) {
+                possibleMapIcon->loadImage(selectedPlaceholderIcon);
+                possibleMapIcon->setZValue(1);
+            }
+        } else {
+            if (possibleMapIcon->isSelected())
+                possibleMapIcon->unselect();
+            if (possibleMapIcon->getZValue() != 0) {
+                possibleMapIcon->loadImage(unselectedPlaceholderIcon);
+                possibleMapIcon->setZValue(0);
+            }
+        }
+    }
 }
 
 QString ModelItem::getPath() const
@@ -112,6 +170,11 @@ const QString& ModelItem::getExtension() const
 const std::optional<Location>& ModelItem::getLocation() const
 {
     return possibleLocation;
+}
+
+QGVIcon* ModelItem::getMapIcon() const
+{
+    return possibleMapIcon;
 }
 
 const std::optional<QPixmap>& ModelItem::getThumbnail() const

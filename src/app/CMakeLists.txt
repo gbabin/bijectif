@@ -12,7 +12,10 @@ endif()
 
 qt_add_resources(bijectif "resources"
     PREFIX "/"
-    FILES ../../resources/map.png
+    FILES
+        ../../resources/map.png
+        ../../resources/placeholder.png
+        ../../resources/placeholder_grayscale.png
 )
 
 set_target_properties(bijectif PROPERTIES

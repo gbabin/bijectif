@@ -10,6 +10,13 @@
 #include "delegate.h"
 #include "filegroup.h"
 
+#include <QGeoView/QGVLayerOSM.h>
+#include <QGeoView/QGVMap.h>
+#include <QGeoView/QGVWidgetScale.h>
+#include <QGeoView/QGVWidgetText.h>
+#include <QGeoView/QGVWidgetZoom.h>
+#include <QGeoView/Raster/QGVIcon.h>
+
 #include <QApplication>
 #include <QClipboard>
 #include <QDesktopServices>
@@ -19,6 +26,8 @@
 #include <QLabel>
 #include <QMenuBar>
 #include <QMessageBox>
+#include <QNetworkDiskCache>
+#include <QSet>
 #include <QSortFilterProxyModel>
 #include <QSpacerItem>
 #include <QSqlError>
@@ -44,7 +53,10 @@ const char* Window::aboutString =
                       "Settings file:<br>"
                       "%4<br>"
                       "<br>"
-                      "<a href=\"https://www.flaticon.com/free-icon/map_1865269\">Map icon</a> "
+                      "Map from <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a><br>"
+                      "<br>"
+                      "<a href=\"https://www.flaticon.com/free-icon/map_1865269\">Map</a> "
+                      "and <a href=\"https://www.flaticon.com/free-icon/placeholder_684908\">placeholder</a> icons "
                       "by <a href=\"https://www.flaticon.com/authors/freepik\">Freepik</a> "
                       "from <a href=\"https://www.flaticon.com/\">Flaticon.com</a>");
 
@@ -168,6 +180,48 @@ Window::Window(const Settings &settings, const QDir &directory, bool benchmark, 
         undoDockWidget->setWidget(new QUndoView(undoStack));
         addDockWidget(Qt::RightDockWidgetArea, undoDockWidget);
     }
+
+    mapDockWidget = new QDockWidget(this);
+    map = new QGVMap(mapDockWidget);
+
+    QGVWidgetZoom* zoom = new QGVWidgetZoom();
+    zoom->setAnchor(QPoint(10, 10), { Qt::LeftEdge, Qt::TopEdge });
+    map->addWidget(zoom);
+
+    QGVWidgetScale* scale = new QGVWidgetScale();
+    scale->setAnchor(QPoint(10, 10), { Qt::LeftEdge, Qt::BottomEdge });
+    map->addWidget(scale);
+
+    QGVWidgetText* text = new QGVWidgetText();
+    text->setText(u"© OpenStreetMap"_s);
+    text->setAnchor(QPoint(10, 10), { Qt::RightEdge, Qt::BottomEdge });
+    map->addWidget(text);
+
+    const QString cacheLocation = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
+    const QString fullCachePath = QDir(cacheLocation).filePath(u"map"_s);
+
+    QNetworkDiskCache *cache = new QNetworkDiskCache(mapDockWidget);
+    cache->setCacheDirectory(fullCachePath);
+    cache->setMaximumCacheSize(settings.mapCacheSize);
+    QNetworkAccessManager *manager = new QNetworkAccessManager(mapDockWidget);
+    manager->setCache(cache);
+    QGV::setNetworkManager(manager);
+
+    QGVLayerOSM *osmLayer = new QGVLayerOSM();
+    osmLayer->setUrl(u"https://tile.openstreetmap.org/${z}/${x}/${y}.png"_s);
+    map->addItem(osmLayer);
+
+    map->setMouseAction(QGV::MouseAction::ZoomRect, false);
+    map->setAcceptDrops(false);
+
+    mapDockWidget->setWidget(map);
+    mapDockWidget->setWindowTitle(tr("Map"));
+    addDockWidget(Qt::LeftDockWidgetArea, mapDockWidget);
+
+    resizeDocks({mapDockWidget}, {settings.initialMapWidth}, Qt::Horizontal);
+
+    connect(map, &QGVMap::selectionsChanged,
+            this, &Window::mapSelectionChanged);
 }
 
 Window::~Window()
@@ -189,6 +243,8 @@ QString Window::getThumbnailsDatabasePath()
 
 void Window::modelLoadingStart()
 {
+    ModelItem::loadIcons();
+
     QList<const FileGroup *> fileGroupList;
 
     try {
@@ -276,6 +332,42 @@ void Window::modelLoadingDone(qint64 dbFileSize)
                                  .arg(locale().formattedDataSize(dbFileSize)),
                              3000);
 
+    {
+        double minLat = +90.0, maxLat = -90.0, minLong = +180.0, maxLong = -180.0;
+
+        for (int row = 0; row < proxyModel->rowCount(); ++row) {
+            const QVariant possibleLocation = view.model()->data(proxyModel->index(row, 0), LocationRole);
+            if (possibleLocation.isValid()) {
+                const Location location = qvariant_cast<Location>(possibleLocation);
+                const double latitude = location.getLatitude();
+                const double longitude = location.getLongitude();
+
+                minLat = qMin(minLat, latitude);
+                maxLat = qMax(maxLat, latitude);
+                minLong = qMin(minLong, longitude);
+                maxLong = qMax(maxLong, longitude);
+            }
+
+            const QVariant possibleMapIcon = view.model()->data(proxyModel->index(row, 0), MapIconRole);
+            if (possibleMapIcon.isValid()) {
+                QGVIcon* mapIcon = qvariant_cast<QGVIcon*>(possibleMapIcon);
+
+                map->addItem(mapIcon);
+            }
+        }
+
+        if (minLat != +90.0 && maxLat != -90.0 && minLong != +180.0 && maxLong != -180.0) {
+            minLat -= 0.01;
+            maxLat += 0.01;
+            minLong -= 0.01;
+            maxLong += 0.01;
+            const QGV::GeoRect rect(minLat, minLong, maxLat, maxLong);
+            map->cameraTo(QGVCameraActions(map).scaleTo(rect));
+        } else {
+            removeDockWidget(mapDockWidget);
+        }
+    }
+
     connect(view.selectionModel(), &QItemSelectionModel::selectionChanged,
             this, &Window::selectionChanged);
 
@@ -322,10 +414,62 @@ void Window::selectionChanged(const QItemSelection &selected, const QItemSelecti
     Q_UNUSED(selected)
     Q_UNUSED(deselected)
 
-    if (view.selectionModel() == nullptr)
+    const QItemSelectionModel* selectionModel = view.selectionModel();
+
+    if (selectionModel == nullptr)
         return;
 
-    const QModelIndexList selectedIndexes = view.selectionModel()->selectedIndexes();
+    const QModelIndexList selectedIndexes = selectionModel->selectedIndexes();
+
+    {
+        const int rowCount = view.model()->rowCount();
+        double minLat = +90.0, maxLat = -90.0, minLong = +180.0, maxLong = -180.0;
+        QSet<int> selectedRows;
+
+        for (const QModelIndex &index : selectedIndexes)
+            selectedRows.insert(index.row());
+
+        disconnect(map, &QGVMap::selectionsChanged,
+                   this, &Window::mapSelectionChanged);
+
+        for (int row = 0 ; row < rowCount ; ++row) {
+            const QModelIndex index = view.model()->index(row, 0);
+            const bool isSelected = selectedRows.contains(row);
+
+            view.model()->setData(index, isSelected, MapSelectedRole);
+
+            if (isSelected) {
+                const QVariant possibleLocation = view.model()->data(index, LocationRole);
+
+                if (possibleLocation.isValid()) {
+                    const Location location = qvariant_cast<Location>(possibleLocation);
+                    const double latitude = location.getLatitude();
+                    const double longitude = location.getLongitude();
+
+                    minLat = qMin(minLat, latitude);
+                    maxLat = qMax(maxLat, latitude);
+                    minLong = qMin(minLong, longitude);
+                    maxLong = qMax(maxLong, longitude);
+                }
+            }
+        }
+
+        connect(map, &QGVMap::selectionsChanged,
+                this, &Window::mapSelectionChanged);
+
+        if (minLat != +90.0 && maxLat != -90.0 && minLong != +180.0 && maxLong != -180.0) {
+            if (selectedRows.size() == 1) {
+                map->cameraTo(QGVCameraActions(map).moveTo(QGV::GeoPos(minLat, minLong)));
+            } else {
+                minLat -= 0.01;
+                maxLat += 0.01;
+                minLong -= 0.01;
+                maxLong += 0.01;
+                const QGV::GeoRect rect(minLat, minLong, maxLat, maxLong);
+                map->cameraTo(QGVCameraActions(map).scaleTo(rect));
+            }
+        }
+    }
 
     if (selectedIndexes.isEmpty()) {
         pasteAct->setDisabled(true);
@@ -517,4 +661,35 @@ void Window::insertAtSelection()
         if (index.column() >= FirstNameCol)
             undoStack->push(new InsertCommand(text, view.model(), index));
     }
+}
+
+void Window::mapSelectionChanged()
+{
+    if (view.selectionModel() == nullptr)
+        return;
+
+    QItemSelection selection;
+    const int rowCount = view.model()->rowCount();
+    bool first = true;
+
+    for (int row = 0 ; row < rowCount ; ++row) {
+        const QModelIndex index = view.model()->index(row, FirstNameCol);
+        const QVariant possibleMapIcon = view.model()->data(index, MapIconRole);
+
+        if (possibleMapIcon.isValid()) {
+            QGVIcon* mapIcon = qvariant_cast<QGVIcon*>(possibleMapIcon);
+
+            if (mapIcon->isSelected()) {
+                selection.select(index, index);
+
+                if (first) {
+                    view.selectionModel()->setCurrentIndex(index, QItemSelectionModel::NoUpdate);
+                    first = false;
+                }
+            }
+        }
+    }
+
+    view.selectionModel()->select(selection, QItemSelectionModel::ClearAndSelect);
+    view.setFocus();
 }

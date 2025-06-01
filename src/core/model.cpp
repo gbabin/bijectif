@@ -6,6 +6,8 @@
 #include "loader.h"
 #include "location.h"
 
+#include <QGeoView/Raster/QGVIcon.h>
+
 #include <QEventLoop>
 #include <QMutex>
 #include <QQueue>
@@ -356,6 +358,14 @@ QVariant Model::data(const QModelIndex &index, int role) const
         } else {
             return QVariant();
         }
+    } else if (role == LocationRole) {
+        if (const std::optional<Location> &location = images.at(index.row())->getLocation())
+            return QVariant::fromValue(location.value());
+        return QVariant();
+    } else if (role == MapIconRole) {
+        if (QGVIcon* mapIcon = images.at(index.row())->getMapIcon())
+            return QVariant::fromValue(mapIcon);
+        return QVariant();
     } else
         return QVariant();
 }
@@ -364,6 +374,12 @@ bool Model::setData(const QModelIndex &index, const QVariant &value, int role)
 {
     if (! index.isValid())
         return false;
+
+    if (role == MapSelectedRole) {
+        const bool selected = value.toBool();
+        images.at(index.row())->setSelected(selected);
+        return true;
+    }
 
     if (index.column() == IdentifierCol) {
         if (role == ChangeIdRole) {
