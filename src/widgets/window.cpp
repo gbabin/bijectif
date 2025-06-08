@@ -489,28 +489,34 @@ void Window::selectionChanged(const QItemSelection &selected, const QItemSelecti
         deleteAct->setDisabled(true);
         insertAct->setDisabled(true);
     } else {
-        const bool anyId = std::any_of(selectedIndexes.cbegin(), selectedIndexes.cend(),
-                                       [](const QModelIndex &index){ return index.column() == IdentifierCol; });
+        const bool allNames = std::all_of(selectedIndexes.cbegin(), selectedIndexes.cend(),
+                                          [](const QModelIndex &index){ return index.column() >= FirstNameCol; });
 
-        const bool anyEmpty = std::any_of(selectedIndexes.cbegin(), selectedIndexes.cend(),
-                                          [this](const QModelIndex &index){ return view.model()->data(index).isNull(); });
+        const bool noneEmpty = std::none_of(selectedIndexes.cbegin(), selectedIndexes.cend(),
+                                            [model = view.model()](const QModelIndex &index){ return model->data(index).isNull(); });
+
+        const bool noHoleNames = std::all_of(selectedIndexes.cbegin(), selectedIndexes.cend(),
+                                             [model = view.model()](const QModelIndex &index) {
+                                                 return index.column() == FirstNameCol
+                                                        || (index.column() > FirstNameCol
+                                                            && ! model->data(index.siblingAtColumn(index.column() - 1)).isNull());
+                                             });
 
         pasteAct->setEnabled(selectedIndexes.size() == 1
-                             || !anyId);
+                             || allNames);
 
         copyAct->setEnabled((selectedIndexes.size() == 1
                              && ! view.model()->data(selectedIndexes.constFirst()).isNull())
                             || (selectedIndexes.size() > 1
-                                && !anyId
-                                && !anyEmpty));
+                                && allNames
+                                && noneEmpty));
 
-        deleteAct->setDisabled(anyEmpty || anyId);
+        deleteAct->setEnabled(allNames && noneEmpty);
 
-        insertAct->setDisabled(anyEmpty
-                               || anyId
-                               || std::any_of(selectedIndexes.cbegin(), selectedIndexes.cend(),
-                                              [this](const QModelIndex &index) {
-                                                  return ! view.model()->data(index.siblingAtColumn(FirstNameCol + settings.maxNames - 1)).isNull();
+        insertAct->setEnabled(noHoleNames
+                              && std::none_of(selectedIndexes.cbegin(), selectedIndexes.cend(),
+                                              [model = view.model(), maxNames = settings.maxNames](const QModelIndex &index) {
+                                                  return ! model->data(index.siblingAtColumn(FirstNameCol + maxNames - 1)).isNull();
                                               }));
     }
 }
