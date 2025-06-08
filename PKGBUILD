@@ -33,6 +33,7 @@ package() {
 
   cd "${pkgname}-${pkgver}"
   install -Dm644 LICENSE "$pkgdir"/usr/share/licenses/bijectif/COPYING
+  install -Dm644 src/KDSignalThrottler/MIT.txt "$pkgdir"/usr/share/licenses/bijectif/MIT.txt
   install -Dm644 src/QGeoView/LICENSE "$pkgdir"/usr/share/licenses/qgeoview/COPYING
   install -Dm644 bijectif.desktop "$pkgdir"/usr/share/applications/bijectif.desktop
 }

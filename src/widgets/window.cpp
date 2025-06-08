@@ -10,6 +10,8 @@
 #include "delegate.h"
 #include "filegroup.h"
 
+#include <KDSignalThrottler.h>
+
 #include <QGeoView/QGVLayerOSM.h>
 #include <QGeoView/QGVMap.h>
 #include <QGeoView/QGVWidgetScale.h>
@@ -58,7 +60,12 @@ const char* Window::aboutString =
                       "<a href=\"https://www.flaticon.com/free-icon/map_1865269\">Map</a> "
                       "and <a href=\"https://www.flaticon.com/free-icon/placeholder_684908\">placeholder</a> icons "
                       "by <a href=\"https://www.flaticon.com/authors/freepik\">Freepik</a> "
-                      "from <a href=\"https://www.flaticon.com/\">Flaticon.com</a>");
+                      "from <a href=\"https://www.flaticon.com/\">Flaticon.com</a><br>"
+                      "<br>"
+                      "This application uses <a href=\"https://github.com/KDABLabs/KDToolBox/tree/master/qt/KDSignalThrottler\">KDSignalThrottler</a> "
+                      "from <a href=\"https://github.com/KDABLabs/KDToolBox\">KDToolBox</a>, "
+                      "© 2020 Klarälvdalens Datakonsult AB, a KDAB Group company &lt;info@kdab.com&gt;, used under the MIT License.<br>"
+                      "See the full license in the <a href=\"https://github.com/KDABLabs/KDToolBox/blob/master/LICENSES/MIT.txt\">MIT.txt</a> file.");
 
 Window::Window(const Settings &settings, const QDir &directory, bool benchmark, QWidget *parent)
     : QMainWindow(parent)
@@ -220,7 +227,12 @@ Window::Window(const Settings &settings, const QDir &directory, bool benchmark, 
 
     resizeDocks({mapDockWidget}, {settings.initialMapWidth}, Qt::Horizontal);
 
+    mapSelectionDebouncer = new KDToolBox::KDSignalDebouncer(this);
+    mapSelectionDebouncer->setTimeout(100);
+
     connect(map, &QGVMap::selectionsChanged,
+            mapSelectionDebouncer, &KDToolBox::KDSignalDebouncer::throttle);
+    connect(mapSelectionDebouncer, &KDToolBox::KDSignalDebouncer::triggered,
             this, &Window::mapSelectionChanged);
 }
 
@@ -430,7 +442,7 @@ void Window::selectionChanged(const QItemSelection &selected, const QItemSelecti
             selectedRows.insert(index.row());
 
         disconnect(map, &QGVMap::selectionsChanged,
-                   this, &Window::mapSelectionChanged);
+                   mapSelectionDebouncer, &KDToolBox::KDSignalDebouncer::throttle);
 
         for (int row = 0 ; row < rowCount ; ++row) {
             const QModelIndex index = view.model()->index(row, 0);
@@ -455,7 +467,7 @@ void Window::selectionChanged(const QItemSelection &selected, const QItemSelecti
         }
 
         connect(map, &QGVMap::selectionsChanged,
-                this, &Window::mapSelectionChanged);
+                mapSelectionDebouncer, &KDToolBox::KDSignalDebouncer::throttle);
 
         if (minLat != +90.0 && maxLat != -90.0 && minLong != +180.0 && maxLong != -180.0) {
             if (selectedRows.size() == 1) {

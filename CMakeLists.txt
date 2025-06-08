@@ -14,6 +14,8 @@ endif()
 
 qt_standard_project_setup()
 
+add_subdirectory(src/KDSignalThrottler)
+
 option(BUILD_EXAMPLES "Build QGeoView examples" OFF)
 add_subdirectory(src/QGeoView)
 

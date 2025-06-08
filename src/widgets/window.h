@@ -16,6 +16,9 @@
 #include <QTableView>
 #include <QUndoStack>
 
+namespace KDToolBox {
+    class KDSignalDebouncer;
+}
 class QGVMap;
 
 class Window : public QMainWindow
@@ -64,6 +67,7 @@ private:
     QUndoStack* undoStack = nullptr;
     QDockWidget* mapDockWidget = nullptr;
     QGVMap* map = nullptr;
+    KDToolBox::KDSignalDebouncer* mapSelectionDebouncer = nullptr;
     QAction* copyAct = nullptr;
     QAction* pasteAct = nullptr;
     QAction* insertAct = nullptr;
