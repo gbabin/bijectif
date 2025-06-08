@@ -1,6 +1,6 @@
 qt_add_library(widgets STATIC
-    delegate.cpp
-    window.cpp
+    delegate.h delegate.cpp
+    window.h window.cpp
 )
 
 target_include_directories(widgets INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})

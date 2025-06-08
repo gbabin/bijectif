@@ -2,17 +2,18 @@ find_package(PkgConfig REQUIRED)
 pkg_check_modules(EXIF REQUIRED libexif)
 
 qt_add_library(core STATIC
-    command_delete.cpp
-    command_edit.cpp
-    command_id.cpp
-    command_insert.cpp
-    command_paste.cpp
-    completermodel.cpp
-    filegroup.cpp
-    loader.cpp
-    location.cpp
-    model.cpp
-    modelitem.cpp
+    command_delete.h command_delete.cpp
+    command_edit.h command_edit.cpp
+    command_id.h command_id.cpp
+    command_insert.h command_insert.cpp
+    command_paste.h command_paste.cpp
+    completermodel.h completermodel.cpp
+    filegroup.h filegroup.cpp
+    loader.h loader.cpp
+    location.h location.cpp
+    model.h model.cpp
+    modelitem.h modelitem.cpp
+    settings.h
 )
 
 target_include_directories(core INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
