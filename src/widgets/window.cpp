@@ -21,6 +21,7 @@
 
 #include <QApplication>
 #include <QClipboard>
+#include <QCompleter>
 #include <QDesktopServices>
 #include <QDockWidget>
 #include <QHeaderView>
@@ -666,7 +667,20 @@ void Window::insertAtSelection()
     QItemSelectionModel* selection = view.selectionModel();
     if (selection == nullptr) return;
 
-    const QString text = QInputDialog::getText(this, tr("Insertion"), tr("Name:"));
+    QInputDialog dialog(this);
+    dialog.setWindowTitle(tr("Insertion"));
+    dialog.setLabelText(tr("Name:"));
+    dialog.setInputMode(QInputDialog::TextInput); // force instanciation of QLineEdit to find it below
+
+    if (QLineEdit* lineEdit = dialog.findChild<QLineEdit *>()) {
+        QCompleter *completer = new QCompleter(&completerModel, lineEdit);
+        completer->setCaseSensitivity(Qt::CaseInsensitive);
+        completer->setModelSorting(QCompleter::CaseInsensitivelySortedModel);
+        lineEdit->setCompleter(completer);
+    }
+
+    if (dialog.exec() != 1) return;
+    const QString text = dialog.textValue();
     if (text.isEmpty()) return;
 
     QModelIndexList indexes = selection->selectedIndexes();
