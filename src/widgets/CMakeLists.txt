@@ -1,5 +1,6 @@
 qt_add_library(widgets STATIC
     delegate.h delegate.cpp
+    tablevieweventfilter.h tablevieweventfilter.cpp
     window.h window.cpp
 )
 

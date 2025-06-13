@@ -366,6 +366,8 @@ QVariant Model::data(const QModelIndex &index, int role) const
         if (QGVIcon* mapIcon = images.at(index.row())->getMapIcon())
             return QVariant::fromValue(mapIcon);
         return QVariant();
+    } else if (role == NameCountRole) {
+        return images.at(index.row())->getNamesSize();
     } else
         return QVariant();
 }

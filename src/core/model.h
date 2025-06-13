@@ -20,7 +20,8 @@ enum UserRole {
     MapUrlRole,
     LocationRole,
     MapIconRole,
-    MapSelectedRole
+    MapSelectedRole,
+    NameCountRole
 };
 
 enum Columns {

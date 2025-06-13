@@ -9,6 +9,7 @@
 #include "command_paste.h"
 #include "delegate.h"
 #include "filegroup.h"
+#include "tablevieweventfilter.h"
 
 #include <KDSignalThrottler.h>
 
@@ -103,6 +104,7 @@ Window::Window(const Settings &settings, const QDir &directory, bool benchmark, 
     view.verticalHeader()->setDefaultSectionSize(settings.thumbnailSize + 4);
     view.setAlternatingRowColors(true);
     view.setWordWrap(true);
+    view.installEventFilter(new TableViewEventFilter(this));
 
     connect(&view, &QTableView::doubleClicked,
             this, &Window::doubleClickedHandler);
@@ -154,6 +156,24 @@ Window::Window(const Settings &settings, const QDir &directory, bool benchmark, 
     QAction* sepAct2 = new QAction(u"|"_s, this);
     sepAct2->setDisabled(true);
     menuBar()->addAction(sepAct2);
+
+    firstAct = new QAction(tr("&First"), this);
+    firstAct->setShortcut(Qt::Key_Home);
+    firstAct->setEnabled(false);
+    connect(firstAct, &QAction::triggered,
+            this, &Window::selectFirst);
+    menuBar()->addAction(firstAct);
+
+    endAct = new QAction(tr("&End"), this);
+    endAct->setShortcut(Qt::Key_End);
+    endAct->setEnabled(false);
+    connect(endAct, &QAction::triggered,
+            this, &Window::selectEnd);
+    menuBar()->addAction(endAct);
+
+    QAction* sepAct3 = new QAction(u"|"_s, this);
+    sepAct3->setDisabled(true);
+    menuBar()->addAction(sepAct3);
 
     QMenu* helpMenu = menuBar()->addMenu(tr("&Help"));
 
@@ -489,6 +509,8 @@ void Window::selectionChanged(const QItemSelection &selected, const QItemSelecti
         copyAct->setDisabled(true);
         deleteAct->setDisabled(true);
         insertAct->setDisabled(true);
+        firstAct->setDisabled(true);
+        endAct->setDisabled(true);
     } else {
         const bool allNames = std::all_of(selectedIndexes.cbegin(), selectedIndexes.cend(),
                                           [](const QModelIndex &index){ return index.column() >= FirstNameCol; });
@@ -500,8 +522,13 @@ void Window::selectionChanged(const QItemSelection &selected, const QItemSelecti
                                              [model = view.model()](const QModelIndex &index) {
                                                  return index.column() == FirstNameCol
                                                         || (index.column() > FirstNameCol
-                                                            && ! model->data(index.siblingAtColumn(index.column() - 1)).isNull());
+                                                            && index.column() <= FirstNameCol + model->data(index, NameCountRole).toInt());
                                              });
+
+        const bool noneFull = std::none_of(selectedIndexes.cbegin(), selectedIndexes.cend(),
+                                           [model = view.model(), maxNames = settings.maxNames](const QModelIndex &index) {
+                                               return model->data(index, NameCountRole).toInt() == maxNames;
+                                           });
 
         pasteAct->setEnabled(selectedIndexes.size() == 1
                              || allNames);
@@ -514,11 +541,11 @@ void Window::selectionChanged(const QItemSelection &selected, const QItemSelecti
 
         deleteAct->setEnabled(allNames && noneEmpty);
 
-        insertAct->setEnabled(noHoleNames
-                              && std::none_of(selectedIndexes.cbegin(), selectedIndexes.cend(),
-                                              [model = view.model(), maxNames = settings.maxNames](const QModelIndex &index) {
-                                                  return ! model->data(index.siblingAtColumn(FirstNameCol + maxNames - 1)).isNull();
-                                              }));
+        insertAct->setEnabled(noHoleNames && noneFull);
+
+        firstAct->setEnabled(true);
+
+        endAct->setEnabled(noneFull);
     }
 }
 
@@ -693,6 +720,66 @@ void Window::insertAtSelection()
         if (index.column() >= FirstNameCol)
             undoStack->push(new InsertCommand(text, view.model(), index));
     }
+}
+
+void Window::selectFirst()
+{
+    QSet<int> selectedRows;
+    QItemSelection selection;
+    int minRow = INT_MAX;
+
+    const QItemSelectionModel* selectionModel = view.selectionModel();
+
+    if (selectionModel == nullptr)
+        return;
+
+    const QModelIndexList selectedIndexes = selectionModel->selectedIndexes();
+
+    for (const QModelIndex &index : selectedIndexes) {
+        selectedRows.insert(index.row());
+        minRow = qMin(minRow, index.row());
+    }
+
+    for (const int row : selectedRows) {
+        const QModelIndex index = view.model()->index(row, FirstNameCol);
+        selection.select(index, index);
+
+        if (row == minRow)
+            view.selectionModel()->setCurrentIndex(index, QItemSelectionModel::NoUpdate);
+    }
+
+    view.selectionModel()->select(selection, QItemSelectionModel::ClearAndSelect);
+}
+
+void Window::selectEnd()
+{
+    QSet<int> selectedRows;
+    QItemSelection selection;
+    int minRow = INT_MAX;
+
+    const QItemSelectionModel* selectionModel = view.selectionModel();
+
+    if (selectionModel == nullptr)
+        return;
+
+    const QModelIndexList selectedIndexes = selectionModel->selectedIndexes();
+
+    for (const QModelIndex &index : selectedIndexes) {
+        selectedRows.insert(index.row());
+        minRow = qMin(minRow, index.row());
+    }
+
+    for (const int row : selectedRows) {
+        const QModelIndex indexFirst = view.model()->index(row, FirstNameCol);
+        const int nameCount = view.model()->data(indexFirst, NameCountRole).toInt();
+        const QModelIndex index = indexFirst.siblingAtColumn(FirstNameCol + nameCount);
+        selection.select(index, index);
+
+        if (row == minRow)
+            view.selectionModel()->setCurrentIndex(index, QItemSelectionModel::NoUpdate);
+    }
+
+    view.selectionModel()->select(selection, QItemSelectionModel::ClearAndSelect);
 }
 
 void Window::mapSelectionChanged()

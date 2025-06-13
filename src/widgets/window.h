@@ -46,6 +46,8 @@ public Q_SLOTS:
     void pasteIntoSelection();
     void deleteSelection();
     void insertAtSelection();
+    void selectFirst();
+    void selectEnd();
     void mapSelectionChanged();
 
 private Q_SLOTS:
@@ -72,6 +74,8 @@ private:
     QAction* pasteAct = nullptr;
     QAction* insertAct = nullptr;
     QAction* deleteAct = nullptr;
+    QAction* firstAct = nullptr;
+    QAction* endAct = nullptr;
     QSqlDatabase db;
 };
 
