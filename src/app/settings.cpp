@@ -5,6 +5,19 @@
 
 using namespace Qt::Literals::StringLiterals;
 
+CustomMap::CustomMap(QString name,
+                     QString url,
+                     int minZoomLevel,
+                     int maxZoomLevel,
+                     QString copyrightNotice)
+    : name(std::move(name))
+    , url(std::move(url))
+    , minZoomLevel(minZoomLevel)
+    , maxZoomLevel(maxZoomLevel)
+    , copyrightNotice(std::move(copyrightNotice))
+{
+}
+
 Settings::Settings()
     : Settings(QSettings(QSettings::IniFormat,
                          QSettings::UserScope,
@@ -12,7 +25,7 @@ Settings::Settings()
 {
 }
 
-Settings::Settings(const QSettings &settings)
+Settings::Settings(QSettings settings)
     : fileName(settings.fileName())
     , thumbnailSize(settings.value("thumbnail size", 128).toInt())
     , tooltipSize(settings.value("tooltip size", 512).toInt())
@@ -31,6 +44,7 @@ Settings::Settings(const QSettings &settings)
     , showCommandHistory(settings.value("show command history", true).toBool())
     , initialMapWidth(settings.value("initial map width", 400).toInt())
     , mapCacheSize(settings.value("map cache size", 200).toInt() * 1024 * 1024)
+    , customMaps(readCustomMaps(settings))
 {
 }
 
@@ -53,4 +67,38 @@ void Settings::log() const
     qDebug() << "Settings: showCommandHistory =" << showCommandHistory;
     qDebug() << "Settings: initialMapWidth =" << initialMapWidth;
     qDebug() << "Settings: mapCacheSize =" << mapCacheSize;
+    for (const CustomMap& customMap : customMaps) {
+        qDebug() << "Settings: customMaps name =" << customMap.name;
+        qDebug() << "Settings: customMaps url =" << customMap.url;
+        qDebug() << "Settings: customMaps minZoomLevel =" << customMap.minZoomLevel;
+        qDebug() << "Settings: customMaps maxZoomLevel =" << customMap.maxZoomLevel;
+        qDebug() << "Settings: customMaps copyrightNotice =" << customMap.copyrightNotice;
+    }
+}
+
+QList<CustomMap> Settings::readCustomMaps(QSettings &settings)
+{
+    QList<CustomMap> customMaps;
+
+    const CustomMap defaultMap(u"OpenStreetMap"_s,
+                               u"https://tile.openstreetmap.org/{z}/{x}/{y}.png"_s,
+                               0,
+                               20,
+                               u"© OpenStreetMap"_s);
+    customMaps.append(defaultMap);
+
+    for (const QString& group : settings.childGroups()) {
+        settings.beginGroup(group);
+        if (settings.contains("tiles url")) {
+            const CustomMap map(group,
+                                settings.value("tiles url").toString(),
+                                settings.value("min zoom level").toInt(),
+                                settings.value("max zoom level").toInt(),
+                                settings.value("copyright notice").toString());
+            customMaps.append(map);
+        }
+        settings.endGroup();
+    }
+
+    return customMaps;
 }

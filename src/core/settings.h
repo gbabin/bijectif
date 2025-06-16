@@ -7,6 +7,32 @@
 #include <QSettings>
 #include <QString>
 
+class CustomMap
+{
+public:
+    CustomMap(QString name,
+              QString url,
+              int minZoomLevel,
+              int maxZoomLevel,
+              QString copyrightNotice);
+
+    /// Custom map name
+    QString name;
+
+    /// Custom map tiles API URL
+    /// Mandatory placeholders: {x}, {y}, {z}
+    QString url;
+
+    /// Custom map tiles min zoom level
+    int minZoomLevel;
+
+    /// Custom map tiles max zoom level
+    int maxZoomLevel;
+
+    /// Custom map copyright notice
+    QString copyrightNotice;
+};
+
 class Settings
 {
 public:
@@ -73,8 +99,12 @@ public:
     /// [in megabytes in settings file]
     const int mapCacheSize;
 
+    /// List of custom maps
+    const QList<CustomMap> customMaps;
+
 private:
-    explicit Settings(const QSettings &settings);
+    static QList<CustomMap> readCustomMaps(QSettings &settings);
+    explicit Settings(QSettings settings);
 };
 
 #endif // SETTINGS_H

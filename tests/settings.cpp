@@ -27,7 +27,7 @@ Settings::Settings()
 {
 }
 
-Settings::Settings(const QSettings &settings)
+Settings::Settings(QSettings settings)
     : Settings()
 {
     Q_UNUSED(settings)

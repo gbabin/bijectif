@@ -8,6 +8,7 @@
 #include "model.h"
 #include "settings.h"
 
+#include <QComboBox>
 #include <QDir>
 #include <QFuture>
 #include <QMainWindow>
@@ -19,7 +20,9 @@
 namespace KDToolBox {
     class KDSignalDebouncer;
 }
+class QGVItem;
 class QGVMap;
+class QGVWidgetText;
 
 class Window : public QMainWindow
 {
@@ -49,6 +52,8 @@ public Q_SLOTS:
     void selectFirst();
     void selectEnd();
     void mapSelectionChanged();
+    void mapProviderChanged(int index);
+    void mapTileReply(bool error, bool canceled, bool fromCache);
 
 private Q_SLOTS:
     static void doubleClickedHandler(const QModelIndex &index);
@@ -69,6 +74,15 @@ private:
     QUndoStack* undoStack = nullptr;
     QDockWidget* mapDockWidget = nullptr;
     QGVMap* map = nullptr;
+    QGVItem* mapItemBackground = nullptr;
+    QGVWidgetText* mapItemCopyrightNotice = nullptr;
+    QComboBox* mapSelector = nullptr;
+    QLabel* mapStatistics = nullptr;
+    int mapRepliesTotalCount = 0;
+    int mapRepliesNewCount = 0;
+    int mapRepliesCanceledCount = 0;
+    int mapRepliesErrorCount = 0;
+    int mapRepliesCacheCount = 0;
     KDToolBox::KDSignalDebouncer* mapSelectionDebouncer = nullptr;
     QAction* copyAct = nullptr;
     QAction* pasteAct = nullptr;

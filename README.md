@@ -63,6 +63,16 @@ initial map width = 400
 map cache size = 200
 ```
 
+Example for custom XYZ map tiles provider:
+
+```
+[MapTiler Basic]
+tiles url = "https://api.maptiler.com/maps/basic-v2/256/{z}/{x}/{y}.png?key=EXAMPLE"
+min zoom level = 0
+max zoom level = 22
+copyright notice = "© MapTiler © OpenStreetMap contributors"
+```
+
 See [`settings.h`](src/settings.h).
 
 ## License

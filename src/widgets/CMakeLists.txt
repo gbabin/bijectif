@@ -1,4 +1,5 @@
 qt_add_library(widgets STATIC
+    custommapxyz.h custommapxyz.cpp
     delegate.h delegate.cpp
     tablevieweventfilter.h tablevieweventfilter.cpp
     window.h window.cpp

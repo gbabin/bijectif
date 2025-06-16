@@ -7,6 +7,7 @@
 #include "command_id.h"
 #include "command_insert.h"
 #include "command_paste.h"
+#include "custommapxyz.h"
 #include "delegate.h"
 #include "filegroup.h"
 #include "tablevieweventfilter.h"
@@ -210,6 +211,7 @@ Window::Window(const Settings &settings, const QDir &directory, bool benchmark, 
     }
 
     mapDockWidget = new QDockWidget(this);
+    mapStatistics = new QLabel(mapDockWidget);
     map = new QGVMap(mapDockWidget);
 
     QGVWidgetZoom* zoom = new QGVWidgetZoom();
@@ -219,11 +221,6 @@ Window::Window(const Settings &settings, const QDir &directory, bool benchmark, 
     QGVWidgetScale* scale = new QGVWidgetScale();
     scale->setAnchor(QPoint(10, 10), { Qt::LeftEdge, Qt::BottomEdge });
     map->addWidget(scale);
-
-    QGVWidgetText* text = new QGVWidgetText();
-    text->setText(u"© OpenStreetMap"_s);
-    text->setAnchor(QPoint(10, 10), { Qt::RightEdge, Qt::BottomEdge });
-    map->addWidget(text);
 
     const QString cacheLocation = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
     const QString fullCachePath = QDir(cacheLocation).filePath(u"map"_s);
@@ -235,14 +232,26 @@ Window::Window(const Settings &settings, const QDir &directory, bool benchmark, 
     manager->setCache(cache);
     QGV::setNetworkManager(manager);
 
-    QGVLayerOSM *osmLayer = new QGVLayerOSM();
-    osmLayer->setUrl(u"https://tile.openstreetmap.org/${z}/${x}/${y}.png"_s);
-    map->addItem(osmLayer);
-
     map->setMouseAction(QGV::MouseAction::ZoomRect, false);
     map->setAcceptDrops(false);
 
-    mapDockWidget->setWidget(map);
+    mapProviderChanged(0);
+
+    QWidget *mapWidget = new QWidget(mapDockWidget);
+    QVBoxLayout *mapLayout = new QVBoxLayout(mapWidget);
+
+    if (settings.customMaps.size() > 1) {
+        mapSelector = new QComboBox(mapDockWidget);
+        for (const CustomMap& map : settings.customMaps) {
+            mapSelector->addItem(map.name);
+        }
+        connect(mapSelector, &QComboBox::currentIndexChanged,
+                this, &Window::mapProviderChanged);
+        mapLayout->addWidget(mapSelector);
+    }
+    mapLayout->addWidget(map);
+    mapLayout->addWidget(mapStatistics);
+    mapDockWidget->setWidget(mapWidget);
     mapDockWidget->setWindowTitle(tr("Map"));
     addDockWidget(Qt::LeftDockWidgetArea, mapDockWidget);
 
@@ -811,4 +820,48 @@ void Window::mapSelectionChanged()
 
     view.selectionModel()->select(selection, QItemSelectionModel::ClearAndSelect);
     view.setFocus();
+}
+
+void Window::mapProviderChanged(int index)
+{
+    if (mapItemBackground != nullptr) {
+        map->removeItem(mapItemBackground);
+        delete mapItemBackground;
+    }
+
+    if (mapItemCopyrightNotice != nullptr) {
+        map->removeWidget(mapItemCopyrightNotice);
+        delete mapItemCopyrightNotice;
+    }
+
+    CustomMapXYZ *tilesLayer = new CustomMapXYZ(settings.customMaps.at(index).url,
+                                                settings.customMaps.at(index).minZoomLevel,
+                                                settings.customMaps.at(index).maxZoomLevel);
+    map->addItem(tilesLayer);
+    mapItemBackground = tilesLayer;
+
+    QGVWidgetText* text = new QGVWidgetText();
+    text->setText(settings.customMaps.at(index).copyrightNotice);
+    text->setAnchor(QPoint(10, 10), { Qt::RightEdge, Qt::BottomEdge });
+    map->addWidget(text);
+    mapItemCopyrightNotice = text;
+
+    connect(tilesLayer, &QGVLayerTilesOnline::tileReply,
+            this, &Window::mapTileReply);
+}
+
+void Window::mapTileReply(bool error, bool canceled, bool fromCache)
+{
+    mapRepliesTotalCount++;
+    if (error) mapRepliesErrorCount++;
+    else if (canceled) mapRepliesCanceledCount++;
+    else if (fromCache) mapRepliesCacheCount++;
+    else mapRepliesNewCount++;
+
+    mapStatistics->setText(tr("Requested tiles: %1 (%2 new, %3 from cache, %4 canceled, %5 errors)")
+                               .arg(mapRepliesTotalCount)
+                               .arg(mapRepliesNewCount)
+                               .arg(mapRepliesCacheCount)
+                               .arg(mapRepliesCanceledCount)
+                               .arg(mapRepliesErrorCount));
 }
