@@ -210,6 +210,15 @@ Window::Window(const Settings &settings, const QDir &directory, bool benchmark, 
         addDockWidget(Qt::RightDockWidgetArea, undoDockWidget);
     }
 
+    viewerDockWidget = new QDockWidget(this);
+    viewer = new Viewer(viewerDockWidget);
+    viewerDockWidget->setWidget(viewer);
+    viewerDockWidget->setWindowTitle(tr("Viewer"));
+    addDockWidget(Qt::LeftDockWidgetArea, viewerDockWidget);
+
+    connect(this, &Window::viewImage,
+            viewer, &Viewer::viewImage);
+
     mapDockWidget = new QDockWidget(this);
     mapStatistics = new QLabel(mapDockWidget);
     map = new QGVMap(mapDockWidget);
@@ -255,7 +264,12 @@ Window::Window(const Settings &settings, const QDir &directory, bool benchmark, 
     mapDockWidget->setWindowTitle(tr("Map"));
     addDockWidget(Qt::LeftDockWidgetArea, mapDockWidget);
 
-    resizeDocks({mapDockWidget}, {settings.initialMapWidth}, Qt::Horizontal);
+    {
+        const int height = view.size().height() / 2;
+        const int width = settings.initialMapWidth;
+        resizeDocks({mapDockWidget, viewerDockWidget}, {height, height}, Qt::Vertical);
+        resizeDocks({mapDockWidget, viewerDockWidget}, {width, width}, Qt::Horizontal);
+    }
 
     mapSelectionDebouncer = new KDToolBox::KDSignalDebouncer(this);
     mapSelectionDebouncer->setTimeout(100);
@@ -462,6 +476,12 @@ void Window::selectionChanged(const QItemSelection &selected, const QItemSelecti
         return;
 
     const QModelIndexList selectedIndexes = selectionModel->selectedIndexes();
+
+    if (selectedIndexes.size() == 1) {
+        Q_EMIT viewImage(view.model()->data(selectedIndexes.constFirst().siblingAtColumn(ThumbnailCol), ImagePathRole).toString());
+    } else {
+        Q_EMIT viewImage(QString());
+    }
 
     {
         const int rowCount = view.model()->rowCount();

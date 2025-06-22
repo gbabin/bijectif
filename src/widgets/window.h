@@ -7,6 +7,7 @@
 #include "completermodel.h"
 #include "model.h"
 #include "settings.h"
+#include "viewer.h"
 
 #include <QComboBox>
 #include <QDir>
@@ -34,6 +35,9 @@ public:
 
     explicit Window(const Settings &settings, const QDir &directory, bool benchmark, QWidget *parent = nullptr);
     ~Window() override;
+
+Q_SIGNALS:
+    void viewImage(const QString& path);
 
 public Q_SLOTS:
     void modelLoadingStart();
@@ -84,6 +88,8 @@ private:
     int mapRepliesErrorCount = 0;
     int mapRepliesCacheCount = 0;
     KDToolBox::KDSignalDebouncer* mapSelectionDebouncer = nullptr;
+    QDockWidget* viewerDockWidget = nullptr;
+    Viewer* viewer = nullptr;
     QAction* copyAct = nullptr;
     QAction* pasteAct = nullptr;
     QAction* insertAct = nullptr;
