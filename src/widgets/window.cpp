@@ -75,7 +75,8 @@ Window::Window(const Settings &settings, const QDir &directory, bool benchmark, 
     , settings(settings)
     , directory(directory)
     , benchmark(benchmark)
-    , model(settings, &completerModel)
+    , memoryCache(settings.memoryCacheSize)
+    , model(settings, memoryCache, &completerModel)
     , undoStack(new QUndoStack(this))
 {
     setMinimumSize(settings.minWidth, settings.minHeight);
@@ -211,7 +212,7 @@ Window::Window(const Settings &settings, const QDir &directory, bool benchmark, 
     }
 
     viewerDockWidget = new QDockWidget(this);
-    viewer = new Viewer(viewerDockWidget);
+    viewer = new Viewer(memoryCache, viewerDockWidget);
     viewerDockWidget->setWidget(viewer);
     viewerDockWidget->setWindowTitle(tr("Viewer"));
     addDockWidget(Qt::LeftDockWidgetArea, viewerDockWidget);

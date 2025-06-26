@@ -11,6 +11,7 @@ qt_add_library(core STATIC
     filegroup.h filegroup.cpp
     loader.h loader.cpp
     location.h location.cpp
+    memorycache.h memorycache.cpp
     model.h model.cpp
     modelitem.h modelitem.cpp
     settings.h

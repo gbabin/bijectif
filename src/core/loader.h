@@ -27,7 +27,7 @@ class Loader : public QObject
 public:
     explicit Loader(QQueue<const FileGroup *> &fileGroups, QMutex &fileGroupsMutex,
                     QList<NewItem> &newThumbnails, QMutex &newThumbnailsMutex,
-                    const Settings &settings, const QDir &directory, QCache<QString, QString> &thumbnailCache,
+                    const Settings &settings, const QDir &directory, MemoryCache &memoryCache,
                     QObject *parent = nullptr);
     ~Loader() override = default;
 
@@ -50,7 +50,7 @@ private:
     QMutex &newThumbnailsMutex;
     const Settings &settings;
     const QDir &directory;
-    QCache<QString, QString> &thumbnailCache;
+    MemoryCache &memoryCache;
 };
 
 #endif // LOADER_H

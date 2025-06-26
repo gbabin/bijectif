@@ -37,7 +37,7 @@ class Model : public QAbstractTableModel
     Q_DISABLE_COPY_MOVE(Model)
 
 public:
-    explicit Model(const Settings &settings, CompleterModel* completerModel, QObject *parent = nullptr);
+    explicit Model(const Settings &settings, MemoryCache &memoryCache, CompleterModel* completerModel, QObject *parent = nullptr);
     ~Model() override;
     void load(const QList<const FileGroup *> &fileGroupList, const QDir &directory, const QString &dbPath);
     Qt::ItemFlags flags(const QModelIndex &index) const override;
@@ -57,7 +57,7 @@ Q_SIGNALS:
 
 private:
     const Settings &settings;
-    QCache<QString, QString> thumbnailCache;
+    MemoryCache &memoryCache;
     QList<ModelItem*> images;
     CompleterModel* completerModel = nullptr;
     QImage mapIcon;

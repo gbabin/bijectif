@@ -77,10 +77,11 @@ public:
     /// Font size (in pixels)
     const int fontSize;
 
-    /// Max number of thumbnails in memory cache
-    const int thumbnailCacheSize;
+    /// Maximal memory cache size (in bytes)
+    /// [in megabytes in settings file]
+    const int memoryCacheSize;
 
-    /// Max number of thumbnails in database cache
+    /// Maximal number of thumbnails in database cache
     const int thumbnailDatabaseLimit;
 
     /// Log verbosity (0 to 4, 4 is most verbose)

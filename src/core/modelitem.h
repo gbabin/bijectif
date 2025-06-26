@@ -6,7 +6,7 @@
 
 #include "filegroup.h"
 #include "location.h"
-#include "settings.h"
+#include "memorycache.h"
 
 #include <QDir>
 #include <QPixmap>
@@ -22,7 +22,7 @@ public:
     static void loadIcons();
     explicit ModelItem(const Settings &settings,
                        const QDir &directory,
-                       QCache<QString, QString> &thumbnailCache,
+                       MemoryCache &memoryCache,
                        const FileGroup *fileGroup,
                        const std::optional<Location> &possibleLocation,
                        const std::optional<QPixmap> &possibleThumbnail,
@@ -60,7 +60,7 @@ private:
     static QImage selectedPlaceholderIcon;
     static QImage unselectedPlaceholderIcon;
     const Settings &settings;
-    QCache<QString, QString> &thumbnailCache;
+    MemoryCache &memoryCache;
     const QDir &folder;
     QString id;
     QStringList names;

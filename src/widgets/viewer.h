@@ -4,6 +4,9 @@
 #ifndef VIEWER_H
 #define VIEWER_H
 
+#include "memorycache.h"
+
+#include <QCache>
 #include <QFutureWatcher>
 #include <QGraphicsPixmapItem>
 #include <QGraphicsScene>
@@ -19,7 +22,7 @@ class Viewer : public QWidget
     Q_OBJECT
 
 public:
-    explicit Viewer(QWidget *parent = nullptr);
+    explicit Viewer(MemoryCache &memoryCache, QWidget *parent = nullptr);
 
 public Q_SLOTS:
     void viewImage(const QString& path);
@@ -31,7 +34,8 @@ protected:
 private:
     void displayImage();
 
-    QFutureWatcher<QImage>* imageReaderWatcher;
+    MemoryCache &memoryCache;
+    QFutureWatcher<QPixmap>* imageReaderWatcher;
     KDToolBox::KDSignalDebouncer* loadDebouncer;
     QGraphicsScene* graphicsScene;
     QGraphicsView* graphicsView;

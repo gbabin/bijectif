@@ -15,7 +15,7 @@
 
 Loader::Loader(QQueue<const FileGroup *> &fileGroups, QMutex &fileGroupsMutex,
                QList<NewItem> &newThumbnails, QMutex &newThumbnailsMutex,
-               const Settings &settings, const QDir &directory, QCache<QString, QString> &thumbnailCache,
+               const Settings &settings, const QDir &directory, MemoryCache &memoryCache,
                QObject *parent)
     : QObject(parent)
     , fileGroups(fileGroups)
@@ -24,7 +24,7 @@ Loader::Loader(QQueue<const FileGroup *> &fileGroups, QMutex &fileGroupsMutex,
     , newThumbnailsMutex(newThumbnailsMutex)
     , settings(settings)
     , directory(directory)
-    , thumbnailCache(thumbnailCache)
+    , memoryCache(memoryCache)
 {
 }
 
@@ -40,7 +40,7 @@ void Loader::loadAll()
         fileGroupsMutex.unlock();
 
         const auto [possibleLocation, possibleThumbnail] = load(settings, fileGroup);
-        ModelItem * const item = new ModelItem(settings, directory, thumbnailCache, fileGroup, possibleLocation, possibleThumbnail);
+        ModelItem * const item = new ModelItem(settings, directory, memoryCache, fileGroup, possibleLocation, possibleThumbnail);
         QByteArray *bytes = nullptr;
         if (possibleThumbnail.has_value()) {
             bytes = new QByteArray();

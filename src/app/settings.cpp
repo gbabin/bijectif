@@ -37,7 +37,7 @@ Settings::Settings(QSettings settings)
     , maxNames(settings.value("max names", 8).toInt())
     , maxFileSize(settings.value("max file size", 20).toInt() * 1024 * 1024)
     , fontSize(settings.value("font size", 16).toInt())
-    , thumbnailCacheSize(settings.value("thumbnail cache size", 100).toInt())
+    , memoryCacheSize(settings.value("memory cache size", 500).toInt() * 1024 * 1024)
     , thumbnailDatabaseLimit(settings.value("thumbnail database limit", 10000).toInt())
     , logVerbosity(settings.value("log verbosity", 2).toInt())
     , resizableColumns(settings.value("resizable columns", false).toBool())
@@ -60,7 +60,7 @@ void Settings::log() const
     qDebug() << "Settings: maxNames =" << maxNames;
     qDebug() << "Settings: maxFileSize =" << maxFileSize;
     qDebug() << "Settings: fontSize =" << fontSize;
-    qDebug() << "Settings: thumbnailCacheSize =" << thumbnailCacheSize;
+    qDebug() << "Settings: memoryCacheSize =" << memoryCacheSize;
     qDebug() << "Settings: thumbnailDatabaseLimit =" << thumbnailDatabaseLimit;
     qDebug() << "Settings: logVerbosity =" << logVerbosity;
     qDebug() << "Settings: resizableColumns =" << resizableColumns;

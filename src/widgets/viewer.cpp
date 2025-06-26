@@ -11,9 +11,13 @@
 #include <QWheelEvent>
 #include <QtConcurrent/QtConcurrentRun>
 
-Viewer::Viewer(QWidget *parent)
+using namespace Qt::Literals::StringLiterals;
+
+Viewer::Viewer(MemoryCache &memoryCache,
+               QWidget *parent)
     : QWidget(parent)
-    , imageReaderWatcher(new QFutureWatcher<QImage>(this))
+    , memoryCache(memoryCache)
+    , imageReaderWatcher(new QFutureWatcher<QPixmap>(this))
     , loadDebouncer(new KDToolBox::KDSignalDebouncer(this))
     , graphicsScene(new QGraphicsScene(this))
     , graphicsView(new QGraphicsView(graphicsScene, this))
@@ -21,7 +25,7 @@ Viewer::Viewer(QWidget *parent)
     , scaleFactor(1.0)
     , isFitted(false)
 {
-    connect(imageReaderWatcher, &QFutureWatcher<QImage>::finished,
+    connect(imageReaderWatcher, &QFutureWatcher<QPixmap>::finished,
             this, &Viewer::imageLoaded);
 
     pixmapItem->setTransformationMode(Qt::SmoothTransformation);
@@ -38,7 +42,7 @@ Viewer::Viewer(QWidget *parent)
     layout->addWidget(graphicsView);
     setLayout(layout);
 
-    loadDebouncer->setTimeout(500);
+    loadDebouncer->setTimeout(250);
     connect(loadDebouncer, &KDToolBox::KDSignalDebouncer::triggered,
             this, &Viewer::loadImage);
 }
@@ -56,35 +60,51 @@ void Viewer::viewImage(const QString& path)
 void Viewer::loadImage()
 {
     if (displayedPath.isNull()) {
-        const QFuture<QImage> future = QtConcurrent::run([]() {
-            return QImage();
+        const QFuture<QPixmap> future = QtConcurrent::run([]() {
+            return QPixmap();
         });
 
         imageReaderWatcher->setFuture(future);
     } else {
-        const QFuture<QImage> future = QtConcurrent::run([path=displayedPath]() {
-            QImageReader reader(path);
-            reader.setAutoTransform(true);
-            return reader.read();
-        });
+        const QPixmap possiblePixmap = memoryCache.getFullImage(displayedPath);
+        if (possiblePixmap.isNull()) {
+            const QFuture<QPixmap> future = QtConcurrent::run([path=displayedPath, &cache=memoryCache]() {
+                QImageReader reader(path);
+                reader.setAutoTransform(true);
+                const QImage image = reader.read();
+                if (image.isNull()) {
+                    qDebug() << "Failed to load image in viewer:" << path;
+                    return QPixmap();
+                } else {
+                    const QPixmap pixmap = QPixmap::fromImage(image);
+                    cache.insertFullImage(path, pixmap);
+                    return pixmap;
+                }
+            });
 
-        imageReaderWatcher->setFuture(future);
+            imageReaderWatcher->setFuture(future);
+        } else {
+            const QFuture<QPixmap> future = QtConcurrent::run([pixmap=possiblePixmap]() {
+                return pixmap;
+            });
+
+            imageReaderWatcher->setFuture(future);
+        }
     }
 }
 
 void Viewer::imageLoaded()
 {
-    const QImage image = imageReaderWatcher->result();
+    const QPixmap pixmap = imageReaderWatcher->result();
 
-    if (image.isNull()) {
-        qDebug() << "Failed to load image in viewer:" << displayedPath;
-        pixmapItem->setPixmap(QPixmap());
+    if (pixmap.isNull()) {
+        pixmapItem->setPixmap(pixmap);
         graphicsScene->setSceneRect(QRectF());
         graphicsView->resetTransform();
         isFitted = false;
     } else {
-        pixmapItem->setPixmap(QPixmap::fromImage(image));
-        graphicsScene->setSceneRect(image.rect());
+        pixmapItem->setPixmap(pixmap);
+        graphicsScene->setSceneRect(pixmap.rect());
         graphicsView->fitInView(graphicsScene->sceneRect(), Qt::KeepAspectRatio);
         isFitted = true;
         scaleFactor = graphicsView->transform().m11();

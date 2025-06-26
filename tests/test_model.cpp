@@ -30,6 +30,7 @@ private:
     static void keepOnlyDisplayRole(QSignalSpy &spy);
 
     const Settings settings;
+    MemoryCache memoryCache{100*1024*1024};
     QTemporaryDir rootDir;
     QDir dbDir;
     QDir filesDir;
@@ -89,7 +90,7 @@ void ModelTest::test_1()
 
     QSortFilterProxyModel proxyModel;
     {
-        Model* model = new Model(settings, new CompleterModel(this));
+        Model* model = new Model(settings, memoryCache, new CompleterModel(this));
         QSignalSpy spyLoadingProgressed(model, &Model::loadingProgressed);
         QVERIFY(spyLoadingProgressed.isValid());
         QSignalSpy spyLoadingFinished(model, &Model::loadingFinished);
@@ -333,7 +334,7 @@ void ModelTest::test_2()
 
     QSortFilterProxyModel proxyModel;
     {
-        Model* model = new Model(settings, new CompleterModel(this));
+        Model* model = new Model(settings, memoryCache, new CompleterModel(this));
         model->load(fileGroupList, filesDir, dbPath);
         qDeleteAll(fileGroupList);
         proxyModel.setSourceModel(model);

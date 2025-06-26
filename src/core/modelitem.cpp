@@ -36,14 +36,14 @@ void ModelItem::loadIcons()
 
 ModelItem::ModelItem(const Settings &settings,
                      const QDir &directory,
-                     QCache<QString, QString> &thumbnailCache,
+                     MemoryCache &memoryCache,
                      const FileGroup *fileGroup,
                      const std::optional<Location> &possibleLocation,
                      const std::optional<QPixmap> &possibleThumbnail,
                      QObject *parent)
     : QObject(parent)
     , settings(settings)
-    , thumbnailCache(thumbnailCache)
+    , memoryCache(memoryCache)
     , folder(directory)
     , id(fileGroup->id)
     , names(fileGroup->names)
@@ -103,28 +103,39 @@ QString ModelItem::getTooltip() const
         return tr("Video");
     } else {
         const QString path = getPath();
-        QString* imgBase64 = thumbnailCache.object(path);
-        if (imgBase64 == nullptr) {
-            QImageReader reader(path);
-            reader.setAutoTransform(true);
-            const QImage image = reader.read();
-
+        QString possibleTooltip = memoryCache.getTooltip(path);
+        if (possibleTooltip.isNull()) {
+            QPixmap possibleImage = memoryCache.getFullImage(path);
+            if (possibleImage.isNull()) {
+                QImageReader reader(path);
+                reader.setAutoTransform(true);
+                const QImage image = reader.read();
+                if (image.isNull()) {
+                    qDebug() << "Failed to load image for tooltip:" << path;
+                    return tr("Failed to load image");
+                } else {
+                    const QPixmap pixmap = QPixmap::fromImage(image);
+                    memoryCache.insertFullImage(path, pixmap);
+                    possibleImage = pixmap;
+                }
+            }
             QByteArray byteArray;
             QBuffer buffer(&byteArray);
             buffer.open(QIODevice::WriteOnly);
-            image.scaled(settings.tooltipSize,
-                         settings.tooltipSize,
-                         Qt::KeepAspectRatio,
-                         Qt::SmoothTransformation)
+            possibleImage.scaled(settings.tooltipSize,
+                                 settings.tooltipSize,
+                                 Qt::KeepAspectRatio,
+                                 Qt::SmoothTransformation)
                 .save(&buffer, "PNG");
             buffer.close();
 
-            const QString tmp = QString::fromLatin1(byteArray.toBase64().data());
-            imgBase64 = new QString(tmp);
-            thumbnailCache.insert(path, imgBase64, 1);
+            const QString tooltip = u"<img src='data:image/png;base64, %1'>"_s
+                                        .arg(QString::fromLatin1(byteArray.toBase64().data()));
+            memoryCache.insertTooltip(path, tooltip);
+            return tooltip;
+        } else {
+            return possibleTooltip;
         }
-
-        return u"<img src='data:image/png;base64, %1'>"_s.arg(*imgBase64);
     }
 }
 

@@ -18,10 +18,10 @@
 
 using namespace Qt::Literals::StringLiterals;
 
-Model::Model(const Settings &settings, CompleterModel* completerModel, QObject *parent)
+Model::Model(const Settings &settings, MemoryCache &memoryCache, CompleterModel* completerModel, QObject *parent)
     : QAbstractTableModel(parent)
     , settings(settings)
-    , thumbnailCache(settings.thumbnailCacheSize)
+    , memoryCache(memoryCache)
     , completerModel(completerModel)
     , mapIcon(QImage(u":/resources/map.png"_s)
                   .scaled(settings.thumbnailSize / 4,
@@ -107,7 +107,7 @@ void Model::load(const QList<const FileGroup *> &fileGroupList, const QDir &dire
                 }
 
                 qInfo() << "Thumbnail retrieval result is not null:" << fileGroup->filePath;
-                ModelItem *item = new ModelItem(settings, directory, thumbnailCache, fileGroup, possibleLocation, possibleThumbnail);
+                ModelItem *item = new ModelItem(settings, directory, memoryCache, fileGroup, possibleLocation, possibleThumbnail);
                 connect(item, &ModelItem::fileRenameFailed,
                         this, &Model::fileRenameFailed);
                 connect(item, &ModelItem::invalidCharacters,
@@ -147,7 +147,7 @@ void Model::load(const QList<const FileGroup *> &fileGroupList, const QDir &dire
                 QThread* thread = new QThread;
                 Loader* loader = new Loader(newFiles, newFilesMutex,
                                             newThumbnails, newThumbnailsMutex,
-                                            settings, directory, thumbnailCache);
+                                            settings, directory, memoryCache);
                 loader->moveToThread(thread);
 
                 connect(thread, &QThread::started, loader, &Loader::loadAll);

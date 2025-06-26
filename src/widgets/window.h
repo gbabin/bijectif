@@ -5,6 +5,7 @@
 #define WINDOW_H
 
 #include "completermodel.h"
+#include "memorycache.h"
 #include "model.h"
 #include "settings.h"
 #include "viewer.h"
@@ -70,6 +71,7 @@ private:
     const Settings &settings;
     const QDir &directory;
     const bool benchmark;
+    MemoryCache memoryCache;
     QProgressDialog* progressDialog = nullptr;
     QTableView view;
     Model model;

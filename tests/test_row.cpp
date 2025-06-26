@@ -50,6 +50,7 @@ private:
                      const QString &name8);
     void verify_dataChanged(QSignalSpy &spy, int left, int right);
     const Settings settings;
+    MemoryCache memoryCache{100*1024*1024};
     QTemporaryDir rootDir;
     QDir dbDir;
     QDir filesDir;
@@ -128,7 +129,7 @@ void RowTest::initTestCase()
     const QList<const FileGroup *> fileGroupList = FileGroup::fileGroupList(settings, filesDir);
     const QString dbPath = dbDir.filePath(u"thumbnails.sqlite"_s);
 
-    Model* tableModel = new Model(settings, new CompleterModel(this));
+    Model* tableModel = new Model(settings, memoryCache, new CompleterModel(this));
     QSignalSpy spyLoadingProgressed(tableModel, &Model::loadingProgressed);
     QVERIFY(spyLoadingProgressed.isValid());
     QSignalSpy spyLoadingFinished(tableModel, &Model::loadingFinished);
