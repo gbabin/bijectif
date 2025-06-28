@@ -28,7 +28,6 @@ Settings::Settings()
 Settings::Settings(QSettings settings)
     : fileName(settings.fileName())
     , thumbnailSize(settings.value("thumbnail size", 128).toInt())
-    , tooltipSize(settings.value("tooltip size", 512).toInt())
     , minWidth(settings.value("min width", 800).toInt())
     , minHeight(settings.value("min height", 600).toInt())
     , listedExtensions(settings.value("listed extensions", u"jpg,jpeg,tif,tiff,png,bmp,gif,dng,mp4,mov,avi"_s.split(u","_s)).toStringList())
@@ -51,7 +50,6 @@ Settings::Settings(QSettings settings)
 void Settings::log() const
 {
     qDebug() << "Settings: thumbnailSize =" << thumbnailSize;
-    qDebug() << "Settings: tooltipSize =" << tooltipSize;
     qDebug() << "Settings: minWidth =" << minWidth;
     qDebug() << "Settings: minHeight =" << minHeight;
     qDebug() << "Settings: listedExtensions =" << listedExtensions;

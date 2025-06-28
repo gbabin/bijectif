@@ -95,50 +95,6 @@ QString ModelItem::getPath() const
     return computeBasePath(folder, id, names) + u"."_s + getExtension();
 }
 
-QString ModelItem::getTooltip() const
-{
-    if (! possibleThumbnail.has_value()) {
-        return tr("Thumbnail unavailable");
-    } else if (settings.videoExtensions.contains(getExtension().toLower())) {
-        return tr("Video");
-    } else {
-        const QString path = getPath();
-        QString possibleTooltip = memoryCache.getTooltip(path);
-        if (possibleTooltip.isNull()) {
-            QPixmap possibleImage = memoryCache.getFullImage(path);
-            if (possibleImage.isNull()) {
-                QImageReader reader(path);
-                reader.setAutoTransform(true);
-                const QImage image = reader.read();
-                if (image.isNull()) {
-                    qDebug() << "Failed to load image for tooltip:" << path;
-                    return tr("Failed to load image");
-                } else {
-                    const QPixmap pixmap = QPixmap::fromImage(image);
-                    memoryCache.insertFullImage(path, pixmap);
-                    possibleImage = pixmap;
-                }
-            }
-            QByteArray byteArray;
-            QBuffer buffer(&byteArray);
-            buffer.open(QIODevice::WriteOnly);
-            possibleImage.scaled(settings.tooltipSize,
-                                 settings.tooltipSize,
-                                 Qt::KeepAspectRatio,
-                                 Qt::SmoothTransformation)
-                .save(&buffer, "PNG");
-            buffer.close();
-
-            const QString tooltip = u"<img src='data:image/png;base64, %1'>"_s
-                                        .arg(QString::fromLatin1(byteArray.toBase64().data()));
-            memoryCache.insertTooltip(path, tooltip);
-            return tooltip;
-        } else {
-            return possibleTooltip;
-        }
-    }
-}
-
 const QString& ModelItem::getId() const
 {
     return id;

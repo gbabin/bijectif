@@ -8,7 +8,6 @@ using namespace Qt::Literals::StringLiterals;
 Settings::Settings()
     : fileName(QStringLiteral("/fake.ini"))
     , thumbnailSize(128)
-    , tooltipSize(512)
     , minWidth(800)
     , minHeight(600)
     , listedExtensions(QString(u"jpg,dnf,webp"_s).split(u","_s))

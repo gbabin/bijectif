@@ -1,4 +1,4 @@
-- video file preview in tooltip
+- video file preview in viewer
 - rename once for multiple cell changes
 - EXIF info (date, time)
 - action progress bar

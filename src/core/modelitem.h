@@ -30,7 +30,6 @@ public:
     ~ModelItem() override;
     void setSelected(bool selected);
     [[nodiscard]] QString getPath() const;
-    [[nodiscard]] QString getTooltip() const;
     [[nodiscard]] const QString& getId() const;
     bool setId(const QString &id);
     [[nodiscard]] int getNamesSize() const;

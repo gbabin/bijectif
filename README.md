@@ -45,7 +45,6 @@ Default `bijectif.ini`:
 
 ```
 thumbnail size = 128
-tooltip size = 512
 min width = 800
 min height = 600
 listed extensions = jpg,jpeg,tif,tiff,png,bmp,gif,dng,mp4,mov,avi

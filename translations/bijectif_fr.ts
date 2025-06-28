@@ -30,24 +30,6 @@
     </message>
 </context>
 <context>
-    <name>ModelItem</name>
-    <message>
-        <location filename="../src/core/modelitem.cpp" line="101"/>
-        <source>Thumbnail unavailable</source>
-        <translation>Miniature indisponible</translation>
-    </message>
-    <message>
-        <location filename="../src/core/modelitem.cpp" line="103"/>
-        <source>Video</source>
-        <translation>Vidéo</translation>
-    </message>
-    <message>
-        <location filename="../src/core/modelitem.cpp" line="115"/>
-        <source>Failed to load image</source>
-        <translation>Échec du chargement de l&apos;image</translation>
-    </message>
-</context>
-<context>
     <name>QObject</name>
     <message>
         <location filename="../src/core/command_delete.cpp" line="14"/>

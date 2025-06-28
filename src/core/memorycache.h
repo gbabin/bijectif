@@ -19,9 +19,6 @@ public:
     void insertFullImage(const QString& path, const QPixmap& pixmap);
     [[nodiscard]] QPixmap getFullImage(const QString& path);
 
-    void insertTooltip(const QString& path, const QString& tooltip);
-    [[nodiscard]] QString getTooltip(const QString& path);
-
 private:
     QCache<QString, QVariant> cache;
     QReadWriteLock lock;

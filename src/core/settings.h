@@ -45,9 +45,6 @@ public:
     /// Thumbnail size in main window (in pixels)
     const int thumbnailSize;
 
-    /// Thumbnail size in tooltips (in pixels)
-    const int tooltipSize;
-
     /// Minimal window width (in pixels)
     const int minWidth;
 

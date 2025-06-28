@@ -338,12 +338,6 @@ QVariant Model::data(const QModelIndex &index, int role) const
         } else {
             return QVariant();
         }
-    } else if (role == Qt::ToolTipRole) {
-        if (index.column() == ThumbnailCol) {
-            return images.at(index.row())->getTooltip();
-        } else {
-            return QVariant();
-        }
     } else if (role == ImagePathRole) {
         if (index.column() == ThumbnailCol) {
             return images.at(index.row())->getPath();
