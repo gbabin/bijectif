@@ -254,20 +254,16 @@ void Model::load(const QList<const FileGroup *> &fileGroupList, const QDir &dire
 
 Qt::ItemFlags Model::flags(const QModelIndex &index) const
 {
-    if (index.column() == IdentifierCol) {
-        return Qt::ItemIsEnabled | Qt::ItemNeverHasChildren | Qt::ItemIsSelectable | Qt::ItemIsEditable;
-    } else if (index.column() == MapCol) {
-        if (images.at(index.row())->getLocation().has_value())
-            return Qt::ItemIsEnabled | Qt::ItemNeverHasChildren;
-        return Qt::ItemNeverHasChildren;
-    } else if (index.column() >= FirstNameCol) {
-        if (images.at(index.row())->getNamesSize() > (index.column() - 1 - FirstNameCol))
-            return Qt::ItemIsEnabled | Qt::ItemNeverHasChildren | Qt::ItemIsSelectable | Qt::ItemIsEditable;
-        else
-            return Qt::ItemIsEnabled | Qt::ItemNeverHasChildren | Qt::ItemIsSelectable;
+    Qt::ItemFlags flags = Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemNeverHasChildren;
+
+    if (index.column() == IdentifierCol
+        || (index.column() >= FirstNameCol
+            && images.at(index.row())->getNamesSize() > (index.column() - 1 - FirstNameCol)))
+    {
+        flags |= Qt::ItemIsEditable;
     }
-    else
-        return Qt::ItemIsEnabled | Qt::ItemNeverHasChildren;
+
+    return flags;
 }
 
 int Model::rowCount(const QModelIndex &parent) const

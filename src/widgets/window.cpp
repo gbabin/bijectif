@@ -560,14 +560,12 @@ void Window::selectionChanged(const QItemSelection &selected, const QItemSelecti
                                                return model->data(index, NameCountRole).toInt() == maxNames;
                                            });
 
-        pasteAct->setEnabled(selectedIndexes.size() == 1
-                             || allNames);
+        const bool oneIdentifier = selectedIndexes.size() == 1
+                                   && selectedIndexes.constFirst().column() == IdentifierCol;
 
-        copyAct->setEnabled((selectedIndexes.size() == 1
-                             && ! view.model()->data(selectedIndexes.constFirst()).isNull())
-                            || (selectedIndexes.size() > 1
-                                && allNames
-                                && noneEmpty));
+        pasteAct->setEnabled(allNames || oneIdentifier);
+
+        copyAct->setEnabled(noneEmpty && (allNames || oneIdentifier));
 
         deleteAct->setEnabled(allNames && noneEmpty);
 
