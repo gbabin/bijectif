@@ -8,9 +8,7 @@
 
 #include <QCache>
 #include <QFutureWatcher>
-#include <QGraphicsPixmapItem>
 #include <QGraphicsScene>
-#include <QGraphicsView>
 #include <QWidget>
 
 namespace KDToolBox {
@@ -35,11 +33,12 @@ private:
     void displayImage();
 
     MemoryCache &memoryCache;
-    QFutureWatcher<QPixmap>* imageReaderWatcher;
+    QFutureWatcher<QVariant>* imageReaderWatcher;
     KDToolBox::KDSignalDebouncer* loadDebouncer;
     QGraphicsScene* graphicsScene;
     QGraphicsView* graphicsView;
     QGraphicsPixmapItem* pixmapItem;
+    QGraphicsSimpleTextItem* messageItem;
     qreal scaleFactor;
     bool isFitted;
     QString displayedPath;

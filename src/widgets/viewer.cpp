@@ -6,6 +6,8 @@
 #include <KDSignalThrottler.h>
 
 #include <QEvent>
+#include <QGraphicsPixmapItem>
+#include <QGraphicsView>
 #include <QImageReader>
 #include <QVBoxLayout>
 #include <QWheelEvent>
@@ -17,15 +19,16 @@ Viewer::Viewer(MemoryCache &memoryCache,
                QWidget *parent)
     : QWidget(parent)
     , memoryCache(memoryCache)
-    , imageReaderWatcher(new QFutureWatcher<QPixmap>(this))
+    , imageReaderWatcher(new QFutureWatcher<QVariant>(this))
     , loadDebouncer(new KDToolBox::KDSignalDebouncer(this))
     , graphicsScene(new QGraphicsScene(this))
     , graphicsView(new QGraphicsView(graphicsScene, this))
     , pixmapItem(new QGraphicsPixmapItem())
+    , messageItem(new QGraphicsSimpleTextItem())
     , scaleFactor(1.0)
     , isFitted(false)
 {
-    connect(imageReaderWatcher, &QFutureWatcher<QPixmap>::finished,
+    connect(imageReaderWatcher, &QFutureWatcher<QVariant>::finished,
             this, &Viewer::imageLoaded);
 
     pixmapItem->setTransformationMode(Qt::SmoothTransformation);
@@ -37,6 +40,7 @@ Viewer::Viewer(MemoryCache &memoryCache,
     graphicsView->viewport()->installEventFilter(this);
 
     graphicsScene->addItem(pixmapItem);
+    graphicsScene->addItem(messageItem);
 
     QLayout* layout = new QVBoxLayout(this);
     layout->addWidget(graphicsView);
@@ -60,32 +64,32 @@ void Viewer::viewImage(const QString& path)
 void Viewer::loadImage()
 {
     if (displayedPath.isNull()) {
-        const QFuture<QPixmap> future = QtConcurrent::run([]() {
-            return QPixmap();
+        const QFuture<QVariant> future = QtConcurrent::run([]() {
+            return QVariant(tr("Select one item for preview"));
         });
 
         imageReaderWatcher->setFuture(future);
     } else {
         const QPixmap possiblePixmap = memoryCache.getFullImage(displayedPath);
         if (possiblePixmap.isNull()) {
-            const QFuture<QPixmap> future = QtConcurrent::run([path=displayedPath, &cache=memoryCache]() {
+            const QFuture<QVariant> future = QtConcurrent::run([path=displayedPath, &cache=memoryCache]() {
                 QImageReader reader(path);
                 reader.setAutoTransform(true);
                 const QImage image = reader.read();
                 if (image.isNull()) {
-                    qDebug() << "Failed to load image in viewer:" << path;
-                    return QPixmap();
+                    qWarning() << "Failed to load image in viewer:" << path << ": Error" << reader.error() << reader.errorString();
+                    return QVariant(tr("Preview not available"));
                 } else {
                     const QPixmap pixmap = QPixmap::fromImage(image);
                     cache.insertFullImage(path, pixmap);
-                    return pixmap;
+                    return QVariant::fromValue(pixmap);
                 }
             });
 
             imageReaderWatcher->setFuture(future);
         } else {
-            const QFuture<QPixmap> future = QtConcurrent::run([pixmap=possiblePixmap]() {
-                return pixmap;
+            const QFuture<QVariant> future = QtConcurrent::run([pixmap=possiblePixmap]() {
+                return QVariant::fromValue(pixmap);
             });
 
             imageReaderWatcher->setFuture(future);
@@ -95,14 +99,18 @@ void Viewer::loadImage()
 
 void Viewer::imageLoaded()
 {
-    const QPixmap pixmap = imageReaderWatcher->result();
+    const QVariant result = imageReaderWatcher->result();
+    const QPixmap pixmap = result.value<QPixmap>();
 
     if (pixmap.isNull()) {
-        pixmapItem->setPixmap(pixmap);
+        const QString message = result.toString();
+        messageItem->setText(message);
+        pixmapItem->setPixmap(QPixmap());
         graphicsScene->setSceneRect(QRectF());
         graphicsView->resetTransform();
         isFitted = false;
     } else {
+        messageItem->setText(QString());
         pixmapItem->setPixmap(pixmap);
         graphicsScene->setSceneRect(pixmap.rect());
         graphicsView->fitInView(graphicsScene->sceneRect(), Qt::KeepAspectRatio);

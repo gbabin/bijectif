@@ -4,27 +4,27 @@
 <context>
     <name>Model</name>
     <message>
-        <location filename="../src/core/model.cpp" line="291"/>
+        <location filename="../src/core/model.cpp" line="287"/>
         <source>Thumbnail</source>
         <translation>Miniature</translation>
     </message>
     <message>
-        <location filename="../src/core/model.cpp" line="292"/>
+        <location filename="../src/core/model.cpp" line="288"/>
         <source>Identifier</source>
         <translation>Identifiant</translation>
     </message>
     <message>
-        <location filename="../src/core/model.cpp" line="293"/>
+        <location filename="../src/core/model.cpp" line="289"/>
         <source>Map</source>
         <translation>Carte</translation>
     </message>
     <message>
-        <location filename="../src/core/model.cpp" line="294"/>
+        <location filename="../src/core/model.cpp" line="290"/>
         <source>Name %1</source>
         <translation>Nom %1</translation>
     </message>
     <message>
-        <location filename="../src/core/model.cpp" line="318"/>
+        <location filename="../src/core/model.cpp" line="314"/>
         <source>%1 file</source>
         <translation>Fichier %1</translation>
     </message>
@@ -65,6 +65,19 @@
 </source>
         <translation>Insérer (%1) [%2] &quot;%3&quot;
 </translation>
+    </message>
+</context>
+<context>
+    <name>Viewer</name>
+    <message>
+        <location filename="../src/widgets/viewer.cpp" line="68"/>
+        <source>Select one item for preview</source>
+        <translation>Sélectionnez un élément pour l&apos;aperçu</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/viewer.cpp" line="81"/>
+        <source>Preview not available</source>
+        <translation>Aperçu non disponible</translation>
     </message>
 </context>
 <context>
@@ -243,29 +256,29 @@ Après : %2</translation>
         <translation>Séquence de caractères interdite</translation>
     </message>
     <message>
-        <location filename="../src/widgets/window.cpp" line="677"/>
-        <location filename="../src/widgets/window.cpp" line="691"/>
+        <location filename="../src/widgets/window.cpp" line="675"/>
+        <location filename="../src/widgets/window.cpp" line="689"/>
         <source>Pasting multiple cells</source>
         <translation>Coller plusieurs cellules</translation>
     </message>
     <message>
-        <location filename="../src/widgets/window.cpp" line="678"/>
-        <location filename="../src/widgets/window.cpp" line="692"/>
+        <location filename="../src/widgets/window.cpp" line="676"/>
+        <location filename="../src/widgets/window.cpp" line="690"/>
         <source>The pasted content has %1 parts. Therefore, each modifed row must have %1 selected cells.</source>
         <translation>Le contenu collé comporte %1 parties. Par conséquent, chaque ligne modifiée doit avoir %1 cellules sélectionnées.</translation>
     </message>
     <message>
-        <location filename="../src/widgets/window.cpp" line="728"/>
+        <location filename="../src/widgets/window.cpp" line="726"/>
         <source>Insertion</source>
         <translation>Insertion</translation>
     </message>
     <message>
-        <location filename="../src/widgets/window.cpp" line="729"/>
+        <location filename="../src/widgets/window.cpp" line="727"/>
         <source>Name:</source>
         <translation>Nom :</translation>
     </message>
     <message>
-        <location filename="../src/widgets/window.cpp" line="882"/>
+        <location filename="../src/widgets/window.cpp" line="880"/>
         <source>Requested tiles: %1 (%2 new, %3 from cache, %4 canceled, %5 errors)</source>
         <translation>Tuiles demandées : %1 (%2 nouvelles, %3 en cache, %4 annulées, %5 erreurs)</translation>
     </message>
