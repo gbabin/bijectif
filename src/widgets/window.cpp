@@ -113,14 +113,15 @@ Window::Window(const Settings &settings, const QDir &directory, bool benchmark, 
 
     setCentralWidget(&view);
 
-    // dock
+    // docks
 
-    if (settings.showCommandHistory) {
-        QDockWidget *undoDockWidget = new QDockWidget(this);
-        undoDockWidget->setWindowTitle(tr("Command history"));
-        undoDockWidget->setWidget(new QUndoView(undoStack));
-        addDockWidget(Qt::RightDockWidgetArea, undoDockWidget);
-    }
+    QDockWidget *undoDockWidget = new QDockWidget(this);
+    undoDockWidget->setWindowTitle(tr("Command history"));
+    undoDockWidget->setWidget(new QUndoView(undoStack));
+    addDockWidget(Qt::RightDockWidgetArea, undoDockWidget);
+
+    if (! settings.showCommandHistory)
+        undoDockWidget->hide();
 
     viewerDockWidget = new QDockWidget(this);
     viewer = new Viewer(memoryCache, viewerDockWidget);
@@ -254,6 +255,11 @@ Window::Window(const Settings &settings, const QDir &directory, bool benchmark, 
     QAction* sepAct3 = new QAction(u"|"_s, this);
     sepAct3->setDisabled(true);
     menuBar()->addAction(sepAct3);
+
+    QMenu *menuDocks = createPopupMenu();
+    menuDocks->setParent(this);
+    menuDocks->setTitle(tr("&Tools"));
+    menuBar()->addMenu(menuDocks);
 
     QMenu* helpMenu = menuBar()->addMenu(tr("&Help"));
 
@@ -421,7 +427,7 @@ void Window::modelLoadingDone(qint64 dbFileSize)
             const QGV::GeoRect rect(minLat, minLong, maxLat, maxLong);
             map->cameraTo(QGVCameraActions(map).scaleTo(rect));
         } else {
-            removeDockWidget(mapDockWidget);
+            mapDockWidget->hide();
         }
     }
 

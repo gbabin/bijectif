@@ -57,7 +57,7 @@ memory cache size = 500
 thumbnail database limit = 10000
 log verbosity = 2
 resizable columns = false
-show command history = true
+show command history = false
 initial map width = 400
 map cache size = 200
 ```
