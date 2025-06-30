@@ -113,6 +113,84 @@ Window::Window(const Settings &settings, const QDir &directory, bool benchmark, 
 
     setCentralWidget(&view);
 
+    // dock
+
+    if (settings.showCommandHistory) {
+        QDockWidget *undoDockWidget = new QDockWidget(this);
+        undoDockWidget->setWindowTitle(tr("Command history"));
+        undoDockWidget->setWidget(new QUndoView(undoStack));
+        addDockWidget(Qt::RightDockWidgetArea, undoDockWidget);
+    }
+
+    viewerDockWidget = new QDockWidget(this);
+    viewer = new Viewer(memoryCache, viewerDockWidget);
+    viewerDockWidget->setWidget(viewer);
+    viewerDockWidget->setWindowTitle(tr("Viewer"));
+    addDockWidget(Qt::LeftDockWidgetArea, viewerDockWidget);
+
+    connect(this, &Window::viewImage,
+            viewer, &Viewer::viewImage);
+
+    mapDockWidget = new QDockWidget(this);
+    mapStatistics = new QLabel(mapDockWidget);
+    map = new QGVMap(mapDockWidget);
+
+    QGVWidgetZoom* zoom = new QGVWidgetZoom();
+    zoom->setAnchor(QPoint(10, 10), { Qt::LeftEdge, Qt::TopEdge });
+    map->addWidget(zoom);
+
+    QGVWidgetScale* scale = new QGVWidgetScale();
+    scale->setAnchor(QPoint(10, 10), { Qt::LeftEdge, Qt::BottomEdge });
+    map->addWidget(scale);
+
+    const QString cacheLocation = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
+    const QString fullCachePath = QDir(cacheLocation).filePath(u"map"_s);
+
+    QNetworkDiskCache *cache = new QNetworkDiskCache(mapDockWidget);
+    cache->setCacheDirectory(fullCachePath);
+    cache->setMaximumCacheSize(settings.mapCacheSize);
+    QNetworkAccessManager *manager = new QNetworkAccessManager(mapDockWidget);
+    manager->setCache(cache);
+    QGV::setNetworkManager(manager);
+
+    map->setMouseAction(QGV::MouseAction::ZoomRect, false);
+    map->setAcceptDrops(false);
+
+    mapProviderChanged(0);
+
+    QWidget *mapWidget = new QWidget(mapDockWidget);
+    QVBoxLayout *mapLayout = new QVBoxLayout(mapWidget);
+
+    if (settings.customMaps.size() > 1) {
+        mapSelector = new QComboBox(mapDockWidget);
+        for (const CustomMap& map : settings.customMaps) {
+            mapSelector->addItem(map.name);
+        }
+        connect(mapSelector, &QComboBox::currentIndexChanged,
+                this, &Window::mapProviderChanged);
+        mapLayout->addWidget(mapSelector);
+    }
+    mapLayout->addWidget(map);
+    mapLayout->addWidget(mapStatistics);
+    mapDockWidget->setWidget(mapWidget);
+    mapDockWidget->setWindowTitle(tr("Map"));
+    addDockWidget(Qt::LeftDockWidgetArea, mapDockWidget);
+
+    {
+        const int height = view.size().height() / 2;
+        const int width = settings.initialMapWidth;
+        resizeDocks({mapDockWidget, viewerDockWidget}, {height, height}, Qt::Vertical);
+        resizeDocks({mapDockWidget, viewerDockWidget}, {width, width}, Qt::Horizontal);
+    }
+
+    mapSelectionDebouncer = new KDToolBox::KDSignalDebouncer(this);
+    mapSelectionDebouncer->setTimeout(100);
+
+    connect(map, &QGVMap::selectionsChanged,
+            mapSelectionDebouncer, &KDToolBox::KDSignalDebouncer::throttle);
+    connect(mapSelectionDebouncer, &KDToolBox::KDSignalDebouncer::triggered,
+            this, &Window::mapSelectionChanged);
+
     // menu & actions
 
     QAction* undoAct = undoStack->createUndoAction(this, tr("&Undo"));
@@ -201,84 +279,6 @@ Window::Window(const Settings &settings, const QDir &directory, bool benchmark, 
 
     menuBar()->setFont(font);
     helpMenu->setFont(font);
-
-    // dock
-
-    if (settings.showCommandHistory) {
-        QDockWidget *undoDockWidget = new QDockWidget(this);
-        undoDockWidget->setWindowTitle(tr("Command history"));
-        undoDockWidget->setWidget(new QUndoView(undoStack));
-        addDockWidget(Qt::RightDockWidgetArea, undoDockWidget);
-    }
-
-    viewerDockWidget = new QDockWidget(this);
-    viewer = new Viewer(memoryCache, viewerDockWidget);
-    viewerDockWidget->setWidget(viewer);
-    viewerDockWidget->setWindowTitle(tr("Viewer"));
-    addDockWidget(Qt::LeftDockWidgetArea, viewerDockWidget);
-
-    connect(this, &Window::viewImage,
-            viewer, &Viewer::viewImage);
-
-    mapDockWidget = new QDockWidget(this);
-    mapStatistics = new QLabel(mapDockWidget);
-    map = new QGVMap(mapDockWidget);
-
-    QGVWidgetZoom* zoom = new QGVWidgetZoom();
-    zoom->setAnchor(QPoint(10, 10), { Qt::LeftEdge, Qt::TopEdge });
-    map->addWidget(zoom);
-
-    QGVWidgetScale* scale = new QGVWidgetScale();
-    scale->setAnchor(QPoint(10, 10), { Qt::LeftEdge, Qt::BottomEdge });
-    map->addWidget(scale);
-
-    const QString cacheLocation = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
-    const QString fullCachePath = QDir(cacheLocation).filePath(u"map"_s);
-
-    QNetworkDiskCache *cache = new QNetworkDiskCache(mapDockWidget);
-    cache->setCacheDirectory(fullCachePath);
-    cache->setMaximumCacheSize(settings.mapCacheSize);
-    QNetworkAccessManager *manager = new QNetworkAccessManager(mapDockWidget);
-    manager->setCache(cache);
-    QGV::setNetworkManager(manager);
-
-    map->setMouseAction(QGV::MouseAction::ZoomRect, false);
-    map->setAcceptDrops(false);
-
-    mapProviderChanged(0);
-
-    QWidget *mapWidget = new QWidget(mapDockWidget);
-    QVBoxLayout *mapLayout = new QVBoxLayout(mapWidget);
-
-    if (settings.customMaps.size() > 1) {
-        mapSelector = new QComboBox(mapDockWidget);
-        for (const CustomMap& map : settings.customMaps) {
-            mapSelector->addItem(map.name);
-        }
-        connect(mapSelector, &QComboBox::currentIndexChanged,
-                this, &Window::mapProviderChanged);
-        mapLayout->addWidget(mapSelector);
-    }
-    mapLayout->addWidget(map);
-    mapLayout->addWidget(mapStatistics);
-    mapDockWidget->setWidget(mapWidget);
-    mapDockWidget->setWindowTitle(tr("Map"));
-    addDockWidget(Qt::LeftDockWidgetArea, mapDockWidget);
-
-    {
-        const int height = view.size().height() / 2;
-        const int width = settings.initialMapWidth;
-        resizeDocks({mapDockWidget, viewerDockWidget}, {height, height}, Qt::Vertical);
-        resizeDocks({mapDockWidget, viewerDockWidget}, {width, width}, Qt::Horizontal);
-    }
-
-    mapSelectionDebouncer = new KDToolBox::KDSignalDebouncer(this);
-    mapSelectionDebouncer->setTimeout(100);
-
-    connect(map, &QGVMap::selectionsChanged,
-            mapSelectionDebouncer, &KDToolBox::KDSignalDebouncer::throttle);
-    connect(mapSelectionDebouncer, &KDToolBox::KDSignalDebouncer::triggered,
-            this, &Window::mapSelectionChanged);
 }
 
 Window::~Window()
