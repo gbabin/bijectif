@@ -31,6 +31,7 @@
 #include <QLabel>
 #include <QMenuBar>
 #include <QMessageBox>
+#include <QNetworkAccessManager>
 #include <QNetworkDiskCache>
 #include <QSet>
 #include <QSortFilterProxyModel>
