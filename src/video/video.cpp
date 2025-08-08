@@ -1,0 +1,189 @@
+// Copyright (C) 2025 gbabin
+// SPDX-License-Identifier: GPL-3.0-only
+
+#include "video.h"
+
+extern "C" {
+#include <libavcodec/avcodec.h>
+#include <libavformat/avformat.h>
+#include <libavutil/imgutils.h>
+#include <libavutil/rational.h>
+#include <libswscale/swscale.h>
+}
+
+#include <QDebug>
+
+std::optional<QPixmap> computeVideoThumbnail(int thumbnailSize, const QString &filePath)
+{
+    AVFormatContext* formatContext = nullptr;
+    AVCodecContext* codecContext = nullptr;
+    enum AVCodecID codecId = AV_CODEC_ID_NONE;
+    const AVCodec* codec = nullptr;
+    AVFrame* frame = nullptr;
+    AVFrame* scaledFrame = nullptr;
+    AVPacket* packet = nullptr;
+    SwsContext* swsContext = nullptr;
+    int videoStreamIndex = -1;
+    std::optional<QPixmap> result = std::nullopt;
+
+    // Open input file
+    int ret = avformat_open_input(&formatContext, filePath.toStdString().c_str(), nullptr, nullptr);
+    if (ret < 0) {
+        qWarning() << "Video loading failed (could not open file):" << filePath;
+        goto cleanup;
+    }
+
+    // Retrieve stream information
+    ret = avformat_find_stream_info(formatContext, nullptr);
+    if (ret < 0) {
+        qWarning() << "Video loading failed (could not find stream information):" << filePath;
+        goto cleanup;
+    }
+
+    // Find the first video stream
+    for (unsigned int i = 0; i < formatContext->nb_streams; i++) {
+        if (formatContext->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_VIDEO) {
+            videoStreamIndex = static_cast<int>(i);
+            break;
+        }
+    }
+
+    if (videoStreamIndex == -1) {
+        qWarning() << "Video loading failed (could not find video stream):" << filePath;
+        goto cleanup;
+    }
+
+    // Find decoder
+    codecId = formatContext->streams[videoStreamIndex]->codecpar->codec_id;
+    codec = avcodec_find_decoder(codecId);
+    if (codec == nullptr) {
+        qWarning() << "Video loading failed (could not find decoder):" << filePath << "(codec =" << avcodec_get_name(codecId) << ")";
+        goto cleanup;
+    }
+
+    // Allocate codec context
+    codecContext = avcodec_alloc_context3(codec);
+    if (codecContext == nullptr) {
+        qWarning() << "Video loading failed (could not allocate codec context):" << filePath;
+        goto cleanup;
+    }
+
+    // Copy codec parameters to context
+    ret = avcodec_parameters_to_context(codecContext, formatContext->streams[videoStreamIndex]->codecpar);
+    if (ret < 0) {
+        qWarning() << "Video loading failed (could not copy codec parameters to context):" << filePath;
+        goto cleanup;
+    }
+
+    // Open codec
+    ret = avcodec_open2(codecContext, codec, nullptr);
+    if (ret < 0) {
+        qWarning() << "Video loading failed (could not open codec):" << filePath;
+        goto cleanup;
+    }
+
+    // Allocate frames and packet
+    frame = av_frame_alloc();
+    scaledFrame = av_frame_alloc();
+    packet = av_packet_alloc();
+
+    if (frame == nullptr || scaledFrame == nullptr || packet == nullptr) {
+        qWarning() << "Video loading failed (could not allocate frames or packet):" << filePath;
+        goto cleanup;
+    }
+
+    // Read frames and find the first video frame
+    while (av_read_frame(formatContext, packet) >= 0) {
+        if (packet->stream_index == videoStreamIndex) {
+            // Send packet to decoder
+            ret = avcodec_send_packet(codecContext, packet);
+            if (ret < 0) {
+                qWarning() << "Video loading failed (could not send packet to decoder):" << filePath;
+                break;
+            }
+
+            // Receive frame from decoder
+            ret = avcodec_receive_frame(codecContext, frame);
+            if (ret == AVERROR(EAGAIN)) {
+                continue;
+            }
+            if (ret < 0) {
+                qWarning() << "Video loading failed (could not decode the first frame):" << filePath;
+                break;
+            }
+
+            // Successfully decoded a frame - this is our first frame
+
+            // Calculate scaled dimensions while maintaining aspect ratio
+            const int originalWidth = frame->width;
+            const int originalHeight = frame->height;
+
+            int scaledWidth, scaledHeight;
+            if (originalWidth > originalHeight) {
+                scaledWidth = thumbnailSize;
+                scaledHeight = (originalHeight * thumbnailSize) / originalWidth;
+            } else {
+                scaledHeight = thumbnailSize;
+                scaledWidth = (originalWidth * thumbnailSize) / originalHeight;
+            }
+
+            // Ensure dimensions are even (some codecs prefer even dimensions)
+            scaledWidth = (scaledWidth / 2) * 2;
+            scaledHeight = (scaledHeight / 2) * 2;
+
+            // Set up scaling context
+            swsContext = sws_getContext(originalWidth, originalHeight, static_cast<AVPixelFormat>(frame->format),
+                                        scaledWidth, scaledHeight, AV_PIX_FMT_RGB24,
+                                        SWS_BICUBIC, nullptr, nullptr, nullptr);
+            if (swsContext == nullptr) {
+                qWarning() << "Video loading failed (could not initialize scaling context):" << filePath;
+                break;
+            }
+
+            // Allocate scaled frame buffer
+            scaledFrame->format = AV_PIX_FMT_RGB24;
+            scaledFrame->width = scaledWidth;
+            scaledFrame->height = scaledHeight;
+            ret = av_frame_get_buffer(scaledFrame, 32);
+            if (ret < 0) {
+                qWarning() << "Video loading failed (could not allocate scaled frame buffer):" << filePath;
+                break;
+            }
+
+            // Scale the frame
+            ret = sws_scale(swsContext,
+                            &frame->data[0], &frame->linesize[0],
+                            0, originalHeight,
+                            &scaledFrame->data[0], &scaledFrame->linesize[0]);
+            if (ret < 0) {
+                qWarning() << "Video loading failed (could not scale the frame):" << filePath;
+                break;
+            }
+
+            // Convert to QPixmap
+            const QImage image(scaledFrame->data[0],
+                               scaledWidth, scaledHeight,
+                               scaledFrame->linesize[0],
+                               QImage::Format_RGB888);
+            if (image.isNull()) {
+                qWarning() << "Video loading failed (could not create image):" << filePath;
+                break;
+            }
+
+            result.emplace(QPixmap::fromImage(image));
+
+            break;
+        }
+        av_packet_unref(packet);
+    }
+
+cleanup:
+    if (swsContext != nullptr)    sws_freeContext(swsContext);
+    if (packet != nullptr)        av_packet_free(&packet);
+    if (scaledFrame != nullptr)   av_frame_free(&scaledFrame);
+    if (frame != nullptr)         av_frame_free(&frame);
+    if (codecContext != nullptr)  avcodec_free_context(&codecContext);
+    if (formatContext != nullptr) avformat_close_input(&formatContext);
+
+    return result;
+}

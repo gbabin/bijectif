@@ -10,7 +10,8 @@ fi
 
 pacman -S --needed --noconfirm \
        mingw-w64-ucrt-x86_64-{cmake,ninja,gcc,libexif} \
-       mingw-w64-ucrt-x86_64-qt6-{base,imageformats,multimedia,tools,translations} \
+       mingw-w64-ucrt-x86_64-ffmpeg \
+       mingw-w64-ucrt-x86_64-qt6-{base,imageformats,tools,translations} \
        zip
 
 rm -rf build/msys2
@@ -26,7 +27,7 @@ cp build/msys2/src/app/*.qm build/msys2/Bijectif
 
 cd build/msys2/Bijectif
 windeployqt-qt6 ./*.exe
-ldd ./*.exe imageformats/*.dll multimedia/*.dll sqldrivers/qsqlite.dll | grep -F ' => /ucrt64/' | awk '{print $3}' | sort --unique | xargs -I_ cp _ .
+ldd ./*.exe imageformats/*.dll sqldrivers/qsqlite.dll | grep -F ' => /ucrt64/' | awk '{print $3}' | sort --unique | xargs -I_ cp _ .
 cd ..
 zip -r9 Bijectif.zip Bijectif
 realpath Bijectif.zip

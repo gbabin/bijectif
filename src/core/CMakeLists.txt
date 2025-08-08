@@ -23,10 +23,10 @@ target_include_directories(core SYSTEM PRIVATE ${EXIF_INCLUDE_DIRS})
 target_compile_options(core PRIVATE ${EXIF_CFLAGS_OTHER})
 
 target_link_libraries(core PRIVATE
+    video
     QGeoView
     ${EXIF_LIBRARIES}
     Qt::Gui
-    Qt::Multimedia
     Qt::Sql
     Qt::Widgets
 )

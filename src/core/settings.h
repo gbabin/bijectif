@@ -61,13 +61,12 @@ public:
     const QStringList imageExtensions;
 
     /// Extensions of video files for thumbnails (comma-separated list, lower case)
-    /// https://doc.qt.io/qt-6/qmediaformat.html#FileFormat-enum
     const QStringList videoExtensions;
 
     /// Maximal number of name parts
     const int maxNames;
 
-    /// Maximal file size considered for computing thumbnails (in bytes)
+    /// Maximal image file size considered for computing thumbnails (in bytes)
     /// [in megabytes in settings file]
     const int maxFileSize;
 

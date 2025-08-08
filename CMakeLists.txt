@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-find_package(Qt6 REQUIRED COMPONENTS Concurrent Core Gui LinguistTools Multimedia Sql Test Widgets)
+find_package(Qt6 REQUIRED COMPONENTS Concurrent Core Gui LinguistTools Network Sql Test Widgets)
 
 if (Qt6_VERSION VERSION_LESS 6.4)
     message(FATAL_ERROR "Qt 6.4 or higher is required. You are using version ${Qt6_VERSION}.")
@@ -21,6 +21,7 @@ add_subdirectory(src/QGeoView)
 
 add_subdirectory(src/app)
 add_subdirectory(src/core)
+add_subdirectory(src/video)
 add_subdirectory(src/widgets)
 add_subdirectory(tests)
 

@@ -2,16 +2,13 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include "loader.h"
+#include "video.h"
 
 #include <libexif/exif-data.h>
 
 #include <QBuffer>
 #include <QImageReader>
-#include <QMediaPlayer>
 #include <QQueue>
-#include <QTimer>
-#include <QVideoFrame>
-#include <QVideoSink>
 
 Loader::Loader(QQueue<const FileGroup *> &fileGroups, QMutex &fileGroupsMutex,
                QList<NewItem> &newThumbnails, QMutex &newThumbnailsMutex,
@@ -110,69 +107,7 @@ std::optional<QPixmap> Loader::computeImageThumbnail(const Settings &settings, c
 
 std::optional<QPixmap> Loader::computeVideoThumbnail(const Settings &settings, const QString &filePath)
 {
-    std::optional<QPixmap> possibleThumbnail;
-
-    QImage image;
-    QVideoSink videoSink;
-    QMediaPlayer mediaPlayer;
-    mediaPlayer.setVideoSink(&videoSink);
-
-    {
-        QEventLoop eventLoop;
-        QTimer::singleShot(3000, &eventLoop,
-                           [&eventLoop](){ eventLoop.exit(1); });
-        QObject::connect(&mediaPlayer, &QMediaPlayer::mediaStatusChanged,
-                         &eventLoop,
-                         [&eventLoop](const QMediaPlayer::MediaStatus status) {
-                             switch (status) {
-                             case QMediaPlayer::LoadingMedia:
-                                 break;
-                             case QMediaPlayer::LoadedMedia:
-                                 eventLoop.exit();
-                                 break;
-                             default:
-                                 eventLoop.exit(1);
-                                 break;
-                             }
-                         });
-        mediaPlayer.setSource(QUrl::fromLocalFile(filePath));
-        const int returnCode = eventLoop.exec();
-        mediaPlayer.disconnect();
-        if (returnCode != 0) {
-            qWarning() << "Video loading failed (setSource):" << filePath << mediaPlayer.mediaStatus() << mediaPlayer.error() << mediaPlayer.errorString();
-        }
-    }
-
-    {
-        QEventLoop eventLoop;
-        QTimer::singleShot(3000, &eventLoop,
-                           [&eventLoop](){ eventLoop.exit(1); });
-        QObject::connect(&videoSink, &QVideoSink::videoFrameChanged,
-                         &eventLoop,
-                         [&eventLoop, &image](const QVideoFrame &frame) {
-                             if (image.isNull()) image = frame.toImage();
-                             eventLoop.exit();
-                         });
-        mediaPlayer.play();
-        const int returnCode = eventLoop.exec();
-        videoSink.disconnect();
-        mediaPlayer.stop();
-        if (returnCode != 0) {
-            qWarning() << "Video loading failed (play):" << filePath << mediaPlayer.mediaStatus() << mediaPlayer.error() << mediaPlayer.errorString();
-        }
-    }
-
-    if (image.isNull()) {
-        qWarning() << "Video loading failed (null):" << filePath;
-    } else {
-        possibleThumbnail.emplace(QPixmap::fromImage(
-            image.scaled(settings.thumbnailSize,
-                         settings.thumbnailSize,
-                         Qt::KeepAspectRatio,
-                         Qt::SmoothTransformation)));
-    }
-
-    return possibleThumbnail;
+    return ::computeVideoThumbnail(settings.thumbnailSize, filePath);
 }
 
 std::optional<Location> Loader::readLocation(const QString &filePath, const QByteArray &bytes)

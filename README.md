@@ -11,7 +11,9 @@ Use `PKGBUILD`.
 ### Debian / Ubuntu
 
 ```
-sudo apt install cmake make g++ libexif-dev qt6-base-dev qt6-multimedia-dev qt6-tools-dev libqt6sql6-sqlite
+sudo apt install cmake make g++ libexif-dev \
+                 libavcodec-dev libavformat-dev libavutil-dev libswscale-dev \
+                 qt6-base-dev qt6-tools-dev libqt6sql6-sqlite
 cmake -DCMAKE_BUILD_TYPE=Release . -B build
 cmake --build build
 ctest --test-dir build/tests --output-on-failure --no-tests=error
@@ -20,7 +22,9 @@ ctest --test-dir build/tests --output-on-failure --no-tests=error
 ### Fedora
 
 ```
-sudo dnf install cmake make gcc-c++ libexif-devel qt6-qtbase-devel qt6-qtmultimedia-devel qt6-qttools-devel
+sudo dnf install cmake make gcc-c++ libexif-devel \
+                 libavcodec-free-devel libavformat-free-devel libavutil-free-devel libswscale-free-devel \
+                 qt6-qtbase-devel qt6-qttools-devel
 cmake -DCMAKE_BUILD_TYPE=Release . -B build
 cmake --build build
 ctest --test-dir build/tests --output-on-failure --no-tests=error
@@ -29,7 +33,9 @@ ctest --test-dir build/tests --output-on-failure --no-tests=error
 ### openSUSE
 
 ```
-sudo zypper install cmake make gcc-c++ libexif-devel qt6-base-devel qt6-multimedia-devel qt6-linguist-devel qt6-sql-sqlite
+sudo zypper install cmake make gcc-c++ libexif-devel \
+                    libavcodec-devel libavformat-devel libavutil-devel libswscale-devel \
+                    qt6-base-devel qt6-linguist-devel qt6-sql-sqlite
 cmake -DCMAKE_BUILD_TYPE=Release . -B build
 cmake --build build
 ctest --test-dir build/tests --output-on-failure --no-tests=error
