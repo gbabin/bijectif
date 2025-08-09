@@ -9,6 +9,7 @@ qt_add_library(core STATIC
     command_paste.h command_paste.cpp
     completermodel.h completermodel.cpp
     filegroup.h filegroup.cpp
+    filekind.h
     loader.h loader.cpp
     location.h location.cpp
     memorycache.h memorycache.cpp

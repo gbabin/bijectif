@@ -334,12 +334,14 @@ QVariant Model::data(const QModelIndex &index, int role) const
         } else {
             return QVariant();
         }
-    } else if (role == ImagePathRole) {
+    } else if (role == FilePathRole) {
         if (index.column() == ThumbnailCol) {
             return images.at(index.row())->getPath();
         } else {
             return QVariant();
         }
+    } else if (role == FileKindRole) {
+        return images.at(index.row())->getKind();
     } else if (role == MapUrlRole) {
         if (index.column() == MapCol) {
             if (const std::optional<Location> &location = images.at(index.row())->getLocation())
@@ -390,7 +392,7 @@ bool Model::setData(const QModelIndex &index, const QVariant &value, int role)
                 Q_EMIT dataChanged(index, index, {Qt::DisplayRole, Qt::EditRole});
                 Q_EMIT dataChanged(index.siblingAtColumn(ThumbnailCol),
                                    index.siblingAtColumn(ThumbnailCol),
-                                   {ImagePathRole});
+                                   {FilePathRole});
                 return true;
             }
         }
@@ -411,7 +413,7 @@ bool Model::setData(const QModelIndex &index, const QVariant &value, int role)
                 Q_EMIT dataChanged(index, index, {Qt::DisplayRole, Qt::EditRole});
                 Q_EMIT dataChanged(index.siblingAtColumn(ThumbnailCol),
                                    index.siblingAtColumn(ThumbnailCol),
-                                   {ImagePathRole});
+                                   {FilePathRole});
                 return true;
             }
         }
@@ -426,7 +428,7 @@ bool Model::setData(const QModelIndex &index, const QVariant &value, int role)
                                    {Qt::DisplayRole, Qt::EditRole});
                 Q_EMIT dataChanged(index.siblingAtColumn(ThumbnailCol),
                                    index.siblingAtColumn(ThumbnailCol),
-                                   {ImagePathRole});
+                                   {FilePathRole});
                 return true;
             }
         }
@@ -443,7 +445,7 @@ bool Model::setData(const QModelIndex &index, const QVariant &value, int role)
                                    {Qt::DisplayRole, Qt::EditRole});
                 Q_EMIT dataChanged(index.siblingAtColumn(ThumbnailCol),
                                    index.siblingAtColumn(ThumbnailCol),
-                                   {ImagePathRole});
+                                   {FilePathRole});
                 return true;
             }
         }

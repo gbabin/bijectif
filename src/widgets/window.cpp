@@ -486,7 +486,12 @@ void Window::selectionChanged(const QItemSelection &selected, const QItemSelecti
     const QModelIndexList selectedIndexes = selectionModel->selectedIndexes();
 
     if (selectedIndexes.size() == 1) {
-        Q_EMIT viewImage(view.model()->data(selectedIndexes.constFirst().siblingAtColumn(ThumbnailCol), ImagePathRole).toString());
+        const QModelIndex& selectedIndex = selectedIndexes.constFirst();
+        const FileKind kind = selectedIndex.data(FileKindRole).value<FileKind>();
+        if (kind == IMAGE)
+            Q_EMIT viewImage(view.model()->data(selectedIndex.siblingAtColumn(ThumbnailCol), FilePathRole).toString());
+        else
+            Q_EMIT viewImage(QString());
     } else {
         Q_EMIT viewImage(QString());
     }
@@ -596,7 +601,7 @@ void Window::dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRi
 void Window::doubleClickedHandler(const QModelIndex &index)
 {
     if (index.column() == ThumbnailCol) {
-        const QVariant data = index.data(ImagePathRole);
+        const QVariant data = index.data(FilePathRole);
         if (data.userType() == QMetaType::QString) {
             const QString path = data.toString();
             QDesktopServices::openUrl(QUrl::fromLocalFile(path));

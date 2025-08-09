@@ -15,14 +15,28 @@ const char* TooManyPartsError::what() const noexcept
     return "The file has too many parts in its name.";
 }
 
-FileGroup::FileGroup(QString filePath, QString id, QStringList names, const QString &extension, qint64 lastModified, qint64 size)
+FileGroup::FileGroup(const Settings &settings, QString filePath, QString id, QStringList names, const QString &extension, qint64 lastModified, qint64 size)
     : filePath(std::move(filePath))
     , lastModified(lastModified)
     , size(size)
+    , kind(findKind(settings, extension))
     , id(std::move(id))
     , names(std::move(names))
 {
     extensions.append(extension);
+}
+
+FileKind FileGroup::findKind(const Settings &settings, const QString &extension)
+{
+    const QString extLow = extension.toLower();
+
+    if (settings.imageExtensions.contains(extLow)) {
+        return IMAGE;
+    } else if (settings.videoExtensions.contains(extLow)) {
+        return VIDEO;
+    } else {
+        return OTHER;
+    }
 }
 
 const QString& FileGroup::getMainExtension() const
@@ -80,7 +94,7 @@ QList<const FileGroup *> FileGroup::fileGroupList(const Settings &settings, cons
                     const qint64 lastModified = (*itFile).lastModified().toSecsSinceEpoch();
                     const qint64 size = (*itFile).size();
 
-                    FileGroup* fileGroup = new FileGroup((*itFile).filePath(), id, names, suffix, lastModified, size);
+                    FileGroup* fileGroup = new FileGroup(settings, (*itFile).filePath(), id, names, suffix, lastModified, size);
                     fileGroupList.append(fileGroup);
                     prefixes.insert(basename, qMakePair(QString(), fileGroup));
                     prefixes.insert((*itFile).fileName(), qMakePair(suffix, fileGroup));

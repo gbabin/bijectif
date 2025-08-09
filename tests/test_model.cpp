@@ -352,7 +352,7 @@ void ModelTest::test_2()
     QCOMPARE(proxyModel.columnCount(), FirstNameCol + settings.maxNames);
     QCOMPARE(proxyModel.rowCount(), 3);
 
-    QCOMPARE(proxyModel.data(proxyModel.index(0, ThumbnailCol), ImagePathRole),
+    QCOMPARE(proxyModel.data(proxyModel.index(0, ThumbnailCol), FilePathRole),
              filesDir.filePath(u"IMG_0001.jpg"_s));
     QCOMPARE(proxyModel.data(proxyModel.index(0, IdentifierCol), Qt::DisplayRole),
              u"IMG_0001"_s);
@@ -361,12 +361,12 @@ void ModelTest::test_2()
                  QVariant());
     }
 
-    QCOMPARE(proxyModel.data(proxyModel.index(1, ThumbnailCol), ImagePathRole),
+    QCOMPARE(proxyModel.data(proxyModel.index(1, ThumbnailCol), FilePathRole),
              filesDir.filePath(u"IMG_0001.1.jpg"_s));
     QCOMPARE(proxyModel.data(proxyModel.index(1, IdentifierCol), Qt::DisplayRole),
              u"IMG_0001.1"_s);
 
-    QCOMPARE(proxyModel.data(proxyModel.index(2, ThumbnailCol), ImagePathRole),
+    QCOMPARE(proxyModel.data(proxyModel.index(2, ThumbnailCol), FilePathRole),
              filesDir.filePath(u"IMG_0002.JPG"_s));
     QCOMPARE(proxyModel.data(proxyModel.index(2, IdentifierCol), Qt::DisplayRole),
              u"IMG_0002"_s);

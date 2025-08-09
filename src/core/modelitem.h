@@ -4,14 +4,17 @@
 #ifndef MODELITEM_H
 #define MODELITEM_H
 
-#include "filegroup.h"
+#include "filekind.h"
 #include "location.h"
 #include "memorycache.h"
+#include "settings.h"
 
 #include <QDir>
 #include <QPixmap>
 
 class QGVIcon;
+
+class FileGroup;
 
 class ModelItem : public QObject
 {
@@ -35,6 +38,7 @@ public:
     [[nodiscard]] int getNamesSize() const;
     [[nodiscard]] const QString& getName(int index) const;
     [[nodiscard]] const QString& getExtension() const;
+    [[nodiscard]] FileKind getKind() const;
     [[nodiscard]] const std::optional<Location>& getLocation() const;
     [[nodiscard]] QGVIcon* getMapIcon() const;
     [[nodiscard]] const std::optional<QPixmap>& getThumbnail() const;
@@ -64,6 +68,7 @@ private:
     QString id;
     QStringList names;
     const QStringList extensions;
+    const FileKind kind;
     const std::optional<Location> possibleLocation;
     const std::optional<QPixmap> possibleThumbnail;
     QGVIcon* possibleMapIcon;

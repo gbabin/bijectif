@@ -60,7 +60,8 @@ std::pair<std::optional<Location>, std::optional<QPixmap>> Loader::load(const Se
     std::optional<Location> possibleLocation;
     std::optional<QPixmap> possibleThumbnail;
 
-    if (settings.imageExtensions.contains(fileGroup->getMainExtension().toLower())) {
+    switch (fileGroup->kind) {
+    case IMAGE:
         if (fileGroup->size <= settings.maxFileSize) {
             QFile file(fileGroup->filePath);
             file.open(QIODevice::ReadOnly);
@@ -71,10 +72,13 @@ std::pair<std::optional<Location>, std::optional<QPixmap>> Loader::load(const Se
         } else {
             qInfo() << "Image ignored because of size:" << fileGroup->filePath;
         }
-    } else if (settings.videoExtensions.contains(fileGroup->getMainExtension().toLower())) {
+        break;
+    case VIDEO:
         possibleThumbnail = computeVideoThumbnail(settings, fileGroup->filePath);
-    } else {
+        break;
+    case OTHER:
         qInfo() << "File ignored because of extension:" << fileGroup->filePath;
+        break;
     }
 
     return std::make_pair(possibleLocation, possibleThumbnail);

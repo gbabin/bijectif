@@ -1,6 +1,7 @@
 // Copyright (C) 2023 gbabin
 // SPDX-License-Identifier: GPL-3.0-only
 
+#include "filegroup.h"
 #include "modelitem.h"
 
 #include <libexif/exif-data.h>
@@ -48,6 +49,7 @@ ModelItem::ModelItem(const Settings &settings,
     , id(fileGroup->id)
     , names(fileGroup->names)
     , extensions(fileGroup->getExtensions())
+    , kind(fileGroup->kind)
     , possibleLocation(possibleLocation)
     , possibleThumbnail(possibleThumbnail)
 {
@@ -132,6 +134,11 @@ const QString& ModelItem::getName(int index) const
 const QString& ModelItem::getExtension() const
 {
     return extensions.constFirst();
+}
+
+FileKind ModelItem::getKind() const
+{
+    return kind;
 }
 
 const std::optional<Location>& ModelItem::getLocation() const
