@@ -70,155 +70,150 @@
 <context>
     <name>Viewer</name>
     <message>
-        <location filename="../src/widgets/viewer.cpp" line="68"/>
-        <source>Select one item for preview</source>
-        <translation>Sélectionnez un élément pour l&apos;aperçu</translation>
-    </message>
-    <message>
         <location filename="../src/widgets/viewer.cpp" line="81"/>
-        <source>Preview not available</source>
-        <translation>Aperçu non disponible</translation>
+        <source>Image preview failed</source>
+        <translation>Échec de l&apos;aperçu de l&apos;image</translation>
     </message>
 </context>
 <context>
     <name>Window</name>
     <message>
-        <location filename="../src/widgets/window.cpp" line="50"/>
+        <location filename="../src/widgets/window.cpp" line="51"/>
         <source>&lt;b&gt;Bijectif %1&lt;/b&gt;&lt;br&gt;Edit titles in filenames&lt;br&gt;&lt;a href=&quot;%2&quot;&gt;%2&lt;/a&gt;&lt;br&gt;Licensed under the terms of the GNU General Public License v3.0&lt;br&gt;&lt;br&gt;Thumbnails database:&lt;br&gt;%3&lt;br&gt;Settings file:&lt;br&gt;%4&lt;br&gt;&lt;br&gt;Map from &lt;a href=&quot;https://www.openstreetmap.org/copyright&quot;&gt;OpenStreetMap&lt;/a&gt;&lt;br&gt;&lt;br&gt;&lt;a href=&quot;https://www.flaticon.com/free-icon/map_1865269&quot;&gt;Map&lt;/a&gt; and &lt;a href=&quot;https://www.flaticon.com/free-icon/placeholder_684908&quot;&gt;placeholder&lt;/a&gt; icons by &lt;a href=&quot;https://www.flaticon.com/authors/freepik&quot;&gt;Freepik&lt;/a&gt; from &lt;a href=&quot;https://www.flaticon.com/&quot;&gt;Flaticon.com&lt;/a&gt;&lt;br&gt;&lt;br&gt;This application uses &lt;a href=&quot;https://github.com/KDABLabs/KDToolBox/tree/master/qt/KDSignalThrottler&quot;&gt;KDSignalThrottler&lt;/a&gt; from &lt;a href=&quot;https://github.com/KDABLabs/KDToolBox&quot;&gt;KDToolBox&lt;/a&gt;, © 2020 Klarälvdalens Datakonsult AB, a KDAB Group company &amp;lt;info@kdab.com&amp;gt;, used under the MIT License.&lt;br&gt;See the full license in the &lt;a href=&quot;https://github.com/KDABLabs/KDToolBox/blob/master/LICENSES/MIT.txt&quot;&gt;MIT.txt&lt;/a&gt; file.</source>
         <translation>&lt;b&gt;Bijectif %1&lt;/b&gt;&lt;br&gt;Modifier les titres dans les noms de fichiers&lt;br&gt;&lt;a href=&quot;%2&quot;&gt;%2&lt;/a&gt;&lt;br&gt;Sous licence selon les termes de la GNU General Public License v3.0&lt;br&gt;&lt;br&gt;Base de données des miniatures :&lt;br&gt;%3&lt;br&gt;Fichier de réglages :&lt;br&gt;%4&lt;br&gt;&lt;br&gt;Carte de &lt;a href=&quot;https://www.openstreetmap.org/copyright&quot;&gt;OpenStreetMap&lt;/a&gt;&lt;br&gt;&lt;br&gt;Icônes &lt;a href=&quot;https://www.flaticon.com/free-icon/map_1865269&quot;&gt;carte&lt;/a&gt; et &lt;a href=&quot;https://www.flaticon.com/free-icon/placeholder_684908&quot;&gt;emplacement&lt;/a&gt; par &lt;a href=&quot;https://www.flaticon.com/authors/freepik&quot;&gt;Freepik&lt;/a&gt; de &lt;a href=&quot;https://www.flaticon.com/&quot;&gt;Flaticon.com&lt;/a&gt;&lt;br&gt;&lt;br&gt;Cette application utilise &lt;a href=&quot;https://github.com/KDABLabs/KDToolBox/tree/master/qt/KDSignalThrottler&quot;&gt;KDSignalThrottler&lt;/a&gt; de &lt;a href=&quot;https://github.com/KDABLabs/KDToolBox&quot;&gt;KDToolBox&lt;/a&gt;, © 2020 Klarälvdalens Datakonsult AB, a KDAB Group company &amp;lt;info@kdab.com&amp;gt;, utilisée selon MIT License.&lt;br&gt;Voir la licence complète dans le fichier &lt;a href=&quot;https://github.com/KDABLabs/KDToolBox/blob/master/LICENSES/MIT.txt&quot;&gt;MIT.txt&lt;/a&gt;.</translation>
     </message>
     <message>
-        <location filename="../src/widgets/window.cpp" line="91"/>
+        <location filename="../src/widgets/window.cpp" line="92"/>
         <source>Folder: %1</source>
         <translation>Dossier : %1</translation>
     </message>
     <message>
-        <location filename="../src/widgets/window.cpp" line="197"/>
+        <location filename="../src/widgets/window.cpp" line="198"/>
         <source>&amp;Undo</source>
         <translation>&amp;Annuler</translation>
     </message>
     <message>
-        <location filename="../src/widgets/window.cpp" line="201"/>
+        <location filename="../src/widgets/window.cpp" line="202"/>
         <source>&amp;Redo</source>
         <translation>&amp;Refaire</translation>
     </message>
     <message>
-        <location filename="../src/widgets/window.cpp" line="209"/>
+        <location filename="../src/widgets/window.cpp" line="210"/>
         <source>&amp;Copy</source>
         <translation>Co&amp;pier</translation>
     </message>
     <message>
-        <location filename="../src/widgets/window.cpp" line="216"/>
+        <location filename="../src/widgets/window.cpp" line="217"/>
         <source>&amp;Paste</source>
         <translation>C&amp;oller</translation>
     </message>
     <message>
-        <location filename="../src/widgets/window.cpp" line="223"/>
+        <location filename="../src/widgets/window.cpp" line="224"/>
         <source>&amp;Insert</source>
         <translation>&amp;Insérer</translation>
     </message>
     <message>
-        <location filename="../src/widgets/window.cpp" line="230"/>
+        <location filename="../src/widgets/window.cpp" line="231"/>
         <source>&amp;Delete</source>
         <translation>&amp;Supprimer</translation>
     </message>
     <message>
-        <location filename="../src/widgets/window.cpp" line="241"/>
+        <location filename="../src/widgets/window.cpp" line="242"/>
         <source>&amp;First</source>
         <translation>Pre&amp;mier</translation>
     </message>
     <message>
-        <location filename="../src/widgets/window.cpp" line="248"/>
+        <location filename="../src/widgets/window.cpp" line="249"/>
         <source>&amp;End</source>
         <translation>&amp;Fin</translation>
     </message>
     <message>
-        <location filename="../src/widgets/window.cpp" line="261"/>
+        <location filename="../src/widgets/window.cpp" line="262"/>
         <source>&amp;Tools</source>
         <translation>Ou&amp;tils</translation>
     </message>
     <message>
-        <location filename="../src/widgets/window.cpp" line="264"/>
+        <location filename="../src/widgets/window.cpp" line="265"/>
         <source>&amp;Help</source>
         <translation>Ai&amp;de</translation>
     </message>
     <message>
-        <location filename="../src/widgets/window.cpp" line="266"/>
+        <location filename="../src/widgets/window.cpp" line="267"/>
         <source>&amp;Website</source>
         <translation>&amp;Site web</translation>
     </message>
     <message>
-        <location filename="../src/widgets/window.cpp" line="271"/>
+        <location filename="../src/widgets/window.cpp" line="272"/>
         <source>&amp;About</source>
         <translation>À &amp;propos</translation>
     </message>
     <message>
-        <location filename="../src/widgets/window.cpp" line="273"/>
+        <location filename="../src/widgets/window.cpp" line="274"/>
         <source>About</source>
         <translation>À propos</translation>
     </message>
     <message>
-        <location filename="../src/widgets/window.cpp" line="281"/>
+        <location filename="../src/widgets/window.cpp" line="282"/>
         <source>About &amp;Qt</source>
         <translation>À propos de &amp;Qt</translation>
     </message>
     <message>
-        <location filename="../src/widgets/window.cpp" line="119"/>
+        <location filename="../src/widgets/window.cpp" line="120"/>
         <source>Command history</source>
         <translation>Historique des commandes</translation>
     </message>
     <message>
-        <location filename="../src/widgets/window.cpp" line="129"/>
+        <location filename="../src/widgets/window.cpp" line="130"/>
         <source>Viewer</source>
         <translation>Aperçu</translation>
     </message>
     <message>
-        <location filename="../src/widgets/window.cpp" line="177"/>
+        <location filename="../src/widgets/window.cpp" line="178"/>
         <source>Map</source>
         <translation>Carte</translation>
     </message>
     <message>
-        <location filename="../src/widgets/window.cpp" line="330"/>
+        <location filename="../src/widgets/window.cpp" line="331"/>
         <source>No file found</source>
         <translation>Aucun fichier trouvé</translation>
     </message>
     <message>
-        <location filename="../src/widgets/window.cpp" line="331"/>
+        <location filename="../src/widgets/window.cpp" line="332"/>
         <source>No appropriate file has been found in %1.</source>
         <translation>Aucun fichier approprié n&apos;a été trouvé dans %1.</translation>
     </message>
     <message>
-        <location filename="../src/widgets/window.cpp" line="336"/>
+        <location filename="../src/widgets/window.cpp" line="337"/>
         <source>Cancel</source>
         <translation>Annuler</translation>
     </message>
     <message>
-        <location filename="../src/widgets/window.cpp" line="336"/>
+        <location filename="../src/widgets/window.cpp" line="337"/>
         <source>Loading thumbnails...</source>
         <translation>Chargement des miniatures...</translation>
     </message>
     <message>
-        <location filename="../src/widgets/window.cpp" line="465"/>
+        <location filename="../src/widgets/window.cpp" line="466"/>
         <source>The following character sequence is not allowed: &quot; - &quot; (hyphen with surrounding spaces).</source>
         <translation>Cette séquence de caractères est interdite : &quot; - &quot; (trait d&apos;union entouré d&apos;espaces).</translation>
     </message>
     <message>
-        <location filename="../src/widgets/window.cpp" line="471"/>
+        <location filename="../src/widgets/window.cpp" line="472"/>
         <source>Identifiers must be unique</source>
         <translation>Les identifiants doivent être uniques</translation>
     </message>
     <message>
-        <location filename="../src/widgets/window.cpp" line="472"/>
+        <location filename="../src/widgets/window.cpp" line="473"/>
         <source>Identifier &quot;%1&quot; is already used.</source>
         <translation>L&apos;identifiant &quot;%1&quot; est déjà utilisé.</translation>
     </message>
     <message>
-        <location filename="../src/widgets/window.cpp" line="318"/>
+        <location filename="../src/widgets/window.cpp" line="319"/>
         <source>Too many name parts</source>
         <translation>Trop d&apos;éléments de noms</translation>
     </message>
     <message>
-        <location filename="../src/widgets/window.cpp" line="319"/>
+        <location filename="../src/widgets/window.cpp" line="320"/>
         <source>The file &quot;%1&quot; has too many parts in its name.
 The maximum number allowed is %2.
 This can be changed with the setting &quot;max names&quot;.</source>
@@ -227,63 +222,78 @@ Le nombre maximum autorisé est %2.
 Cela peut être modifié avec le paramètre &quot;max names&quot;.</translation>
     </message>
     <message>
-        <location filename="../src/widgets/window.cpp" line="394"/>
+        <location filename="../src/widgets/window.cpp" line="395"/>
         <source>Load completed (Thumbnails database: %1)</source>
         <translation>Chargement terminé (Base de données des miniatures : %1)</translation>
     </message>
     <message>
-        <location filename="../src/widgets/window.cpp" line="450"/>
+        <location filename="../src/widgets/window.cpp" line="451"/>
         <source>Unable to rename file</source>
         <translation>Impossible de renommer le fichier</translation>
     </message>
     <message>
-        <location filename="../src/widgets/window.cpp" line="451"/>
+        <location filename="../src/widgets/window.cpp" line="452"/>
         <source>Before : %1
 After : %2</source>
         <translation>Avant : %1
 Après : %2</translation>
     </message>
     <message>
-        <location filename="../src/widgets/window.cpp" line="457"/>
+        <location filename="../src/widgets/window.cpp" line="458"/>
         <source>Forbidden characters</source>
         <translation>Caractères interdits</translation>
     </message>
     <message>
-        <location filename="../src/widgets/window.cpp" line="458"/>
+        <location filename="../src/widgets/window.cpp" line="459"/>
         <source>The following characters are not allowed:
 &lt; &gt; : &quot; / \ | ? * ,</source>
         <translation>Les caractères suivants ne sont pas autorisés :
 &lt; &gt; : &quot; / \ | ? * ,</translation>
     </message>
     <message>
-        <location filename="../src/widgets/window.cpp" line="464"/>
+        <location filename="../src/widgets/window.cpp" line="465"/>
         <source>Forbidden character sequence</source>
         <translation>Séquence de caractères interdite</translation>
     </message>
     <message>
-        <location filename="../src/widgets/window.cpp" line="681"/>
-        <location filename="../src/widgets/window.cpp" line="695"/>
+        <location filename="../src/widgets/window.cpp" line="496"/>
+        <source>Video preview not available</source>
+        <translation>Aperçu vidéo non disponible</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/window.cpp" line="499"/>
+        <source>Preview not available</source>
+        <translation>Aperçu non disponible</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/window.cpp" line="503"/>
+        <source>Select one item for preview</source>
+        <translation>Sélectionnez un élément pour l&apos;aperçu</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/window.cpp" line="694"/>
+        <location filename="../src/widgets/window.cpp" line="708"/>
         <source>Pasting multiple cells</source>
         <translation>Coller plusieurs cellules</translation>
     </message>
     <message>
-        <location filename="../src/widgets/window.cpp" line="682"/>
-        <location filename="../src/widgets/window.cpp" line="696"/>
+        <location filename="../src/widgets/window.cpp" line="695"/>
+        <location filename="../src/widgets/window.cpp" line="709"/>
         <source>The pasted content has %1 parts. Therefore, each modifed row must have %1 selected cells.</source>
         <translation>Le contenu collé comporte %1 parties. Par conséquent, chaque ligne modifiée doit avoir %1 cellules sélectionnées.</translation>
     </message>
     <message>
-        <location filename="../src/widgets/window.cpp" line="732"/>
+        <location filename="../src/widgets/window.cpp" line="745"/>
         <source>Insertion</source>
         <translation>Insertion</translation>
     </message>
     <message>
-        <location filename="../src/widgets/window.cpp" line="733"/>
+        <location filename="../src/widgets/window.cpp" line="746"/>
         <source>Name:</source>
         <translation>Nom :</translation>
     </message>
     <message>
-        <location filename="../src/widgets/window.cpp" line="886"/>
+        <location filename="../src/widgets/window.cpp" line="899"/>
         <source>Requested tiles: %1 (%2 new, %3 from cache, %4 canceled, %5 errors)</source>
         <translation>Tuiles demandées : %1 (%2 nouvelles, %3 en cache, %4 annulées, %5 erreurs)</translation>
     </message>

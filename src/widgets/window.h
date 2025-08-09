@@ -38,7 +38,7 @@ public:
     ~Window() override;
 
 Q_SIGNALS:
-    void viewImage(const QString& path);
+    void viewItem(ViewerItemKind kind, const QString& item);
 
 public Q_SLOTS:
     void modelLoadingStart();

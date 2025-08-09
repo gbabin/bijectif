@@ -19,7 +19,7 @@ Viewer::Viewer(MemoryCache &memoryCache,
                QWidget *parent)
     : QWidget(parent)
     , memoryCache(memoryCache)
-    , imageReaderWatcher(new QFutureWatcher<QVariant>(this))
+    , itemLoadingWatcher(new QFutureWatcher<QVariant>(this))
     , loadDebouncer(new KDToolBox::KDSignalDebouncer(this))
     , graphicsScene(new QGraphicsScene(this))
     , graphicsView(new QGraphicsView(graphicsScene, this))
@@ -28,8 +28,8 @@ Viewer::Viewer(MemoryCache &memoryCache,
     , scaleFactor(1.0)
     , isFitted(false)
 {
-    connect(imageReaderWatcher, &QFutureWatcher<QVariant>::finished,
-            this, &Viewer::imageLoaded);
+    connect(itemLoadingWatcher, &QFutureWatcher<QVariant>::finished,
+            this, &Viewer::itemLoaded);
 
     pixmapItem->setTransformationMode(Qt::SmoothTransformation);
 
@@ -48,37 +48,37 @@ Viewer::Viewer(MemoryCache &memoryCache,
 
     loadDebouncer->setTimeout(250);
     connect(loadDebouncer, &KDToolBox::KDSignalDebouncer::triggered,
-            this, &Viewer::loadImage);
+            this, &Viewer::loadItem);
 }
 
-void Viewer::viewImage(const QString& path)
+void Viewer::viewItem(ViewerItemKind kind, const QString& item)
 {
-    if (displayedPath == path)
-        return;
-
-    displayedPath = path;
+    switch (kind) {
+    case VI_IMAGE:
+        imagePathToDisplay = item;
+        messageToDisplay.clear();
+        break;
+    case VI_TEXT:
+        imagePathToDisplay.clear();
+        messageToDisplay = item;
+        break;
+    }
 
     QMetaObject::invokeMethod(loadDebouncer, &KDToolBox::KDSignalDebouncer::throttle);
 }
 
-void Viewer::loadImage()
+void Viewer::loadItem()
 {
-    if (displayedPath.isNull()) {
-        const QFuture<QVariant> future = QtConcurrent::run([]() {
-            return QVariant(tr("Select one item for preview"));
-        });
-
-        imageReaderWatcher->setFuture(future);
-    } else {
-        const QPixmap possiblePixmap = memoryCache.getFullImage(displayedPath);
+    if (! imagePathToDisplay.isEmpty()) {
+        const QPixmap possiblePixmap = memoryCache.getFullImage(imagePathToDisplay);
         if (possiblePixmap.isNull()) {
-            const QFuture<QVariant> future = QtConcurrent::run([path=displayedPath, &cache=memoryCache]() {
+            const QFuture<QVariant> future = QtConcurrent::run([path=imagePathToDisplay, &cache=memoryCache]() {
                 QImageReader reader(path);
                 reader.setAutoTransform(true);
                 const QImage image = reader.read();
                 if (image.isNull()) {
                     qWarning() << "Failed to load image in viewer:" << path << ": Error" << reader.error() << reader.errorString();
-                    return QVariant(tr("Preview not available"));
+                    return QVariant(tr("Image preview failed"));
                 } else {
                     const QPixmap pixmap = QPixmap::fromImage(image);
                     cache.insertFullImage(path, pixmap);
@@ -86,20 +86,32 @@ void Viewer::loadImage()
                 }
             });
 
-            imageReaderWatcher->setFuture(future);
+            itemLoadingWatcher->setFuture(future);
         } else {
             const QFuture<QVariant> future = QtConcurrent::run([pixmap=possiblePixmap]() {
                 return QVariant::fromValue(pixmap);
             });
 
-            imageReaderWatcher->setFuture(future);
+            itemLoadingWatcher->setFuture(future);
         }
+    } else if (! messageToDisplay.isEmpty()) {
+        const QFuture<QVariant> future = QtConcurrent::run([message=messageToDisplay]() {
+            return QVariant::fromValue(message);
+        });
+
+        itemLoadingWatcher->setFuture(future);
+    } else {
+        const QFuture<QVariant> future = QtConcurrent::run([]() {
+            return QVariant();
+        });
+
+        itemLoadingWatcher->setFuture(future);
     }
 }
 
-void Viewer::imageLoaded()
+void Viewer::itemLoaded()
 {
-    const QVariant result = imageReaderWatcher->result();
+    const QVariant result = itemLoadingWatcher->result();
     const QPixmap pixmap = result.value<QPixmap>();
 
     if (pixmap.isNull()) {

@@ -15,6 +15,11 @@ namespace KDToolBox {
     class KDSignalDebouncer;
 }
 
+enum ViewerItemKind {
+    VI_IMAGE,
+    VI_TEXT
+};
+
 class Viewer : public QWidget
 {
     Q_OBJECT
@@ -23,17 +28,15 @@ public:
     explicit Viewer(MemoryCache &memoryCache, QWidget *parent = nullptr);
 
 public Q_SLOTS:
-    void viewImage(const QString& path);
+    void viewItem(ViewerItemKind kind, const QString& item);
 
 protected:
     bool eventFilter(QObject *obj, QEvent *event) override;
     void resizeEvent(QResizeEvent *event) override;
 
 private:
-    void displayImage();
-
     MemoryCache &memoryCache;
-    QFutureWatcher<QVariant>* imageReaderWatcher;
+    QFutureWatcher<QVariant>* itemLoadingWatcher;
     KDToolBox::KDSignalDebouncer* loadDebouncer;
     QGraphicsScene* graphicsScene;
     QGraphicsView* graphicsView;
@@ -41,11 +44,12 @@ private:
     QGraphicsSimpleTextItem* messageItem;
     qreal scaleFactor;
     bool isFitted;
-    QString displayedPath;
+    QString imagePathToDisplay;
+    QString messageToDisplay;
 
 private Q_SLOTS:
-    void loadImage();
-    void imageLoaded();
+    void loadItem();
+    void itemLoaded();
 };
 
 #endif // VIEWER_H

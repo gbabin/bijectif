@@ -130,8 +130,8 @@ Window::Window(const Settings &settings, const QDir &directory, bool benchmark, 
     viewerDockWidget->setWindowTitle(tr("Viewer"));
     addDockWidget(Qt::LeftDockWidgetArea, viewerDockWidget);
 
-    connect(this, &Window::viewImage,
-            viewer, &Viewer::viewImage);
+    connect(this, &Window::viewItem,
+            viewer, &Viewer::viewItem);
 
     mapDockWidget = new QDockWidget(this);
     mapStatistics = new QLabel(mapDockWidget);
@@ -488,12 +488,19 @@ void Window::selectionChanged(const QItemSelection &selected, const QItemSelecti
     if (selectedIndexes.size() == 1) {
         const QModelIndex& selectedIndex = selectedIndexes.constFirst();
         const FileKind kind = selectedIndex.data(FileKindRole).value<FileKind>();
-        if (kind == IMAGE)
-            Q_EMIT viewImage(view.model()->data(selectedIndex.siblingAtColumn(ThumbnailCol), FilePathRole).toString());
-        else
-            Q_EMIT viewImage(QString());
+        switch (kind) {
+        case IMAGE:
+            Q_EMIT viewItem(VI_IMAGE, view.model()->data(selectedIndex.siblingAtColumn(ThumbnailCol), FilePathRole).toString());
+            break;
+        case VIDEO:
+            Q_EMIT viewItem(VI_TEXT, tr("Video preview not available"));
+            break;
+        case OTHER:
+            Q_EMIT viewItem(VI_TEXT, tr("Preview not available"));
+            break;
+        }
     } else {
-        Q_EMIT viewImage(QString());
+        Q_EMIT viewItem(VI_TEXT, tr("Select one item for preview"));
     }
 
     {
