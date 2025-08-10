@@ -94,8 +94,8 @@ void Model::load(const QList<const FileGroup *> &fileGroupList, const QDir &dire
                 if (! query.value(u"latitude"_s).isNull()
                     && ! query.value(u"longitude"_s).isNull())
                 {
-                    possibleLocation.emplace(Location(query.value(u"latitude"_s).toDouble(),
-                                                      query.value(u"longitude"_s).toDouble()));
+                    possibleLocation.emplace(query.value(u"latitude"_s).toDouble(),
+                                             query.value(u"longitude"_s).toDouble());
                 }
                 std::optional<QPixmap> possibleThumbnail;
                 if (! query.value(u"thumbnail"_s).isNull())

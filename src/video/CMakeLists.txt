@@ -13,6 +13,7 @@ qt_add_library(video STATIC
 target_include_directories(video INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 
 target_link_libraries(video PRIVATE
+    location
     Qt::Gui
     PkgConfig::FFmpeg
 )

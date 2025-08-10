@@ -25,6 +25,7 @@ set_target_properties(bijectif PROPERTIES
 
 target_link_libraries(bijectif PRIVATE
     core
+    location
     widgets
     Qt::Gui
     Qt::Sql

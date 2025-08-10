@@ -11,7 +11,6 @@ qt_add_library(core STATIC
     filegroup.h filegroup.cpp
     filekind.h
     loader.h loader.cpp
-    location.h location.cpp
     memorycache.h memorycache.cpp
     model.h model.cpp
     modelitem.h modelitem.cpp
@@ -24,6 +23,7 @@ target_include_directories(core SYSTEM PRIVATE ${EXIF_INCLUDE_DIRS})
 target_compile_options(core PRIVATE ${EXIF_CFLAGS_OTHER})
 
 target_link_libraries(core PRIVATE
+    location
     video
     QGeoView
     ${EXIF_LIBRARIES}

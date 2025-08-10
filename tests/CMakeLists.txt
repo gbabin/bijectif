@@ -10,6 +10,7 @@ set_target_properties(test_model PROPERTIES
 
 target_link_libraries(test_model PRIVATE
     core
+    location
     Qt::Gui
     Qt::Sql
     Qt::Test
@@ -27,6 +28,7 @@ set_target_properties(test_row PROPERTIES
 
 target_link_libraries(test_row PRIVATE
     core
+    location
     Qt::Gui
     Qt::Sql
     Qt::Test

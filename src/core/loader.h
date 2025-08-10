@@ -41,7 +41,7 @@ Q_SIGNALS:
 private:
     static std::pair<std::optional<Location>, std::optional<QPixmap>> load(const Settings &settings, const FileGroup *fileGroup);
     static std::optional<QPixmap> computeImageThumbnail(const Settings &settings, const QString &filePath, const QByteArray &bytes);
-    static std::optional<QPixmap> computeVideoThumbnail(const Settings &settings, const QString &filePath);
+    static std::pair<std::optional<Location>, std::optional<QPixmap>> computeVideoThumbnailLocation(const Settings &settings, const QString &filePath);
     static std::optional<Location> readLocation(const QString &filePath, const QByteArray &bytes);
 
     QQueue<const FileGroup *> &fileGroups;

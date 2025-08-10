@@ -6,16 +6,21 @@
 extern "C" {
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
-#include <libavutil/imgutils.h>
-#include <libavutil/rational.h>
+#include <libavutil/dict.h>
+#include <libavutil/frame.h>
+#include <libavutil/log.h>
 #include <libswscale/swscale.h>
 }
 
 #include <QDebug>
+#include <QRegularExpression>
 
-std::optional<QPixmap> computeVideoThumbnail(int thumbnailSize, const QString &filePath)
+using namespace Qt::Literals::StringLiterals;
+
+std::pair<std::optional<Location>, std::optional<QPixmap>> computeVideoThumbnailLocation(int thumbnailSize, const QString &filePath)
 {
     AVFormatContext* formatContext = nullptr;
+    AVDictionaryEntry* metadataTag = nullptr;
     AVCodecContext* codecContext = nullptr;
     enum AVCodecID codecId = AV_CODEC_ID_NONE;
     const AVCodec* codec = nullptr;
@@ -24,7 +29,11 @@ std::optional<QPixmap> computeVideoThumbnail(int thumbnailSize, const QString &f
     AVPacket* packet = nullptr;
     SwsContext* swsContext = nullptr;
     int videoStreamIndex = -1;
-    std::optional<QPixmap> result = std::nullopt;
+
+    std::optional<Location> possibleLocation;
+    std::optional<QPixmap> possibleThumbnail;
+
+    av_log_set_level(AV_LOG_ERROR);
 
     // Open input file
     int ret = avformat_open_input(&formatContext, filePath.toStdString().c_str(), nullptr, nullptr);
@@ -38,6 +47,26 @@ std::optional<QPixmap> computeVideoThumbnail(int thumbnailSize, const QString &f
     if (ret < 0) {
         qWarning() << "Video loading failed (could not find stream information):" << filePath;
         goto cleanup;
+    }
+
+    // Get the location metadata
+    metadataTag = av_dict_get(formatContext->metadata, "location", nullptr, 0);
+    if (metadataTag != nullptr) {
+        static const QRegularExpression re(u"^([+-][0-9.]+)([+-][0-9.]+)"_s); // ISO 6709 format
+        const QRegularExpressionMatch match = re.match(metadataTag->value);
+        if (match.hasMatch()) {
+            bool latitudeOk = false;
+            const double latitude = match.captured(1).toDouble(&latitudeOk);
+            bool longitudeOk = false;
+            const double longitude = match.captured(2).toDouble(&longitudeOk);
+            if (latitudeOk && longitudeOk) {
+                possibleLocation.emplace(latitude, longitude);
+            } else {
+                qWarning() << "Video loading location error (latitude or longitude parsing failed):" << filePath;
+            }
+        } else {
+            qWarning() << "Video loading location error (format of location tag not recognized):" << filePath;
+        }
     }
 
     // Find the first video stream
@@ -170,7 +199,7 @@ std::optional<QPixmap> computeVideoThumbnail(int thumbnailSize, const QString &f
                 break;
             }
 
-            result.emplace(QPixmap::fromImage(image));
+            possibleThumbnail.emplace(QPixmap::fromImage(image));
 
             break;
         }
@@ -185,5 +214,5 @@ cleanup:
     if (codecContext != nullptr)  avcodec_free_context(&codecContext);
     if (formatContext != nullptr) avformat_close_input(&formatContext);
 
-    return result;
+    return std::make_pair(possibleLocation, possibleThumbnail);
 }

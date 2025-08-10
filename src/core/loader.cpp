@@ -74,7 +74,7 @@ std::pair<std::optional<Location>, std::optional<QPixmap>> Loader::load(const Se
         }
         break;
     case VIDEO:
-        possibleThumbnail = computeVideoThumbnail(settings, fileGroup->filePath);
+        std::tie(possibleLocation, possibleThumbnail) = computeVideoThumbnailLocation(settings, fileGroup->filePath);
         break;
     case OTHER:
         qInfo() << "File ignored because of extension:" << fileGroup->filePath;
@@ -109,9 +109,9 @@ std::optional<QPixmap> Loader::computeImageThumbnail(const Settings &settings, c
     return possibleThumbnail;
 }
 
-std::optional<QPixmap> Loader::computeVideoThumbnail(const Settings &settings, const QString &filePath)
+std::pair<std::optional<Location>, std::optional<QPixmap>> Loader::computeVideoThumbnailLocation(const Settings &settings, const QString &filePath)
 {
-    return ::computeVideoThumbnail(settings.thumbnailSize, filePath);
+    return ::computeVideoThumbnailLocation(settings.thumbnailSize, filePath);
 }
 
 std::optional<Location> Loader::readLocation(const QString &filePath, const QByteArray &bytes)
@@ -221,8 +221,8 @@ std::optional<Location> Loader::readLocation(const QString &filePath, const QByt
 
     if (latitude != 0.0 && longitude != 0.0 && latitude_ref != 0 && longitude_ref != 0)
     {
-        possibleLocation.emplace(Location(latitude * (latitude_ref == 'S' ? -1.0 : 1.0),
-                                          longitude * (longitude_ref == 'W' ? -1.0 : 1.0)));
+        possibleLocation.emplace(latitude * (latitude_ref == 'S' ? -1.0 : 1.0),
+                                 longitude * (longitude_ref == 'W' ? -1.0 : 1.0));
     }
 
     return possibleLocation;

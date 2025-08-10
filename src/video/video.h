@@ -4,8 +4,10 @@
 #ifndef VIDEO_H
 #define VIDEO_H
 
+#include "location.h"
+
 #include <QPixmap>
 
-std::optional<QPixmap> computeVideoThumbnail(int thumbnailSize, const QString &filePath);
+std::pair<std::optional<Location>, std::optional<QPixmap>> computeVideoThumbnailLocation(int thumbnailSize, const QString &filePath);
 
 #endif // VIDEO_H
