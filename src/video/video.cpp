@@ -7,6 +7,7 @@ extern "C" {
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
 #include <libavutil/dict.h>
+#include <libavutil/display.h>
 #include <libavutil/frame.h>
 #include <libavutil/log.h>
 #include <libswscale/swscale.h>
@@ -29,6 +30,8 @@ std::pair<std::optional<Location>, std::optional<QPixmap>> computeVideoThumbnail
     AVPacket* packet = nullptr;
     SwsContext* swsContext = nullptr;
     int videoStreamIndex = -1;
+    const AVPacketSideData* sideData = nullptr;
+    double rotation = 0.0; // angle in degrees
 
     std::optional<Location> possibleLocation;
     std::optional<QPixmap> possibleThumbnail;
@@ -80,6 +83,14 @@ std::pair<std::optional<Location>, std::optional<QPixmap>> computeVideoThumbnail
     if (videoStreamIndex == -1) {
         qWarning() << "Video loading failed (could not find video stream):" << filePath;
         goto cleanup;
+    }
+
+    // Get the rotation metadata
+    sideData = av_packet_side_data_get(formatContext->streams[videoStreamIndex]->codecpar->coded_side_data,
+                                       formatContext->streams[videoStreamIndex]->codecpar->nb_coded_side_data,
+                                       AV_PKT_DATA_DISPLAYMATRIX);
+    if (sideData != nullptr) {
+        rotation = std::round(av_display_rotation_get((int32_t*)sideData->data));
     }
 
     // Find decoder
@@ -190,13 +201,17 @@ std::pair<std::optional<Location>, std::optional<QPixmap>> computeVideoThumbnail
             }
 
             // Convert to QPixmap
-            const QImage image(scaledFrame->data[0],
-                               scaledWidth, scaledHeight,
-                               scaledFrame->linesize[0],
-                               QImage::Format_RGB888);
+            QImage image(scaledFrame->data[0],
+                         scaledWidth, scaledHeight,
+                         scaledFrame->linesize[0],
+                         QImage::Format_RGB888);
             if (image.isNull()) {
                 qWarning() << "Video loading failed (could not create image):" << filePath;
                 break;
+            }
+
+            if (rotation != 0.0) {
+                image = image.transformed(QTransform().rotate(-rotation));
             }
 
             possibleThumbnail.emplace(QPixmap::fromImage(image));
