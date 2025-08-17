@@ -493,7 +493,11 @@ void Window::selectionChanged(const QItemSelection &selected, const QItemSelecti
 
     const QModelIndexList selectedIndexes = selectionModel->selectedIndexes();
 
-    if (selectedIndexes.size() == 1) {
+    if (selectedIndexes.size() == 1
+        || (selectedIndexes.size() > 1
+            && std::all_of(selectedIndexes.cbegin(), selectedIndexes.cend(),
+                           [first=selectedIndexes.constFirst()](const QModelIndex &index){ return index.row() == first.row(); })))
+    {
         const QModelIndex& selectedIndex = selectedIndexes.constFirst();
         const FileKind kind = selectedIndex.data(FileKindRole).value<FileKind>();
         switch (kind) {

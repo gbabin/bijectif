@@ -55,10 +55,14 @@ void Viewer::viewItem(ViewerItemKind kind, const QString& item)
 {
     switch (kind) {
     case VI_IMAGE:
+        if (item == imagePathToDisplay)
+            return;
         imagePathToDisplay = item;
         messageToDisplay.clear();
         break;
     case VI_TEXT:
+        if (item == messageToDisplay)
+            return;
         imagePathToDisplay.clear();
         messageToDisplay = item;
         break;
