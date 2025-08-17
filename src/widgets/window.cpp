@@ -114,6 +114,12 @@ Window::Window(const Settings &settings, const QDir &directory, bool benchmark, 
 
     setCentralWidget(&view);
 
+
+    // no docks or menus when benchmarking model creation
+    if (benchmark)
+        return;
+
+
     // docks
 
     QDockWidget *undoDockWidget = new QDockWidget(this);
@@ -376,8 +382,10 @@ void Window::modelLoadingDone(qint64 dbFileSize)
 
     future.waitForFinished();
 
-    if (benchmark)
+    if (benchmark) {
         QApplication::exit();
+        return;
+    }
 
     QSortFilterProxyModel* proxyModel = new QSortFilterProxyModel(&view);
     model.setParent(proxyModel);
