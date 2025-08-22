@@ -1,6 +1,6 @@
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(FFmpeg REQUIRED IMPORTED_TARGET
-    libavcodec
+    libavcodec>=60.30.100
     libavformat
     libavutil
     libswscale
