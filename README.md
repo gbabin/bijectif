@@ -11,7 +11,7 @@ Use `PKGBUILD`.
 ### Debian / Ubuntu
 
 ```
-sudo apt install cmake make g++ libexif-dev \
+sudo apt install cmake make pkg-config g++ libexif-dev \
                  libavcodec-dev libavformat-dev libavutil-dev libswscale-dev \
                  qt6-base-dev qt6-tools-dev libqt6sql6-sqlite
 cmake -DCMAKE_BUILD_TYPE=Release . -B build
