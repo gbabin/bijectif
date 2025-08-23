@@ -45,7 +45,7 @@
 
 using namespace Qt::Literals::StringLiterals;
 
-const QString Window::versionString = u"v1.8"_s;
+const QString Window::versionString = u"v2.0"_s;
 const QString Window::websiteString = u"https://github.com/gbabin/bijectif"_s;
 const char* Window::aboutString =
     QT_TRANSLATE_NOOP("Window",
