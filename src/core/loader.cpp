@@ -64,11 +64,14 @@ std::pair<std::optional<Location>, std::optional<QPixmap>> Loader::load(const Se
     case IMAGE:
         if (fileGroup->size <= settings.maxFileSize) {
             QFile file(fileGroup->filePath);
-            file.open(QIODevice::ReadOnly);
-            const QByteArray bytes = file.readAll();
-            file.close();
-            possibleThumbnail = computeImageThumbnail(settings, fileGroup->filePath, bytes);
-            possibleLocation = readLocation(fileGroup->filePath, bytes);
+            if (file.open(QIODevice::ReadOnly)) {
+                const QByteArray bytes = file.readAll();
+                file.close();
+                possibleThumbnail = computeImageThumbnail(settings, fileGroup->filePath, bytes);
+                possibleLocation = readLocation(fileGroup->filePath, bytes);
+            } else {
+                qWarning() << "Image loading failed (could not open file):" << fileGroup->filePath;
+            }
         } else {
             qInfo() << "Image ignored because of size:" << fileGroup->filePath;
         }
