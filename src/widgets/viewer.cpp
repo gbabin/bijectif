@@ -140,7 +140,7 @@ bool Viewer::eventFilter(QObject *obj, QEvent *event)
     if (event->type() == QEvent::Wheel)
     {
         if (! pixmapItem->pixmap().isNull()) {
-            QWheelEvent *wheelEvent = static_cast<QWheelEvent *>(event);
+            const QWheelEvent *const wheelEvent = static_cast<QWheelEvent *>(event);
 
             if (wheelEvent->angleDelta().y() > 0) {
                 scaleFactor *= 1.25;

@@ -355,7 +355,7 @@ QVariant Model::data(const QModelIndex &index, int role) const
             return QVariant::fromValue(location.value());
         return QVariant();
     } else if (role == MapIconRole) {
-        if (QGVIcon* mapIcon = images.at(index.row())->getMapIcon())
+        if (const QGVIcon *const mapIcon = images.at(index.row())->getMapIcon())
             return QVariant::fromValue(mapIcon);
         return QVariant();
     } else if (role == NameCountRole) {

@@ -638,7 +638,7 @@ void Window::copySelection()
 {
     QApplication::clipboard()->clear();
 
-    QItemSelectionModel* selection = view.selectionModel();
+    const QItemSelectionModel *const selection = view.selectionModel();
     if (selection == nullptr) return;
 
     if (selection->selectedIndexes().size() == 1) {
@@ -671,7 +671,7 @@ void Window::copySelection()
 
 void Window::pasteIntoSelection()
 {
-    QItemSelectionModel* selection = view.selectionModel();
+    const QItemSelectionModel *const selection = view.selectionModel();
     if (selection == nullptr) return;
 
     QString mode = u"plain"_s;
@@ -733,7 +733,7 @@ void Window::pasteIntoSelection()
 
 void Window::deleteSelection()
 {
-    QItemSelectionModel* selection = view.selectionModel();
+    const QItemSelectionModel *const selection = view.selectionModel();
     if (selection == nullptr) return;
 
     QModelIndexList indexes = selection->selectedIndexes();
@@ -750,7 +750,7 @@ void Window::deleteSelection()
 
 void Window::insertAtSelection()
 {
-    QItemSelectionModel* selection = view.selectionModel();
+    const QItemSelectionModel *const selection = view.selectionModel();
     if (selection == nullptr) return;
 
     QInputDialog dialog(this);
@@ -855,7 +855,7 @@ void Window::mapSelectionChanged()
         const QVariant possibleMapIcon = view.model()->data(index, MapIconRole);
 
         if (possibleMapIcon.isValid()) {
-            QGVIcon* mapIcon = qvariant_cast<QGVIcon*>(possibleMapIcon);
+            const QGVIcon *const mapIcon = qvariant_cast<QGVIcon*>(possibleMapIcon);
 
             if (mapIcon->isSelected()) {
                 selection.select(index, index);

@@ -129,7 +129,7 @@ std::optional<Location> Loader::readLocation(const QString &filePath, const QByt
         qInfo() << "Image EXIF reading data failed:" << filePath;
     } else {
         const ExifByteOrder bo = exif_data_get_byte_order(ed);
-        ExifEntry *entry = nullptr;
+        const ExifEntry *entry = nullptr;
 
         entry = exif_content_get_entry(ed->ifd[EXIF_IFD_GPS], static_cast<ExifTag>(EXIF_TAG_GPS_LATITUDE));
         if (entry == nullptr) {

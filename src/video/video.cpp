@@ -21,7 +21,7 @@ using namespace Qt::Literals::StringLiterals;
 std::pair<std::optional<Location>, std::optional<QPixmap>> computeVideoThumbnailLocation(int thumbnailSize, const QString &filePath)
 {
     AVFormatContext* formatContext = nullptr;
-    AVDictionaryEntry* metadataTag = nullptr;
+    const AVDictionaryEntry* metadataTag = nullptr;
     AVCodecContext* codecContext = nullptr;
     enum AVCodecID codecId = AV_CODEC_ID_NONE;
     const AVCodec* codec = nullptr;

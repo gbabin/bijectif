@@ -14,7 +14,7 @@ TableViewEventFilter::TableViewEventFilter(QObject *parent)
 bool TableViewEventFilter::eventFilter(QObject *obj, QEvent *event)
 {
     if (event->type() == QEvent::KeyPress) {
-        QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
+        const QKeyEvent *const keyEvent = static_cast<QKeyEvent *>(event);
         if (keyEvent->key() == Qt::Key_End)
             return true;
     }
