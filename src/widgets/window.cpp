@@ -641,8 +641,10 @@ void Window::copySelection()
     const QItemSelectionModel *const selection = view.selectionModel();
     if (selection == nullptr) return;
 
-    if (selection->selectedIndexes().size() == 1) {
-        const QModelIndex index = selection->selectedIndexes().constFirst();
+    QModelIndexList indexes = selection->selectedIndexes();
+
+    if (indexes.size() == 1) {
+        const QModelIndex index = indexes.constFirst();
         if (index.column() == IdentifierCol || index.column() >= FirstNameCol) {
             const QVariant data = index.data(Qt::DisplayRole);
             if (data.userType() == QMetaType::QString) {
@@ -650,8 +652,7 @@ void Window::copySelection()
             }
         }
     }
-    else if (selection->selectedIndexes().size() > 1) {
-        QModelIndexList indexes = selection->selectedIndexes();
+    else if (indexes.size() > 1) {
         std::sort(indexes.begin(), indexes.end(),
                   [](const QModelIndex& a, const QModelIndex& b) {
                       return a.column() < b.column()
@@ -701,7 +702,9 @@ void Window::pasteIntoSelection()
             }
         }
         else if (texts.size() > 1) {
-            if (selection->selectedIndexes().size() % texts.size() != 0) {
+            QModelIndexList indexes = selection->selectedIndexes();
+
+            if (indexes.size() % texts.size() != 0) {
                 QMessageBox::information(this,
                                          tr("Pasting multiple cells"),
                                          tr("The pasted content has %1 parts. Therefore, each modifed row must have %1 selected cells.")
@@ -709,7 +712,6 @@ void Window::pasteIntoSelection()
                 return;
             }
 
-            QModelIndexList indexes = selection->selectedIndexes();
             std::sort(indexes.begin(), indexes.end(),
                       [](const QModelIndex& a, const QModelIndex& b) {
                           return a.row() < b.row()
