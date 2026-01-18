@@ -54,6 +54,9 @@ std::pair<std::optional<Location>, std::optional<QPixmap>> computeVideoThumbnail
 
     // Get the location metadata
     metadataTag = av_dict_get(formatContext->metadata, "location", nullptr, 0);
+    if (metadataTag == nullptr) {
+        metadataTag = av_dict_get(formatContext->metadata, "com.apple.quicktime.location.ISO6709", nullptr, 0);
+    }
     if (metadataTag != nullptr) {
         static const QRegularExpression re(u"^([+-][0-9.]+)([+-][0-9.]+)"_s); // ISO 6709 format
         const QRegularExpressionMatch match = re.match(metadataTag->value);
