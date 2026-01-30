@@ -11,6 +11,7 @@
 #include <QBuffer>
 #include <QCache>
 #include <QImageReader>
+#include <QPainter>
 #include <QSqlQuery>
 #include <QStack>
 
@@ -20,19 +21,28 @@ using namespace Qt::Literals::StringLiterals;
 QImage ModelItem::selectedPlaceholderIcon;
 QImage ModelItem::unselectedPlaceholderIcon;
 
-void ModelItem::loadIcons()
+QImage ModelItem::createBottomAnchoredIcon(const QString &path)
 {
-    selectedPlaceholderIcon = QImage(u":/resources/placeholder.png"_s)
-                                  .scaled(32,
-                                          32,
-                                          Qt::KeepAspectRatio,
-                                          Qt::SmoothTransformation);
+    const int size = 32;
 
-    unselectedPlaceholderIcon = QImage(u":/resources/placeholder_grayscale.png"_s)
-                                    .scaled(32,
-                                            32,
+    const QImage icon = QImage(path).scaled(size,
+                                            size,
                                             Qt::KeepAspectRatio,
                                             Qt::SmoothTransformation);
+
+    QImage centered(2 * size, 2 * size, icon.format());
+    centered.fill(Qt::transparent);
+
+    QPainter painter(&centered);
+    painter.drawImage(size / 2, 0, icon);
+
+    return centered;
+}
+
+void ModelItem::loadIcons()
+{
+    selectedPlaceholderIcon   = createBottomAnchoredIcon(u":/resources/placeholder.png"_s);
+    unselectedPlaceholderIcon = createBottomAnchoredIcon(u":/resources/placeholder_grayscale.png"_s);
 }
 
 ModelItem::ModelItem(const Settings &settings,

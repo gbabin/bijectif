@@ -52,6 +52,7 @@ Q_SIGNALS:
     void invalidCharacterSequence();
 
 private:
+    [[nodiscard]] static QImage createBottomAnchoredIcon(const QString &path);
     [[nodiscard]] static QString computeBasePath(const QDir &folder, const QString &id, const QStringList &names);
     [[nodiscard]] static QList<QPair<QString, QString>> computeNewPaths(const QDir &folder,
                                                                         const QString &oldId, const QStringList &oldNames,
