@@ -26,7 +26,7 @@ cp build/msys2/*.dll build/msys2/Bijectif
 cp build/msys2/src/app/*.qm build/msys2/Bijectif
 
 cd build/msys2/Bijectif
-windeployqt-qt6 ./*.exe
+windeployqt6 ./*.exe
 ldd ./*.exe imageformats/*.dll sqldrivers/qsqlite.dll | grep -F ' => /ucrt64/' | awk '{print $3}' | sort --unique | xargs -I_ cp _ .
 cd ..
 zip -r9 Bijectif.zip Bijectif
