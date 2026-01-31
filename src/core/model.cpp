@@ -222,19 +222,21 @@ void Model::load(const QList<const FileGroup *> &fileGroupList, const QDir &dire
             qWarning() << "Thumbnail storing transaction end query failed:" << query.lastError();
         }
 
-        // limit database size
-        if (query.exec(u"DELETE FROM thumbnails2 "
-                        "WHERE path NOT IN (SELECT path FROM thumbnails2 ORDER BY timestamp DESC LIMIT %1)"_s.arg(settings.thumbnailDatabaseLimit))) {
-            qInfo() << "Thumbnails database size limiting query succeeded";
-        } else {
-            qWarning() << "Thumbnails database size limiting query failed:" << query.lastError();
-        }
+        if (! newThumbnails.isEmpty()) {
+            // limit database size
+            if (query.exec(u"DELETE FROM thumbnails2 "
+                            "WHERE path NOT IN (SELECT path FROM thumbnails2 ORDER BY timestamp DESC LIMIT %1)"_s.arg(settings.thumbnailDatabaseLimit))) {
+                qInfo() << "Thumbnails database size limiting query succeeded";
+            } else {
+                qWarning() << "Thumbnails database size limiting query failed:" << query.lastError();
+            }
 
-        // repacking database
-        if (query.exec(u"VACUUM"_s)) {
-            qInfo() << "Thumbnails database repacking query succeeded";
-        } else {
-            qWarning() << "Thumbnails database repacking query failed:" << query.lastError();
+            // repacking database
+            if (query.exec(u"VACUUM"_s)) {
+                qInfo() << "Thumbnails database repacking query succeeded";
+            } else {
+                qWarning() << "Thumbnails database repacking query failed:" << query.lastError();
+            }
         }
 
         db.close();
