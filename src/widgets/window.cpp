@@ -340,12 +340,15 @@ void Window::modelLoadingStart()
         return;
     }
 
-    progressDialog = new QProgressDialog(tr("Loading thumbnails..."), tr("Cancel"), 0, 11 * fileGroupList.size(), this);
+    progressDialog = new QProgressDialog(tr("Loading thumbnails..."), tr("Cancel"), 0, 11 * fileGroupList.size() + 1000, this);
     progressDialog->setMinimumDuration(2000);
     progressDialog->setWindowModality(Qt::WindowModal);
     progressDialog->setAttribute(Qt::WA_DeleteOnClose);
     progressDialog->setCancelButton(nullptr);
     progressDialog->setValue(0);
+
+    connect(&model, &Model::loadingLabelText,
+            this, &Window::modelLoadingLabelText);
 
     connect(&model, &Model::loadingProgressed,
             this, &Window::modelLoadingProgressed);
@@ -369,6 +372,11 @@ void Window::modelLoadingStart()
         model.load(fileGroupList, directory, getThumbnailsDatabasePath());
         qDeleteAll(fileGroupList);
     });
+}
+
+void Window::modelLoadingLabelText(const QString &text)
+{
+    progressDialog->setLabelText(text);
 }
 
 void Window::modelLoadingProgressed(int step)

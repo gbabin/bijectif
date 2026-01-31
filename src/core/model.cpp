@@ -76,6 +76,8 @@ void Model::load(const QList<const FileGroup *> &fileGroupList, const QDir &dire
         QQueue<const FileGroup *> newFiles;
         newFiles.reserve(fileGroupList.size());
 
+        Q_EMIT loadingLabelText(tr("Retrieving existing thumbnails..."));
+
         // retrieve thumbnails & locations
         for (const FileGroup * const fileGroup : fileGroupList) {
             query.prepare(u"SELECT timestamp, latitude, longitude, thumbnail "
@@ -130,6 +132,8 @@ void Model::load(const QList<const FileGroup *> &fileGroupList, const QDir &dire
 
         if (! newFiles.empty())
         {
+            Q_EMIT loadingLabelText(tr("Computing new thumbnails..."));
+
             newThumbnails.reserve(newFiles.size());
 
             QMutex newFilesMutex;
@@ -178,51 +182,55 @@ void Model::load(const QList<const FileGroup *> &fileGroupList, const QDir &dire
             qDeleteAll(threads);
         }
 
-        // store new thumbnails
-        if (query.exec(u"BEGIN TRANSACTION"_s)) {
-            qInfo() << "Thumbnail storing transaction begin query succeeded";
-        } else {
-            qWarning() << "Thumbnail storing transaction begin query failed:" << query.lastError();
-        }
-        for (const NewItem &item : std::as_const(newThumbnails)) {
-            connect(item.modelItem, &ModelItem::fileRenameFailed,
-                    this, &Model::fileRenameFailed);
-            connect(item.modelItem, &ModelItem::invalidCharacters,
-                    this, &Model::invalidCharacters);
-            connect(item.modelItem, &ModelItem::invalidCharacterSequence,
-                    this, &Model::invalidCharacterSequence);
-            images.append(item.modelItem);
-
-            QVariant latitude, longitude, thumbnail;
-            if (const std::optional<Location> &location = item.modelItem->getLocation()) {
-                latitude = location->getLatitude();
-                longitude = location->getLongitude();
-            }
-            if (item.thumbnail != nullptr)
-                thumbnail = *item.thumbnail;
-            query.prepare(u"INSERT OR REPLACE INTO thumbnails2 (path, timestamp, latitude, longitude, thumbnail) "
-                           "VALUES (:path, :timestamp, :latitude, :longitude, :thumbnail)"_s);
-            query.bindValue(u":path"_s, item.filePath);
-            query.bindValue(u":timestamp"_s, timestamp);
-            query.bindValue(u":latitude"_s, latitude);
-            query.bindValue(u":longitude"_s, longitude);
-            query.bindValue(u":thumbnail"_s, thumbnail);
-            if (query.exec()) {
-                qInfo() << "Thumbnail storing query succeeded:" << item.filePath;
-            } else {
-                qWarning() << "Thumbnail storing query failed:" << item.filePath << ":" << query.lastError();
-            }
-
-            Q_EMIT loadingProgressed();
-            delete item.thumbnail;
-        }
-        if (query.exec(u"END TRANSACTION"_s)) {
-            qInfo() << "Thumbnail storing transaction end query succeeded";
-        } else {
-            qWarning() << "Thumbnail storing transaction end query failed:" << query.lastError();
-        }
-
         if (! newThumbnails.isEmpty()) {
+            Q_EMIT loadingLabelText(tr("Storing new thumbnails..."));
+
+            // store new thumbnails
+            if (query.exec(u"BEGIN TRANSACTION"_s)) {
+                qInfo() << "Thumbnail storing transaction begin query succeeded";
+            } else {
+                qWarning() << "Thumbnail storing transaction begin query failed:" << query.lastError();
+            }
+            for (const NewItem &item : std::as_const(newThumbnails)) {
+                connect(item.modelItem, &ModelItem::fileRenameFailed,
+                        this, &Model::fileRenameFailed);
+                connect(item.modelItem, &ModelItem::invalidCharacters,
+                        this, &Model::invalidCharacters);
+                connect(item.modelItem, &ModelItem::invalidCharacterSequence,
+                        this, &Model::invalidCharacterSequence);
+                images.append(item.modelItem);
+
+                QVariant latitude, longitude, thumbnail;
+                if (const std::optional<Location> &location = item.modelItem->getLocation()) {
+                    latitude = location->getLatitude();
+                    longitude = location->getLongitude();
+                }
+                if (item.thumbnail != nullptr)
+                    thumbnail = *item.thumbnail;
+                query.prepare(u"INSERT OR REPLACE INTO thumbnails2 (path, timestamp, latitude, longitude, thumbnail) "
+                               "VALUES (:path, :timestamp, :latitude, :longitude, :thumbnail)"_s);
+                query.bindValue(u":path"_s, item.filePath);
+                query.bindValue(u":timestamp"_s, timestamp);
+                query.bindValue(u":latitude"_s, latitude);
+                query.bindValue(u":longitude"_s, longitude);
+                query.bindValue(u":thumbnail"_s, thumbnail);
+                if (query.exec()) {
+                    qInfo() << "Thumbnail storing query succeeded:" << item.filePath;
+                } else {
+                    qWarning() << "Thumbnail storing query failed:" << item.filePath << ":" << query.lastError();
+                }
+
+                Q_EMIT loadingProgressed();
+                delete item.thumbnail;
+            }
+            if (query.exec(u"END TRANSACTION"_s)) {
+                qInfo() << "Thumbnail storing transaction end query succeeded";
+            } else {
+                qWarning() << "Thumbnail storing transaction end query failed:" << query.lastError();
+            }
+
+            Q_EMIT loadingLabelText(tr("Cleaning database..."));
+
             // limit database size
             if (query.exec(u"DELETE FROM thumbnails2 "
                             "WHERE path NOT IN (SELECT path FROM thumbnails2 ORDER BY timestamp DESC LIMIT %1)"_s.arg(settings.thumbnailDatabaseLimit))) {
@@ -238,6 +246,7 @@ void Model::load(const QList<const FileGroup *> &fileGroupList, const QDir &dire
                 qWarning() << "Thumbnails database repacking query failed:" << query.lastError();
             }
         }
+        Q_EMIT loadingProgressed(1000);
 
         db.close();
     }

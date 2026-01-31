@@ -49,6 +49,7 @@ public:
     bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
 
 Q_SIGNALS:
+    void loadingLabelText(const QString &text);
     void loadingProgressed(int step = 1);
     void loadingFinished(qint64 dbFileSize);
     void fileRenameFailed(const QString &before, const QString &after);

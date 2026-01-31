@@ -136,7 +136,7 @@ void RowTest::initTestCase()
     QVERIFY(spyLoadingFinished.isValid());
     tableModel->load(fileGroupList, filesDir, dbPath);
     qDeleteAll(fileGroupList);
-    QCOMPARE(spyLoadingProgressed.count(), 2);
+    QCOMPARE(spyLoadingProgressed.count(), 3);
     QCOMPARE(spyLoadingProgressed.takeFirst().constFirst().toInt(), 10);
     QCOMPARE(spyLoadingProgressed.takeFirst().constFirst().toInt(), 1);
     QCOMPARE(spyLoadingFinished.count(), 1);

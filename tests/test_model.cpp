@@ -97,7 +97,7 @@ void ModelTest::test_1()
         QVERIFY(spyLoadingFinished.isValid());
         model->load(fileGroupList, filesDir, dbPath);
         qDeleteAll(fileGroupList);
-        QCOMPARE(spyLoadingProgressed.count(), 2 * 100);
+        QCOMPARE(spyLoadingProgressed.count(), 2 * 100 + 1);
         QCOMPARE(spyLoadingFinished.count(), 1);
         proxyModel.setSourceModel(model);
     }

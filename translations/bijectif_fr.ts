@@ -4,27 +4,47 @@
 <context>
     <name>Model</name>
     <message>
-        <location filename="../src/core/model.cpp" line="287"/>
+        <location filename="../src/core/model.cpp" line="79"/>
+        <source>Retrieving existing thumbnails...</source>
+        <translation>Récupération des miniatures existantes...</translation>
+    </message>
+    <message>
+        <location filename="../src/core/model.cpp" line="135"/>
+        <source>Computing new thumbnails...</source>
+        <translation>Calcul de nouvelles miniatures...</translation>
+    </message>
+    <message>
+        <location filename="../src/core/model.cpp" line="186"/>
+        <source>Storing new thumbnails...</source>
+        <translation>Stockage de nouvelles miniatures...</translation>
+    </message>
+    <message>
+        <location filename="../src/core/model.cpp" line="232"/>
+        <source>Cleaning database...</source>
+        <translation>Nettoyage de la base de données...</translation>
+    </message>
+    <message>
+        <location filename="../src/core/model.cpp" line="298"/>
         <source>Thumbnail</source>
         <translation>Miniature</translation>
     </message>
     <message>
-        <location filename="../src/core/model.cpp" line="288"/>
+        <location filename="../src/core/model.cpp" line="299"/>
         <source>Identifier</source>
         <translation>Identifiant</translation>
     </message>
     <message>
-        <location filename="../src/core/model.cpp" line="289"/>
+        <location filename="../src/core/model.cpp" line="300"/>
         <source>Map</source>
         <translation>Carte</translation>
     </message>
     <message>
-        <location filename="../src/core/model.cpp" line="290"/>
+        <location filename="../src/core/model.cpp" line="301"/>
         <source>Name %1</source>
         <translation>Nom %1</translation>
     </message>
     <message>
-        <location filename="../src/core/model.cpp" line="314"/>
+        <location filename="../src/core/model.cpp" line="325"/>
         <source>%1 file</source>
         <translation>Fichier %1</translation>
     </message>
@@ -193,17 +213,17 @@
         <translation>Chargement des miniatures...</translation>
     </message>
     <message>
-        <location filename="../src/widgets/window.cpp" line="474"/>
+        <location filename="../src/widgets/window.cpp" line="482"/>
         <source>The following character sequence is not allowed: &quot; - &quot; (hyphen with surrounding spaces).</source>
         <translation>Cette séquence de caractères est interdite : &quot; - &quot; (trait d&apos;union entouré d&apos;espaces).</translation>
     </message>
     <message>
-        <location filename="../src/widgets/window.cpp" line="480"/>
+        <location filename="../src/widgets/window.cpp" line="488"/>
         <source>Identifiers must be unique</source>
         <translation>Les identifiants doivent être uniques</translation>
     </message>
     <message>
-        <location filename="../src/widgets/window.cpp" line="481"/>
+        <location filename="../src/widgets/window.cpp" line="489"/>
         <source>Identifier &quot;%1&quot; is already used.</source>
         <translation>L&apos;identifiant &quot;%1&quot; est déjà utilisé.</translation>
     </message>
@@ -222,78 +242,78 @@ Le nombre maximum autorisé est %2.
 Cela peut être modifié avec le paramètre &quot;max names&quot;.</translation>
     </message>
     <message>
-        <location filename="../src/widgets/window.cpp" line="403"/>
+        <location filename="../src/widgets/window.cpp" line="411"/>
         <source>Load completed (Thumbnails database: %1)</source>
         <translation>Chargement terminé (Base de données des miniatures : %1)</translation>
     </message>
     <message>
-        <location filename="../src/widgets/window.cpp" line="459"/>
+        <location filename="../src/widgets/window.cpp" line="467"/>
         <source>Unable to rename file</source>
         <translation>Impossible de renommer le fichier</translation>
     </message>
     <message>
-        <location filename="../src/widgets/window.cpp" line="460"/>
+        <location filename="../src/widgets/window.cpp" line="468"/>
         <source>Before : %1
 After : %2</source>
         <translation>Avant : %1
 Après : %2</translation>
     </message>
     <message>
-        <location filename="../src/widgets/window.cpp" line="466"/>
+        <location filename="../src/widgets/window.cpp" line="474"/>
         <source>Forbidden characters</source>
         <translation>Caractères interdits</translation>
     </message>
     <message>
-        <location filename="../src/widgets/window.cpp" line="467"/>
+        <location filename="../src/widgets/window.cpp" line="475"/>
         <source>The following characters are not allowed:
 &lt; &gt; : &quot; / \ | ? * ,</source>
         <translation>Les caractères suivants ne sont pas autorisés :
 &lt; &gt; : &quot; / \ | ? * ,</translation>
     </message>
     <message>
-        <location filename="../src/widgets/window.cpp" line="473"/>
+        <location filename="../src/widgets/window.cpp" line="481"/>
         <source>Forbidden character sequence</source>
         <translation>Séquence de caractères interdite</translation>
     </message>
     <message>
-        <location filename="../src/widgets/window.cpp" line="508"/>
+        <location filename="../src/widgets/window.cpp" line="516"/>
         <source>Video preview not available</source>
         <translation>Aperçu vidéo non disponible</translation>
     </message>
     <message>
-        <location filename="../src/widgets/window.cpp" line="511"/>
+        <location filename="../src/widgets/window.cpp" line="519"/>
         <source>Preview not available</source>
         <translation>Aperçu non disponible</translation>
     </message>
     <message>
-        <location filename="../src/widgets/window.cpp" line="515"/>
+        <location filename="../src/widgets/window.cpp" line="523"/>
         <source>Select one item for preview</source>
         <translation>Sélectionnez un élément pour l&apos;aperçu</translation>
     </message>
     <message>
-        <location filename="../src/widgets/window.cpp" line="706"/>
-        <location filename="../src/widgets/window.cpp" line="720"/>
+        <location filename="../src/widgets/window.cpp" line="717"/>
+        <location filename="../src/widgets/window.cpp" line="730"/>
         <source>Pasting multiple cells</source>
         <translation>Coller plusieurs cellules</translation>
     </message>
     <message>
-        <location filename="../src/widgets/window.cpp" line="707"/>
-        <location filename="../src/widgets/window.cpp" line="721"/>
+        <location filename="../src/widgets/window.cpp" line="718"/>
+        <location filename="../src/widgets/window.cpp" line="731"/>
         <source>The pasted content has %1 parts. Therefore, each modifed row must have %1 selected cells.</source>
         <translation>Le contenu collé comporte %1 parties. Par conséquent, chaque ligne modifiée doit avoir %1 cellules sélectionnées.</translation>
     </message>
     <message>
-        <location filename="../src/widgets/window.cpp" line="757"/>
+        <location filename="../src/widgets/window.cpp" line="767"/>
         <source>Insertion</source>
         <translation>Insertion</translation>
     </message>
     <message>
-        <location filename="../src/widgets/window.cpp" line="758"/>
+        <location filename="../src/widgets/window.cpp" line="768"/>
         <source>Name:</source>
         <translation>Nom :</translation>
     </message>
     <message>
-        <location filename="../src/widgets/window.cpp" line="911"/>
+        <location filename="../src/widgets/window.cpp" line="921"/>
         <source>Requested tiles: %1 (%2 new, %3 from cache, %4 canceled, %5 errors)</source>
         <translation>Tuiles demandées : %1 (%2 nouvelles, %3 en cache, %4 annulées, %5 erreurs)</translation>
     </message>
