@@ -89,7 +89,7 @@ Window::Window(const Settings &settings, const QDir &directory, bool benchmark, 
 
     statusBar()->setFont(font);
 
-    QLabel* dirLabel = new QLabel(tr("Folder: %1").arg(QDir::toNativeSeparators(directory.path())));
+    dirLabel = new QLabel(tr("Folder: %1").arg(QDir::toNativeSeparators(directory.path())));
     dirLabel->setFont(font);
 
     QLabel* versionLabel = new QLabel(versionString);
@@ -407,6 +407,8 @@ void Window::modelLoadingDone(qint64 dbFileSize)
     } else {
         view.horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
     }
+
+    dirLabel->setText(tr("Folder: %1 (%2 elements)").arg(QDir::toNativeSeparators(directory.path())).arg(model.rowCount()));
 
     statusBar()->showMessage(tr("Load completed (Thumbnails database: %1)")
                                  .arg(locale().formattedDataSize(dbFileSize)),

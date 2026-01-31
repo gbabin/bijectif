@@ -79,6 +79,7 @@ private:
     CompleterModel completerModel;
     QFuture<void> future;
     QUndoStack* undoStack = nullptr;
+    QLabel* dirLabel = nullptr;
     QDockWidget* mapDockWidget = nullptr;
     QGVMap* map = nullptr;
     QGVItem* mapItemBackground = nullptr;
