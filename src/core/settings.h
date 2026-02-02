@@ -80,6 +80,10 @@ public:
     /// Maximal number of thumbnails in database cache
     const int thumbnailDatabaseLimit;
 
+    /// Maximal allowed unused space in thumbnails database file (in bytes)
+    /// [in megabytes in settings file]
+    const int thumbnailDatabaseMaxUnused;
+
     /// Log verbosity (0 to 4, 4 is most verbose)
     const int logVerbosity;
 

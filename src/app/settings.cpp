@@ -38,6 +38,7 @@ Settings::Settings(QSettings settings)
     , fontSize(settings.value("font size", 16).toInt())
     , memoryCacheSize(settings.value("memory cache size", 500).toInt() * 1024 * 1024)
     , thumbnailDatabaseLimit(settings.value("thumbnail database limit", 10000).toInt())
+    , thumbnailDatabaseMaxUnused(settings.value("thumbnail database max unused", 64).toInt() * 1024 * 1024)
     , logVerbosity(settings.value("log verbosity", 2).toInt())
     , resizableColumns(settings.value("resizable columns", false).toBool())
     , showCommandHistory(settings.value("show command history", false).toBool())
@@ -60,6 +61,7 @@ void Settings::log() const
     qDebug() << "Settings: fontSize =" << fontSize;
     qDebug() << "Settings: memoryCacheSize =" << memoryCacheSize;
     qDebug() << "Settings: thumbnailDatabaseLimit =" << thumbnailDatabaseLimit;
+    qDebug() << "Settings: thumbnailDatabaseMaxUnused =" << thumbnailDatabaseMaxUnused;
     qDebug() << "Settings: logVerbosity =" << logVerbosity;
     qDebug() << "Settings: resizableColumns =" << resizableColumns;
     qDebug() << "Settings: showCommandHistory =" << showCommandHistory;

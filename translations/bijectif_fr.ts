@@ -24,27 +24,32 @@
         <translation>Nettoyage de la base de données...</translation>
     </message>
     <message>
-        <location filename="../src/core/model.cpp" line="298"/>
+        <location filename="../src/core/model.cpp" line="251"/>
+        <source>Compacting database...</source>
+        <translation>Compactage de la base de données...</translation>
+    </message>
+    <message>
+        <location filename="../src/core/model.cpp" line="313"/>
         <source>Thumbnail</source>
         <translation>Miniature</translation>
     </message>
     <message>
-        <location filename="../src/core/model.cpp" line="299"/>
+        <location filename="../src/core/model.cpp" line="314"/>
         <source>Identifier</source>
         <translation>Identifiant</translation>
     </message>
     <message>
-        <location filename="../src/core/model.cpp" line="300"/>
+        <location filename="../src/core/model.cpp" line="315"/>
         <source>Map</source>
         <translation>Carte</translation>
     </message>
     <message>
-        <location filename="../src/core/model.cpp" line="301"/>
+        <location filename="../src/core/model.cpp" line="316"/>
         <source>Name %1</source>
         <translation>Nom %1</translation>
     </message>
     <message>
-        <location filename="../src/core/model.cpp" line="325"/>
+        <location filename="../src/core/model.cpp" line="340"/>
         <source>%1 file</source>
         <translation>Fichier %1</translation>
     </message>

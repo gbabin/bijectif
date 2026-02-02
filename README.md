@@ -61,6 +61,7 @@ max file size = 20
 font size = 16
 memory cache size = 500
 thumbnail database limit = 10000
+thumbnail database max unused = 64
 log verbosity = 2
 resizable columns = false
 show command history = false

@@ -238,14 +238,29 @@ void Model::load(const QList<const FileGroup *> &fileGroupList, const QDir &dire
             } else {
                 qWarning() << "Thumbnails database size limiting query failed:" << query.lastError();
             }
-
-            // repacking database
-            if (query.exec(u"VACUUM"_s)) {
-                qInfo() << "Thumbnails database repacking query succeeded";
-            } else {
-                qWarning() << "Thumbnails database repacking query failed:" << query.lastError();
-            }
         }
+
+        if (query.exec(u"SELECT freelist_count * page_size AS size FROM pragma_freelist_count, pragma_page_size"_s)) {
+            qInfo() << "Thumbnails database free space size query succeeded";
+
+            query.first();
+            const int size = query.value(u"size"_s).toInt();
+            qInfo() << "Thumbnails database free space:" << size << "bytes";
+
+            if (size >= settings.thumbnailDatabaseMaxUnused) {
+                Q_EMIT loadingLabelText(tr("Compacting database..."));
+
+                // repacking database
+                if (query.exec(u"VACUUM"_s)) {
+                    qInfo() << "Thumbnails database repacking query succeeded";
+                } else {
+                    qWarning() << "Thumbnails database repacking query failed:" << query.lastError();
+                }
+            }
+        } else {
+            qWarning() << "Thumbnails database size limiting query failed:" << query.lastError();
+        }
+
         Q_EMIT loadingProgressed(1000);
 
         db.close();
