@@ -1,6 +1,7 @@
 // Copyright (C) 2024 gbabin
 // SPDX-License-Identifier: GPL-3.0-only
 
+#include "heifexif.h"
 #include "loader.h"
 #include "video.h"
 
@@ -68,7 +69,9 @@ std::pair<std::optional<Location>, std::optional<QPixmap>> Loader::load(const Se
                 const QByteArray bytes = file.readAll();
                 file.close();
                 possibleThumbnail = computeImageThumbnail(settings, fileGroup->filePath, bytes);
-                possibleLocation = readLocation(fileGroup->filePath, bytes);
+                possibleLocation = readLocation(fileGroup->filePath, bytes); // try to use EXIF data from JPEG
+                if (! possibleLocation)
+                    possibleLocation = readLocation(fileGroup->filePath, getExifBytesHeif(fileGroup->filePath, bytes)); // try to use EXIF data from HEIF
             } else {
                 qWarning() << "Image loading failed (could not open file):" << fileGroup->filePath;
             }

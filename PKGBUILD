@@ -5,9 +5,10 @@ pkgdesc='Edit image titles in filenames'
 arch=('x86_64')
 url='https://github.com/gbabin/bijectif'
 license=('GPL3')
-depends=(ffmpeg libexif qt6-base)
+depends=(ffmpeg libexif libheif qt6-base)
 makedepends=(cmake make pkg-config qt6-tools)
-optdepends=('qt6-imageformats: additional image formats')
+optdepends=('kimageformats: additional image formats'
+            'qt6-imageformats: additional image formats')
 source=("${pkgname}-${pkgver}.tar.gz::https://github.com/gbabin/bijectif/archive/v${pkgver}.tar.gz")
 sha256sums=('SKIP')
 

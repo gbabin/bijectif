@@ -11,7 +11,7 @@ Use `PKGBUILD`.
 ### Debian / Ubuntu
 
 ```
-sudo apt install cmake make pkg-config g++ libexif-dev \
+sudo apt install cmake make pkg-config g++ libexif-dev libheif-dev \
                  libavcodec-dev libavformat-dev libavutil-dev libswscale-dev \
                  qt6-base-dev qt6-tools-dev libqt6sql6-sqlite
 cmake -DCMAKE_BUILD_TYPE=Release . -B build
@@ -22,7 +22,7 @@ ctest --test-dir build/tests --output-on-failure --no-tests=error
 ### Fedora
 
 ```
-sudo dnf install cmake make gcc-c++ libexif-devel \
+sudo dnf install cmake make gcc-c++ libexif-devel libheif-devel \
                  libavcodec-free-devel libavformat-free-devel libavutil-free-devel libswscale-free-devel \
                  qt6-qtbase-devel qt6-qttools-devel
 cmake -DCMAKE_BUILD_TYPE=Release . -B build
@@ -33,7 +33,7 @@ ctest --test-dir build/tests --output-on-failure --no-tests=error
 ### openSUSE
 
 ```
-sudo zypper install cmake make gcc-c++ libexif-devel \
+sudo zypper install cmake make gcc-c++ libexif-devel libheif-devel \
                     libavcodec-devel libavformat-devel libavutil-devel libswscale-devel \
                     qt6-base-devel qt6-linguist-devel qt6-sql-sqlite
 cmake -DCMAKE_BUILD_TYPE=Release . -B build
@@ -45,6 +45,10 @@ ctest --test-dir build/tests --output-on-failure --no-tests=error
 
 Use `build-msys2.sh` in [MSYS2](https://www.msys2.org/) UCRT64 environment.
 
+## Image formats
+
+More image formats can be read by installing `kimageformats` or `kf6-kimageformats`.
+
 ## Settings
 
 Default `bijectif.ini`:
@@ -53,8 +57,8 @@ Default `bijectif.ini`:
 thumbnail size = 128
 min width = 800
 min height = 600
-listed extensions = jpg,jpeg,tif,tiff,png,bmp,gif,dng,mp4,mov,avi
-image extensions = jpg,jpeg,tif,tiff,png,bmp,gif
+listed extensions = jpg,jpeg,heic,tif,tiff,png,bmp,gif,dng,mp4,mov,avi
+image extensions = jpg,jpeg,heic,tif,tiff,png,bmp,gif
 video extensions = mp4,mov,avi
 max names = 8
 max file size = 20

@@ -21,6 +21,7 @@ add_subdirectory(src/QGeoView)
 
 add_subdirectory(src/app)
 add_subdirectory(src/core)
+add_subdirectory(src/heif)
 add_subdirectory(src/location)
 add_subdirectory(src/video)
 add_subdirectory(src/widgets)

@@ -9,8 +9,9 @@ then
 fi
 
 pacman -S --needed --noconfirm \
-       mingw-w64-ucrt-x86_64-{cmake,ninja,gcc,libexif} \
+       mingw-w64-ucrt-x86_64-{cmake,ninja,gcc,libexif,libheif} \
        mingw-w64-ucrt-x86_64-ffmpeg \
+       mingw-w64-ucrt-x86_64-kimageformats \
        mingw-w64-ucrt-x86_64-qt6-{base,imageformats,tools,translations} \
        zip
 
