@@ -9,8 +9,15 @@ depends=(ffmpeg libexif libheif qt6-base)
 makedepends=(cmake make pkg-config qt6-tools)
 optdepends=('kimageformats: additional image formats'
             'qt6-imageformats: additional image formats')
-source=("${pkgname}-${pkgver}.tar.gz::https://github.com/gbabin/bijectif/archive/v${pkgver}.tar.gz")
-sha256sums=('SKIP')
+source=("${pkgname}-${pkgver}.tar.gz::https://github.com/gbabin/bijectif/archive/v${pkgver}.tar.gz"
+        "QGeoView.tar.gz::https://github.com/gbabin/QGeoView/archive/9a8df787f001c995a9f2a8c164bbe202b8b5ff66.tar.gz")
+sha256sums=('SKIP'
+            'SKIP')
+
+prepare() {
+  rmdir "${pkgname}-${pkgver}/src/QGeoView"
+  ln -s "${srcdir}"/QGeoView-*/ "${pkgname}-${pkgver}/src/QGeoView"
+}
 
 build() {
   cmake -B build \
