@@ -27,7 +27,7 @@ add_subdirectory(src/video)
 add_subdirectory(src/widgets)
 add_subdirectory(tests)
 
-foreach(TARGET core widgets bijectif)
+foreach(TARGET core heifexif location video widgets bijectif)
     target_compile_definitions(${TARGET} PUBLIC
         QT_NO_CAST_FROM_ASCII
         QT_NO_CAST_FROM_BYTEARRAY

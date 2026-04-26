@@ -59,7 +59,7 @@ std::pair<std::optional<Location>, std::optional<QPixmap>> computeVideoThumbnail
     }
     if (metadataTag != nullptr) {
         static const QRegularExpression re(u"^([+-][0-9.]+)([+-][0-9.]+)"_s); // ISO 6709 format
-        const QRegularExpressionMatch match = re.match(metadataTag->value);
+        const QRegularExpressionMatch match = re.match(QString::fromUtf8(metadataTag->value));
         if (match.hasMatch()) {
             bool latitudeOk = false;
             const double latitude = match.captured(1).toDouble(&latitudeOk);
