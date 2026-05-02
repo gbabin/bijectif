@@ -76,9 +76,9 @@ std::pair<std::optional<Location>, std::optional<QPixmap>> computeVideoThumbnail
     }
 
     // Find the first video stream
-    for (unsigned int i = 0; i < formatContext->nb_streams; i++) {
+    for (int i = 0; i < formatContext->nb_streams; i++) {
         if (formatContext->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_VIDEO) {
-            videoStreamIndex = static_cast<int>(i);
+            videoStreamIndex = i;
             break;
         }
     }
