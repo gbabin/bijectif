@@ -8,6 +8,7 @@
 
 #include <QGeoView/Raster/QGVIcon.h>
 
+#include <QElapsedTimer>
 #include <QEventLoop>
 #include <QMutex>
 #include <QQueue>
@@ -232,11 +233,19 @@ void Model::load(const QList<const FileGroup *> &fileGroupList, const QDir &dire
             Q_EMIT loadingLabelText(tr("Cleaning database..."));
 
             // limit database size
-            if (query.exec(u"DELETE FROM thumbnails2 "
-                            "WHERE path NOT IN (SELECT path FROM thumbnails2 ORDER BY timestamp DESC LIMIT %1)"_s.arg(settings.thumbnailDatabaseLimit))) {
-                qInfo() << "Thumbnails database size limiting query succeeded";
-            } else {
-                qWarning() << "Thumbnails database size limiting query failed:" << query.lastError();
+            {
+                QElapsedTimer timer;
+                const QString queryStr = u"DELETE FROM thumbnails2 "
+                                          "WHERE path NOT IN (SELECT path FROM thumbnails2 ORDER BY timestamp DESC LIMIT %1)"_s.arg(settings.thumbnailDatabaseLimit);
+                timer.start();
+                const bool success = query.exec(queryStr);
+                qint64 elapsedMs = timer.elapsed();
+
+                if (success) {
+                    qInfo() << "Thumbnails database size limiting query succeeded in" << elapsedMs << "ms";
+                } else {
+                    qWarning() << "Thumbnails database size limiting query failed:" << query.lastError();
+                }
             }
         }
 
@@ -251,10 +260,17 @@ void Model::load(const QList<const FileGroup *> &fileGroupList, const QDir &dire
                 Q_EMIT loadingLabelText(tr("Compacting database..."));
 
                 // repacking database
-                if (query.exec(u"VACUUM"_s)) {
-                    qInfo() << "Thumbnails database repacking query succeeded";
-                } else {
-                    qWarning() << "Thumbnails database repacking query failed:" << query.lastError();
+                {
+                    QElapsedTimer timer;
+                    timer.start();
+                    const bool success = query.exec(u"VACUUM"_s);
+                    qint64 elapsedMs = timer.elapsed();
+
+                    if (success) {
+                        qInfo() << "Thumbnails database repacking query succeeded in" << elapsedMs << "ms";
+                    } else {
+                        qWarning() << "Thumbnails database repacking query failed:" << query.lastError();
+                    }
                 }
             }
         } else {
