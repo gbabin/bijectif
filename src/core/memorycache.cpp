@@ -12,31 +12,27 @@ MemoryCache::MemoryCache(qsizetype maxCost)
 {
 }
 
-void MemoryCache::insertFullImage(const QString& path, const QPixmap& pixmap)
+void MemoryCache::insertPyramid(const QString& path, QSharedPointer<const Pyramid> pyramid)
 {
-    const QString cacheKey = u"fullimage %1"_s.arg(path);
-
     const QWriteLocker locker(&lock);
-    if (cache.contains(cacheKey)) {
-        qDebug() << cacheKey << "already in memory cache";
+    if (cache.contains(path)) {
+        qDebug() << path << "already in memory cache";
     } else {
-        const qsizetype cost = (pixmap.height() * pixmap.width() * pixmap.depth()) / 8;
-        qDebug() << cacheKey << "insert in memory cache with cost =" << cost;
-        cache.insert(cacheKey, new QVariant(pixmap), cost);
+        const qsizetype cost = pyramid->getMemorySize();
+        qDebug() << path << "insert in memory cache with cost =" << cost;
+        cache.insert(path, new QVariant(QVariant::fromValue(pyramid)), cost);
     }
 }
 
-QPixmap MemoryCache::getFullImage(const QString& path)
+QSharedPointer<const Pyramid> MemoryCache::getPyramid(const QString& path)
 {
-    const QString cacheKey = u"fullimage %1"_s.arg(path);
-
     const QReadLocker locker(&lock);
-    const QVariant* variant = cache.object(cacheKey);
+    const QVariant* variant = cache.object(path);
     if (variant == nullptr) {
-        qDebug() << cacheKey << "not in memory cache";
-        return QPixmap();
+        qDebug() << path << "not in memory cache";
+        return QSharedPointer<const Pyramid>();
     } else {
-        qDebug() << cacheKey << "in memory cache";
-        return variant->value<QPixmap>();
+        qDebug() << path << "in memory cache";
+        return variant->value<QSharedPointer<const Pyramid>>();
     }
 }

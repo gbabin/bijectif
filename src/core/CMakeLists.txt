@@ -14,6 +14,7 @@ qt_add_library(core STATIC
     memorycache.h memorycache.cpp
     model.h model.cpp
     modelitem.h modelitem.cpp
+    pyramid.h pyramid.cpp
     settings.h
 )
 

@@ -42,7 +42,11 @@ private:
     QGraphicsView* graphicsView;
     QGraphicsPixmapItem* pixmapItem;
     QGraphicsSimpleTextItem* messageItem;
-    qreal scaleFactor;
+    QSharedPointer<const Pyramid> pyramid;
+    qreal viewScale;
+    qreal pixmapScale;
+    bool pixmapScaleMin;
+    bool pixmapScaleMax;
     bool isFitted;
     QString imagePathToDisplay;
     QString messageToDisplay;

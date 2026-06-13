@@ -25,7 +25,11 @@ Viewer::Viewer(MemoryCache &memoryCache,
     , graphicsView(new QGraphicsView(graphicsScene, this))
     , pixmapItem(new QGraphicsPixmapItem())
     , messageItem(new QGraphicsSimpleTextItem())
-    , scaleFactor(1.0)
+    , viewScale(1.0)
+    , pixmapScale(1.0)
+    , pixmapScaleMin(false)
+    , pixmapScaleMax(false)
+    , pyramid(nullptr)
     , isFitted(false)
 {
     connect(itemLoadingWatcher, &QFutureWatcher<QVariant>::finished,
@@ -46,7 +50,7 @@ Viewer::Viewer(MemoryCache &memoryCache,
     layout->addWidget(graphicsView);
     setLayout(layout);
 
-    loadDebouncer->setTimeout(250);
+    loadDebouncer->setTimeout(100);
     connect(loadDebouncer, &KDToolBox::KDSignalDebouncer::triggered,
             this, &Viewer::loadItem);
 }
@@ -68,32 +72,28 @@ void Viewer::viewItem(ViewerItemKind kind, const QString& item)
         break;
     }
 
-    QMetaObject::invokeMethod(loadDebouncer, &KDToolBox::KDSignalDebouncer::throttle);
+    loadDebouncer->throttle();
 }
 
 void Viewer::loadItem()
 {
     if (! imagePathToDisplay.isEmpty()) {
-        const QPixmap possiblePixmap = memoryCache.getFullImage(imagePathToDisplay);
-        if (possiblePixmap.isNull()) {
+        const QSharedPointer<const Pyramid> possiblePyramid = memoryCache.getPyramid(imagePathToDisplay);
+        if (possiblePyramid.isNull()) {
             const QFuture<QVariant> future = QtConcurrent::run([path=imagePathToDisplay, &cache=memoryCache]() {
-                QImageReader reader(path);
-                reader.setAutoTransform(true);
-                const QImage image = reader.read();
-                if (image.isNull()) {
-                    qWarning() << "Failed to load image in viewer:" << path << ": Error" << reader.error() << reader.errorString();
+                const QSharedPointer<const Pyramid> pyramid = QSharedPointer<const Pyramid>::create(path);
+                if (pyramid->isEmpty()) {
                     return QVariant(tr("Image preview failed"));
                 } else {
-                    const QPixmap pixmap = QPixmap::fromImage(image);
-                    cache.insertFullImage(path, pixmap);
-                    return QVariant::fromValue(pixmap);
+                    cache.insertPyramid(path, pyramid);
+                    return QVariant::fromValue(pyramid);
                 }
             });
 
             itemLoadingWatcher->setFuture(future);
         } else {
-            const QFuture<QVariant> future = QtConcurrent::run([pixmap=possiblePixmap]() {
-                return QVariant::fromValue(pixmap);
+            const QFuture<QVariant> future = QtConcurrent::run([possiblePyramid]() {
+                return QVariant::fromValue(possiblePyramid);
             });
 
             itemLoadingWatcher->setFuture(future);
@@ -116,22 +116,43 @@ void Viewer::loadItem()
 void Viewer::itemLoaded()
 {
     const QVariant result = itemLoadingWatcher->result();
-    const QPixmap pixmap = result.value<QPixmap>();
 
-    if (pixmap.isNull()) {
+    if (result.canConvert<QString>()) {
         const QString message = result.toString();
         messageItem->setText(message);
         pixmapItem->setPixmap(QPixmap());
-        graphicsScene->setSceneRect(QRectF());
+        graphicsScene->setSceneRect(QRect());
         graphicsView->resetTransform();
         isFitted = false;
-    } else {
+        pyramid.clear();
+    } else if (result.canConvert<QSharedPointer<const Pyramid>>()) {
+        pyramid = result.value<QSharedPointer<const Pyramid>>();
+
+        const QSize viewportSize = graphicsView->viewport()->size();
+        const QPair<QPixmap, qreal> scaled = pyramid->getPixmap(viewportSize);
+
         messageItem->setText(QString());
-        pixmapItem->setPixmap(pixmap);
-        graphicsScene->setSceneRect(pixmap.rect());
+        pixmapScale = scaled.second;
+        pixmapScaleMin = false;
+        pixmapScaleMax = false;
+        pixmapItem->setPixmap(scaled.first);
+        pixmapItem->setTransformationMode(Qt::SmoothTransformation);
+        pixmapItem->setTransform(QTransform::fromScale(1.0 / pixmapScale, 1.0 / pixmapScale));
+
+        const QSize originalSize = pyramid->getOriginalSize();
+        graphicsScene->setSceneRect(QRect(QPoint(), originalSize));
         graphicsView->fitInView(graphicsScene->sceneRect(), Qt::KeepAspectRatio);
         isFitted = true;
-        scaleFactor = graphicsView->transform().m11();
+        viewScale = graphicsView->transform().m11();
+    } else if (! result.isNull()) {
+        qCritical() << "Unsupported viewer item variant type:" << result.typeName();
+
+        messageItem->setText(QString());
+        pixmapItem->setPixmap(QPixmap());
+        graphicsScene->setSceneRect(QRect());
+        graphicsView->resetTransform();
+        isFitted = false;
+        pyramid.clear();
     }
 }
 
@@ -140,16 +161,63 @@ bool Viewer::eventFilter(QObject *obj, QEvent *event)
     if (event->type() == QEvent::Wheel)
     {
         if (! pixmapItem->pixmap().isNull()) {
-            const QWheelEvent *const wheelEvent = static_cast<QWheelEvent *>(event);
+            {
+                const QWheelEvent *const wheelEvent = static_cast<QWheelEvent *>(event);
 
-            if (wheelEvent->angleDelta().y() > 0) {
-                scaleFactor *= 1.25;
-            } else {
-                scaleFactor *= 0.8;
+                constexpr qreal zoomFactor = 1.1;
+
+                if (wheelEvent->angleDelta().y() > 0) {
+                    viewScale *= zoomFactor;
+                } else if (wheelEvent->angleDelta().y() < 0) {
+                    viewScale /= zoomFactor;
+                } else {
+                    return true;
+                }
             }
 
-            graphicsView->setTransform(QTransform::fromScale(scaleFactor,scaleFactor));
-            isFitted = false;
+            {
+                isFitted = false;
+
+                if (viewScale > 4.0)
+                    viewScale = 4.0;
+
+                const QSize viewportSize = graphicsView->viewport()->size();
+                const QSize originalSize = pyramid->getOriginalSize();
+                const qreal minScale = std::min((qreal)viewportSize.width() / originalSize.width(),
+                                                (qreal)viewportSize.height() / originalSize.height());
+                if (viewScale < minScale) {
+                    viewScale = minScale;
+                    isFitted = true;
+                }
+            }
+
+            if (!pixmapScaleMax && pixmapScale < viewScale) {
+                const QPair<QPixmap, qreal> scaled = pyramid->getPixmap(viewScale);
+
+                if (scaled.second == pixmapScale) {
+                    pixmapScaleMax = true;
+                } else {
+                    pixmapScale = scaled.second;
+                    pixmapScaleMin = false;
+                    pixmapScaleMax = false;
+                    pixmapItem->setPixmap(scaled.first);
+                    pixmapItem->setTransform(QTransform::fromScale(1.0 / pixmapScale, 1.0 / pixmapScale));
+                }
+            } else if (!pixmapScaleMin && pixmapScale > viewScale * 2.0) {
+                const QPair<QPixmap, qreal> scaled = pyramid->getPixmap(viewScale);
+
+                if (scaled.second == pixmapScale) {
+                    pixmapScaleMin = true;
+                } else {
+                    pixmapScale = scaled.second;
+                    pixmapScaleMin = false;
+                    pixmapScaleMax = false;
+                    pixmapItem->setPixmap(scaled.first);
+                    pixmapItem->setTransform(QTransform::fromScale(1.0 / pixmapScale, 1.0 / pixmapScale));
+                }
+            }
+
+            graphicsView->setTransform(QTransform::fromScale(viewScale,viewScale));
         }
 
         return true;

@@ -4,9 +4,10 @@
 #ifndef MEMORYCACHE_H
 #define MEMORYCACHE_H
 
+#include "pyramid.h"
+
 #include <QCache>
 #include <QReadWriteLock>
-#include <QPixmap>
 
 class MemoryCache
 {
@@ -16,8 +17,8 @@ public:
     explicit MemoryCache(qsizetype maxCost);
     ~MemoryCache() = default;
 
-    void insertFullImage(const QString& path, const QPixmap& pixmap);
-    [[nodiscard]] QPixmap getFullImage(const QString& path);
+    void insertPyramid(const QString& path, QSharedPointer<const Pyramid> pyramid);
+    [[nodiscard]] QSharedPointer<const Pyramid> getPyramid(const QString& path);
 
 private:
     QCache<QString, QVariant> cache;
