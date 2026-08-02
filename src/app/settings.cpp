@@ -83,7 +83,7 @@ QList<CustomMap> Settings::readCustomMaps(QSettings &settings)
     const CustomMap defaultMap(u"OpenStreetMap"_s,
                                u"https://tile.openstreetmap.org/{z}/{x}/{y}.png"_s,
                                0,
-                               20,
+                               19,
                                u"© OpenStreetMap"_s);
     customMaps.append(defaultMap);
 
