@@ -25,7 +25,7 @@ class Loader : public QObject
     Q_DISABLE_COPY_MOVE(Loader)
 
 public:
-    explicit Loader(QQueue<const FileGroup *> &fileGroups, QMutex &fileGroupsMutex,
+    explicit Loader(const QVector<const FileGroup *> &fileGroups, QAtomicInt &fileGroupsIndex,
                     QList<NewItem> &newThumbnails, QMutex &newThumbnailsMutex,
                     const Settings &settings, const QDir &directory, MemoryCache &memoryCache,
                     QObject *parent = nullptr);
@@ -44,8 +44,8 @@ private:
     static std::pair<std::optional<Location>, std::optional<QPixmap>> computeVideoThumbnailLocation(const Settings &settings, const QString &filePath);
     static std::optional<Location> readLocation(const QString &filePath, const QByteArray &bytes);
 
-    QQueue<const FileGroup *> &fileGroups;
-    QMutex &fileGroupsMutex;
+    const QVector<const FileGroup *> &fileGroups;
+    QAtomicInt &fileGroupsIndex;
     QList<NewItem> &newThumbnails;
     QMutex &newThumbnailsMutex;
     const Settings &settings;

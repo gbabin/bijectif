@@ -11,7 +11,6 @@
 #include <QElapsedTimer>
 #include <QEventLoop>
 #include <QMutex>
-#include <QQueue>
 #include <QSqlDatabase>
 #include <QSqlError>
 #include <QSqlQuery>
@@ -74,7 +73,7 @@ void Model::load(const QList<const FileGroup *> &fileGroupList, const QDir &dire
             qWarning() << "Thumbnails database table (v2) creation failure:" << query.lastError();
         }
 
-        QQueue<const FileGroup *> newFiles;
+        QVector<const FileGroup *> newFiles;
         newFiles.reserve(fileGroupList.size());
 
         Q_EMIT loadingLabelText(tr("Retrieving existing thumbnails..."));
@@ -137,7 +136,7 @@ void Model::load(const QList<const FileGroup *> &fileGroupList, const QDir &dire
 
             newThumbnails.reserve(newFiles.size());
 
-            QMutex newFilesMutex;
+            QAtomicInt newFilesIndex = 0;
             QMutex newThumbnailsMutex;
             QVector<QThread*> threads;
             QVector<Loader*> loaders;
@@ -150,7 +149,7 @@ void Model::load(const QList<const FileGroup *> &fileGroupList, const QDir &dire
 
             for (int i = 0 ; i < threadCount ; i++) {
                 QThread* thread = new QThread;
-                Loader* loader = new Loader(newFiles, newFilesMutex,
+                Loader* loader = new Loader(newFiles, newFilesIndex,
                                             newThumbnails, newThumbnailsMutex,
                                             settings, directory, memoryCache);
                 loader->moveToThread(thread);

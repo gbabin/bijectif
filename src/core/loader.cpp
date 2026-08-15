@@ -9,15 +9,14 @@
 
 #include <QBuffer>
 #include <QImageReader>
-#include <QQueue>
 
-Loader::Loader(QQueue<const FileGroup *> &fileGroups, QMutex &fileGroupsMutex,
+Loader::Loader(const QVector<const FileGroup *> &fileGroups, QAtomicInt &fileGroupsIndex,
                QList<NewItem> &newThumbnails, QMutex &newThumbnailsMutex,
                const Settings &settings, const QDir &directory, MemoryCache &memoryCache,
                QObject *parent)
     : QObject(parent)
     , fileGroups(fileGroups)
-    , fileGroupsMutex(fileGroupsMutex)
+    , fileGroupsIndex(fileGroupsIndex)
     , newThumbnails(newThumbnails)
     , newThumbnailsMutex(newThumbnailsMutex)
     , settings(settings)
@@ -29,13 +28,12 @@ Loader::Loader(QQueue<const FileGroup *> &fileGroups, QMutex &fileGroupsMutex,
 void Loader::loadAll()
 {
     Q_FOREVER {
-        fileGroupsMutex.lock();
-        if (fileGroups.isEmpty()) {
-            fileGroupsMutex.unlock();
+        const int index = fileGroupsIndex++;
+
+        if (index >= fileGroups.size()) {
             break;
         }
-        FileGroup const * const fileGroup = fileGroups.dequeue();
-        fileGroupsMutex.unlock();
+        FileGroup const * const fileGroup = fileGroups[index];
 
         const auto [possibleLocation, possibleThumbnail] = load(settings, fileGroup);
         ModelItem * const item = new ModelItem(settings, directory, memoryCache, fileGroup, possibleLocation, possibleThumbnail);
