@@ -56,7 +56,21 @@ void Model::load(const QList<const FileGroup *> &fileGroupList, const QDir &dire
         } else {
             qWarning() << "Thumbnails database opening failure:" << db.lastError();
         }
+
         QSqlQuery query(db);
+
+        if (query.exec(u"PRAGMA journal_mode = WAL"_s)) {
+            qInfo() << "Pragma journal_mode succeeded";
+        } else {
+            qWarning() << "Pragma journal_mode failed:" << query.lastError();
+        }
+
+        if (query.exec(u"PRAGMA synchronous = NORMAL"_s)) {
+            qInfo() << "Pragma synchronous succeeded";
+        } else {
+            qWarning() << "Pragma synchronous failed:" << query.lastError();
+        }
+
         if (query.exec(u"DROP TABLE IF EXISTS thumbnails"_s)) {
             qInfo() << "Thumbnails database table (v1) dropped";
         } else {
