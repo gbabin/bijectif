@@ -301,6 +301,7 @@ bool ModelItem::syncFilename(const QList<QPair<QString, QString>> &pathsList)
     Q_ASSERT(! pathsList.isEmpty());
 
     QStack<QPair<QString, QString>> renamed;
+    renamed.reserve(pathsList.size());
 
     for (const QPair<QString, QString>& paths : pathsList) {
         if (QFile::rename(paths.first, paths.second)) {
