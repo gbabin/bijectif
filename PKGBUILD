@@ -22,7 +22,7 @@ prepare() {
 build() {
   cmake -B build \
         -S "${pkgname}-${pkgver}" \
-        -W no-dev \
+        -W no-author \
         -D CMAKE_BUILD_TYPE=None \
         -D CMAKE_INSTALL_PREFIX=/usr
   cmake --build build
