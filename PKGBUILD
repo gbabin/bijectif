@@ -10,7 +10,7 @@ makedepends=(cmake make pkg-config qt6-tools)
 optdepends=('kimageformats: additional image formats'
             'qt6-imageformats: additional image formats')
 source=("${pkgname}-${pkgver}.tar.gz::https://github.com/gbabin/bijectif/archive/v${pkgver}.tar.gz"
-        "QGeoView.tar.gz::https://github.com/gbabin/QGeoView/archive/9a8df787f001c995a9f2a8c164bbe202b8b5ff66.tar.gz")
+        "QGeoView.tar.gz::https://github.com/gbabin/QGeoView/archive/7045e5bbb8e744f500452245cd12f1cc4d7aa19d.tar.gz")
 sha256sums=('SKIP'
             'SKIP')
 

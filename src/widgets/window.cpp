@@ -908,18 +908,40 @@ void Window::mapProviderChanged(int index)
     map->addWidget(text);
     mapItemCopyrightNotice = text;
 
-    connect(tilesLayer, &QGVLayerTilesOnline::tileReply,
-            this, &Window::mapTileReply);
+    connect(tilesLayer, &QGVLayerTilesOnline::tileReplySuccess,
+            this, &Window::tileReplySuccess);
+
+    connect(tilesLayer, &QGVLayerTilesOnline::tileReplyCanceled,
+            this, &Window::tileReplyCanceled);
+
+    connect(tilesLayer, &QGVLayerTilesOnline::tileReplyError,
+            this, &Window::tileReplyError);
 }
 
-void Window::mapTileReply(bool error, bool canceled, bool fromCache)
+void Window::tileReplySuccess(bool fromCache)
 {
     mapRepliesTotalCount++;
-    if (error) mapRepliesErrorCount++;
-    else if (canceled) mapRepliesCanceledCount++;
-    else if (fromCache) mapRepliesCacheCount++;
+    if (fromCache) mapRepliesCacheCount++;
     else mapRepliesNewCount++;
+    updateMapStatistics();
+}
 
+void Window::tileReplyCanceled()
+{
+    mapRepliesTotalCount++;
+    mapRepliesCanceledCount++;
+    updateMapStatistics();
+}
+
+void Window::tileReplyError()
+{
+    mapRepliesTotalCount++;
+    mapRepliesErrorCount++;
+    updateMapStatistics();
+}
+
+void Window::updateMapStatistics()
+{
     mapStatistics->setText(tr("Requested tiles: %1 (%2 new, %3 from cache, %4 canceled, %5 errors)")
                                .arg(mapRepliesTotalCount)
                                .arg(mapRepliesNewCount)

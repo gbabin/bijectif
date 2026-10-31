@@ -59,7 +59,9 @@ public Q_SLOTS:
     void selectEnd();
     void mapSelectionChanged();
     void mapProviderChanged(int index);
-    void mapTileReply(bool error, bool canceled, bool fromCache);
+    void tileReplySuccess(bool fromCache);
+    void tileReplyCanceled();
+    void tileReplyError();
 
 private Q_SLOTS:
     static void doubleClickedHandler(const QModelIndex &index);
@@ -69,6 +71,7 @@ private:
     static const QString websiteString;
     static const char* aboutString;
 
+    void updateMapStatistics();
     const Settings &settings;
     const QDir &directory;
     const bool benchmark;

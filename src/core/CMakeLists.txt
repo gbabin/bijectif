@@ -30,6 +30,7 @@ target_link_libraries(core PRIVATE
     QGeoView
     ${EXIF_LIBRARIES}
     Qt::Gui
+    Qt::Network
     Qt::Sql
     Qt::Widgets
 )
